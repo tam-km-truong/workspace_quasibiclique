@@ -94,6 +94,53 @@ def AB_V(rows_data, cols_data, edges, epsilon):
 
     return model 
 
+def AB_V_h(rows_data, cols_data, edges, epsilon):
+    """<
+    Arguments:
+    ----------
+    rows_data: list of tuples (row, degree) of rows in the matrix.
+    cols_data: list of tuples (col, degree) of columns in the matrix.
+    edges: list of tuples (row, col) corresponding to the zeros of the matrix.
+    epsilon: float, error tolerance for density constraints.
+
+    Returns:
+    --------
+    LpProblem:
+        The ILP model.
+    """
+    model = LpProblem(name="AB_V_h", sense=LpMaximize)
+
+    # Variables for rows and columns
+
+    lpRows = {row: (LpVariable(f'row_{row}', cat='Integer',
+                    lowBound=0, upBound=1), degree) for row, degree in rows_data}
+    lpCols = {col: (LpVariable(f'col_{col}', cat='Integer',
+                               lowBound=0, upBound=1), degree) for col, degree in cols_data}             
+    # Objective function: Maximize sum of selected row and column variables
+    model += lpSum(
+        [lpvar for lpvar, _ in lpRows.values()] +
+        [lpvar for lpvar, _ in lpCols.values()]
+    ), "max_sum_vertices"
+
+    # Constraints for row and column thresholds
+    row_threshold = 2
+    col_threshold = 2
+    print()
+    print('-' * 40)
+    print('row_threshold=', row_threshold )
+    model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
+    print('col_threshold=', col_threshold )
+    model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
+    print()
+    print('-' * 40)
+    # Add row density constraints
+    #__row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    #__col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    __col_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+
+    return model 
+
 
 def AB_E(rows_data, cols_data, edges, epsilon):
     """
@@ -1107,6 +1154,8 @@ def solve(path_to_data, model, epsilon=0.1):
         model = AB_E_c_r(rows, cols, edges, epsilon)
     elif model == 'AB_V':
         model = AB_V(rows, cols, edges, epsilon)
+    elif model == 'AB_V_h':
+        model = AB_V_h(rows, cols, edges, epsilon)
     elif model == 'max_Ones':
         model = max_Ones(rows, cols, edges, epsilon)
     elif model == 'max_Ones_comp':
@@ -1139,7 +1188,7 @@ def solve(path_to_data, model, epsilon=0.1):
     #read the result from the solver
     rows_res = []
     cols_res = []
-    if model_name == 'AB_V'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_r' or model_name == 'AB_E_c_r':
+    if model_name == 'AB_V'  or model_name == 'AB_V_h'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_r' or model_name == 'AB_E_c_r':
         for var in model.variables():
             if var.varValue == 1:
                 if var.name[:3] == "row":
@@ -1288,9 +1337,12 @@ def parse_arguments():
         '--filepath', dest='filepath', required=True, default='',
         help='Select the data',
     )
-
+    # argparser.add_argument(
+    #     '--model', dest='model', required=False, default='AB_V',
+    #     help='Select the model to use',
+    # )
     argparser.add_argument(
-        '--model', dest='model', required=False, default='AB_V',
+        '--model', dest='model', required=False, default='AB_V_h',
         help='Select the model to use',
     )
 
@@ -1301,7 +1353,7 @@ def parse_arguments():
 
     arg = argparser.parse_args()
 
-    if arg.model not in ['König_V', 'König_E', 'AB_E', 'AB_E_r', 'AB_E_c_r','AB_V','max_Ones','max_Ones_comp','max_Surface','max_Vertices','minDel_RC', 'minDel_Ones', 'KP_QB']:
+    if arg.model not in ['König_V', 'König_E', 'AB_E', 'AB_E_r', 'AB_E_c_r','AB_V','AB_V_h','max_Ones','max_Ones_comp','max_Surface','max_Vertices','minDel_RC', 'minDel_Ones', 'KP_QB']:
         argparser.print_help()
         sys.exit(1)
 

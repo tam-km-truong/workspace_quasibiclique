@@ -30,6 +30,552 @@ from pulp import (
 #                     LP MODEL - König theorem classical                        #
 # ============================================================================ #
 
+def AB_V(rows_data, cols_data, edges, epsilon):
+    """<
+    Arguments:
+    ----------
+    rows_data: list of tuples (row, degree) of rows in the matrix.
+    cols_data: list of tuples (col, degree) of columns in the matrix.
+    edges: list of tuples (row, col) corresponding to the zeros of the matrix.
+    epsilon: float, error tolerance for density constraints.
+
+    Returns:
+    --------
+    LpProblem:
+        The ILP model.
+    """
+    model = LpProblem(name="AB_V", sense=LpMaximize)
+
+    # Variables for rows and columns
+
+    lpRows = {row: (LpVariable(f'row_{row}', cat='Integer',
+                    lowBound=0, upBound=1), degree) for row, degree in rows_data}
+    lpCols = {col: (LpVariable(f'col_{col}', cat='Integer',
+                               lowBound=0, upBound=1), degree) for col, degree in cols_data}
+    # lpCells = {}
+    # for row, _ in rows_data:
+    #     for col, _ in cols_data:
+    #         if (row, col) in edges:
+    #             lpCells[(row, col)] = (LpVariable(
+    #                 f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 1)
+    #         else:
+    #             lpCells[(row, col)] = (LpVariable(  
+    #                 f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 0)
+                
+    # Objective function: Maximize sum of selected row and column variables
+    model += lpSum(
+        [lpvar for lpvar, _ in lpRows.values()] +
+        [lpvar for lpvar, _ in lpCols.values()]
+    ), "max_sum_vertices"
+
+    # Constraints for row and column thresholds
+    row_threshold = 2
+    col_threshold = 2
+    print()
+    print('-' * 40)
+    print('row_threshold=', row_threshold )
+    model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
+    print('col_threshold=', col_threshold )
+    model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
+    print()
+    print('-' * 40)
+    #just for testing 
+    # for row, col in lpCells:
+    #     #model += (lpRows[row][0] >= lpCells[(row, col)][0]), f'cell_{row}_{col}_1'
+    #     #model += (lpCols[col][0] >= lpCells[(row, col)][0]), f'ce ll_{row}_{col}_2'
+    #     model += ((lpRows[row][0]+lpCols[col][0])/2 <= lpCells[(row, col)][0]), f'cell_{row}_{col}_3'
+    #     model += (lpRows[row][0]+lpCols[col][0] -1 <= lpCells[(row, col)][0]), f'cell_{row}_{col}_4'
+    #just for testing     
+    # Add row density constraints
+    __row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    __col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    #__row_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    #__col_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+
+    return model 
+
+def AB_V_h(rows_data, cols_data, edges, epsilon):
+    """<
+    Arguments:
+    ----------
+    rows_data: list of tuples (row, degree) of rows in the matrix.
+    cols_data: list of tuples (col, degree) of columns in the matrix.
+    edges: list of tuples (row, col) corresponding to the zeros of the matrix.
+    epsilon: float, error tolerance for density constraints.
+
+    Returns:
+    --------
+    LpProblem:
+        The ILP model.
+    """
+    model = LpProblem(name="AB_V_h", sense=LpMaximize)
+
+    # Variables for rows and columns
+
+    lpRows = {row: (LpVariable(f'row_{row}', cat='Integer',
+                    lowBound=0, upBound=1), degree) for row, degree in rows_data}
+    lpCols = {col: (LpVariable(f'col_{col}', cat='Integer',
+                               lowBound=0, upBound=1), degree) for col, degree in cols_data}             
+    # Objective function: Maximize sum of selected row and column variables
+    model += lpSum(
+        [lpvar for lpvar, _ in lpRows.values()] +
+        [lpvar for lpvar, _ in lpCols.values()]
+    ), "max_sum_vertices"
+
+    # Constraints for row and column thresholds
+    row_threshold = 2
+    col_threshold = 2
+    print()
+    print('-' * 40)
+    print('row_threshold=', row_threshold )
+    model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
+    print('col_threshold=', col_threshold )
+    model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
+    print()
+    print('-' * 40)
+    # Add row density constraints
+    #__row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    #__col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    __col_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+
+    return model 
+
+
+def AB_E(rows_data, cols_data, edges, epsilon):
+    """
+    Arguments:
+    ----------
+    rows_data: list of tuples (row, degree) of rows in the matrix.
+    cols_data: list of tuples (col, degree) of columns in the matrix.
+    edges: list of tuples (row, col) corresponding to the zeros of the matrix.
+    epsilon: float, error tolerance for density constraints.
+
+    Returns:
+    --------
+    LpProblem:
+        The ILP model.
+    """
+    model = LpProblem(name="AB_E", sense=LpMaximize)
+
+    # Variables for rows and columns
+
+    lpRows = {row: (LpVariable(f'row_{row}', cat='Integer',
+                    lowBound=0, upBound=1), degree) for row, degree in rows_data}
+    lpCols = {col: (LpVariable(f'col_{col}', cat='Integer',
+                               lowBound=0, upBound=1), degree) for col, degree in cols_data}
+    lpCells = {}
+    for row, _ in rows_data:
+        for col, _ in cols_data:
+            if (row, col) in edges:
+                lpCells[(row, col)] = (LpVariable(
+                    #f'cell_{row}_{col}', cat='Continuous', lowBound=0, upBound=1), 1)
+                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 1)
+            else:
+                lpCells[(row, col)] = (LpVariable(  
+                    #f'cell_{row}_{col}', cat='Continuous', lowBound=0, upBound=1), 0)
+                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 0)
+  
+    # Objective function: Maximize sum of selected row and column variables
+    #
+    model += lpSum([cellValue*lpvar for lpvar,
+                   cellValue in lpCells.values()]), 'maximize_weight'
+    # 
+    #model += lpSum(
+    #    [lpvar for lpvar, _ in lpRows.values()] +
+    #    [lpvar for lpvar, _ in lpCols.values()]
+    #), "max_sum_vertices"
+
+    # Constraints for row and column thresholds
+    row_threshold = 2
+    col_threshold = 2
+    print()
+    print('-' * 40)
+    print('row_threshold=', row_threshold )
+    model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
+    print('col_threshold=', col_threshold )
+    model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
+    print()
+    print('-' * 40)
+    for row, col in edges:
+    #for row, col in lpCells:
+        #model += (lpRows[row][0] >= lpCells[(row, col)][0]), f'cell_{row}_{col}_1'
+        #model += (lpCols[col][0] >= lpCells[(row, col)][0]), f'ce ll_{row}_{col}_2'
+        model += ((lpRows[row][0]+lpCols[col][0])/2 >= lpCells[(row, col)][0]), f'cell_{row}_{col}_3'
+        model += (lpRows[row][0]+lpCols[col][0] -1 <= lpCells[(row, col)][0]), f'cell_{row}_{col}_4'
+        #########################################
+        #compacting  with degree 
+        #########################################
+        '''        
+    for col, _ in cols_data:
+        col_edges = [u for u, v in edges if v == col]           
+        model += (
+            lpSum(lpCells[(row, col)][0] for row in col_edges) <= lpCols[col][1]*lpCols[col][0]
+        ), f"col_degre_{col}"
+    for row, _ in rows_data:
+        row_edges = [v for u, v in edges if u == row]           
+        model += (
+            lpSum(lpCells[(row, col)][0] for col in row_edges) <= lpRows[row][1]*lpRows[row][0]
+        ), f"row_degre_{row}"
+        
+    #      #########################################
+          '''
+    # Add row density constraints
+    __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    __col_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    #__row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    #__col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+
+    return model 
+
+def AB_E_r(rows_data, cols_data, edges, epsilon):
+    """
+    Arguments:
+    ----------
+    rows_data: list of tuples (row, degree) of rows in the matrix.
+    cols_data: list of tuples (col, degree) of columns in the matrix.
+    edges: list of tuples (row, col) corresponding to the zeros of the matrix.
+    epsilon: float, error tolerance for density constraints.
+
+    Returns:
+    --------
+    LpProblem:
+        The ILP model.
+    """
+    model = LpProblem(name="AB_E_r", sense=LpMaximize)
+
+    # Variables for rows and columns
+
+    lpRows = {row: (LpVariable(f'row_{row}', cat='Integer',
+                    lowBound=0, upBound=1), degree) for row, degree in rows_data}
+    lpCols = {col: (LpVariable(f'col_{col}', cat='Integer',
+                               lowBound=0, upBound=1), degree) for col, degree in cols_data}
+    lpCells = {}
+    for row, _ in rows_data:
+        for col, _ in cols_data:
+            if (row, col) in edges:
+                lpCells[(row, col)] = (LpVariable(
+                    #f'cell_{row}_{col}', cat='Continuous', lowBound=0, upBound=1), 1)
+                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 1)
+            else:
+                lpCells[(row, col)] = (LpVariable(  
+                    #f'cell_{row}_{col}', cat='Continuous', lowBound=0, upBound=1), 0)
+                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 0)
+    # print()
+    # print('-' * 40)
+    # print('lpCells=')
+    # print(lpCells)
+    # print()
+    # print('-' * 40)
+    # Objective function: Maximize sum of selected row and column variables
+    #
+    model += lpSum([cellValue*lpvar for lpvar,
+                   cellValue in lpCells.values()]), 'maximize_weight'
+    # 
+    #model += lpSum(
+    #    [lpvar for lpvar, _ in lpRows.values()] +
+    #    [lpvar for lpvar, _ in lpCols.values()]
+    #), "max_sum_vertices"
+
+    # Constraints for row and column thresholds
+    row_threshold = 2
+    col_threshold = 2
+    print()
+    print('-' * 40)
+    print('row_threshold=', row_threshold )
+    model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
+    print('col_threshold=', col_threshold )
+    model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
+    print()
+    print('-' * 40)
+    for row, col in edges:
+    #for row, col in lpCells:
+        #model += (lpRows[row][0] >= lpCells[(row, col)][0]), f'cell_{row}_{col}_1'
+        #model += (lpCols[col][0] >= lpCells[(row, col)][0]), f'ce ll_{row}_{col}_2'
+        model += ((lpRows[row][0]+lpCols[col][0])/2 >= lpCells[(row, col)][0]), f'cell_{row}_{col}_3'
+        model += (lpRows[row][0]+lpCols[col][0] -1 <= lpCells[(row, col)][0]), f'cell_{row}_{col}_4'
+        #########################################
+        #compacting  with degree 
+        #########################################
+        
+    # for col, _ in cols_data:
+    #     col_edges = [u for u, v in edges if v == col]           
+    #     model += (
+    #         lpSum(lpCells[(row, col)][0] for row in col_edges) <= lpCols[col][1]*lpCols[col][0]
+    #     ), f"col_degre_{col}"
+    # for row, _ in rows_data:
+    #     row_edges = [v for u, v in edges if u == row]           
+    #     model += (
+    #         lpSum(lpCells[(row, col)][0] for col in row_edges) <= lpRows[row][1]*lpRows[row][0]
+    #     ), f"row_degre_{row}"
+        
+    #      #########################################
+
+
+    # Add row density constraints
+    #__row_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    #__col_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    __row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    __col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+
+    return model 
+
+def AB_E_c_r(rows_data, cols_data, edges, epsilon):
+    """
+    Arguments:
+    ----------
+    rows_data: list of tuples (row, degree) of rows in the matrix.
+    cols_data: list of tuples (col, degree) of columns in the matrix.
+    edges: list of tuples (row, col) corresponding to the zeros of the matrix.
+    epsilon: float, error tolerance for density constraints.
+
+    Returns:
+    --------
+    LpProblem:
+        The ILP model.
+    """
+    model = LpProblem(name="AB_E_c_r", sense=LpMaximize)
+
+    # Variables for rows and columns
+
+    lpRows = {row: (LpVariable(f'row_{row}', cat='Integer',
+                    lowBound=0, upBound=1), degree) for row, degree in rows_data}
+    lpCols = {col: (LpVariable(f'col_{col}', cat='Integer',
+                               lowBound=0, upBound=1), degree) for col, degree in cols_data}
+    lpCells = {}
+    for row, _ in rows_data:
+        for col, _ in cols_data:
+            if (row, col) in edges:
+                lpCells[(row, col)] = (LpVariable(
+                    #f'cell_{row}_{col}', cat='Continuous', lowBound=0, upBound=1), 1)
+                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 1)
+            else:
+                lpCells[(row, col)] = (LpVariable(  
+                    #f'cell_{row}_{col}', cat='Continuous', lowBound=0, upBound=1), 0)
+                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 0)
+    # print()
+    # print('-' * 40)
+    # print('lpCells=')
+    # print(lpCells)
+    # print()
+    # print('-' * 40)
+    # Objective function: Maximize sum of selected row and column variables
+    #
+    model += lpSum([cellValue*lpvar for lpvar,
+                   cellValue in lpCells.values()]), 'maximize_weight'
+    # 
+    #model += lpSum(
+    #    [lpvar for lpvar, _ in lpRows.values()] +
+    #    [lpvar for lpvar, _ in lpCols.values()]
+    #), "max_sum_vertices"
+
+    # Constraints for row and column thresholds
+    row_threshold = 2
+    col_threshold = 2
+    print()
+    print('-' * 40)
+    print('row_threshold=', row_threshold )
+    model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
+    print('col_threshold=', col_threshold )
+    model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
+    print()
+    print('-' * 40)
+    for row, col in edges:
+    #for row, col in lpCells:
+        #model += (lpRows[row][0] >= lpCells[(row, col)][0]), f'cell_{row}_{col}_1'
+        #model += (lpCols[col][0] >= lpCells[(row, col)][0]), f'ce ll_{row}_{col}_2'
+        #model += ((lpRows[row][0]+lpCols[col][0])/2 >= lpCells[(row, col)][0]), f'cell_{row}_{col}_3'
+        model += (lpRows[row][0]+lpCols[col][0] -1 <= lpCells[(row, col)][0]), f'cell_{row}_{col}_4'
+        #########################################
+        #compacting  with degree 
+        #########################################
+        
+    for col, _ in cols_data:
+        col_edges = [u for u, v in edges if v == col]           
+        model += (
+            lpSum(lpCells[(row, col)][0] for row in col_edges) <= lpCols[col][1]*lpCols[col][0]
+        ), f"col_degre_{col}"
+    for row, _ in rows_data:
+        row_edges = [v for u, v in edges if u == row]           
+        model += (
+            lpSum(lpCells[(row, col)][0] for col in row_edges) <= lpRows[row][1]*lpRows[row][0]
+        ), f"row_degre_{row}"
+        
+         #########################################
+
+
+    # Add row density constraints
+    #__row_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    #__col_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    __row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    __col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+
+    return model 
+
+
+def __col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon):
+    """
+    Adds col density constraints to the model.
+
+    Arguments:
+    ----------
+    rows_data: list of tuples (row, degree) of rows in the matrix.
+    cols_data: list of tuples (col, degree) of columns in the matrix.
+    edges: list of tuples (row, col) corresponding to the zeros of the matrix.
+    model: LpProblem to add constraints to.
+    lpRows: dict of row variables and their degrees.
+    lpCols: dict of column variables and their degrees.
+    epsilon: float, error tolerance for density constraints.
+    """
+    mu = 0.0001
+    Big_R = len(rows_data) + 1
+    Big_C = len(cols_data) + 1
+    Big_M =Big_R + Big_C
+    #print('Big_R=', Big_R)
+    #print('Big_C=', Big_C)
+
+    for col, _ in cols_data:
+        #print(f"Adding col density constraints for col {col}:")
+        col_edges = [u for u, v in edges if v == col]
+        #print(f"Col edges: {col_edges}") 
+        #print(f"lpCols[col][0]: {lpCols[col][0]}")             
+        # Constraint for col density upper bound
+        #print(f"Sum of edge variables: {lpSum(lpRows[row][0] for row in col_edges)}")
+        #print(f"Sum of row variables: {lpSum(lpRows[row][0] for  row, _ in rows_data)}")
+        model += (
+            lpSum(lpRows[row][0] for row in col_edges) - (1 - epsilon) * lpSum(lpRows[row][0] for row, _ in rows_data) >= 
+            (lpCols[col][0]-1) * Big_M
+        ), f"col_err_rate_1_{col}"
+
+        # Constraint for col density lower bound
+        
+        model += (
+            lpSum(lpRows[row][0] for row in col_edges) - (1 - epsilon) * lpSum(lpRows[row][0] for row, _ in rows_data) <=
+            -mu + lpCols[col][0] * Big_M
+        ), f"col_err_rate_0_{col}"
+
+def __row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon):
+    """
+    Adds row density constraints to the model.
+
+    Arguments:
+    ----------
+    rows_data: list of tuples (row, degree) of rows in the matrix.
+    cols_data: list of tuples (col, degree) of columns in the matrix.
+    edges: list of tuples (row, col) corresponding to the zeros of the matrix.
+    model: LpProblem to add constraints to.
+    lpRows: dict of row variables and their degrees.
+    lpCols: dict of column variables and their degrees.
+    epsilon: float, error tolerance for density constraints.
+    """
+    mu = 0.0001
+    Big_R = len(rows_data) + 1
+    Big_C = len(cols_data) + 1
+    Big_M= Big_R+Big_C 
+    #print('Big_R=', Big_R)
+    #print('Big_C=', Big_C)
+
+    for row, _ in rows_data:
+        #print(f"Adding row density constraints for row {row}:")
+        row_edges = [v for u, v in edges if u == row]
+        #print(f"Row edges: {row_edges}") 
+        #print(f"lpRows[row][0]: {lpRows[row][0]}")             
+        # Constraint for row density upper bound
+        #print(f"Sum of edge variables: {lpSum(lpCols[col][0] for col in row_edges)}")
+        #print(f"Sum of column variables: {lpSum(lpCols[col][0] for  col, _ in cols_data)}")
+        model += (
+            lpSum(lpCols[col][0] for col in row_edges) - (1 - epsilon) * lpSum(lpCols[col][0] for col, _ in cols_data) >= 
+            (lpRows[row][0]-1) * Big_M
+        ), f"row_err_rate_1_{row}"
+
+        # Constraint for row density lower bound
+        
+        model += (
+            lpSum(lpCols[col][0] for col in row_edges) - (1 - epsilon) * lpSum(lpCols[col][0] for col, _ in cols_data) <=
+            -mu + lpRows[row][0] * Big_M
+        ), f"row_err_rate_0_{row}"
+
+def __col_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon):
+    """
+    Adds col density constraints to the model.
+
+    Arguments:
+    ----------
+    rows_data: list of tuples (row, degree) of rows in the matrix.
+    cols_data: list of tuples (col, degree) of columns in the matrix.
+    edges: list of tuples (row, col) corresponding to the zeros of the matrix.
+    model: LpProblem to add constraints to.
+    lpRows: dict of row variables and their degrees.
+    lpCols: dict of column variables and their degrees.
+    epsilon: float, error tolerance for density constraints.
+    """
+    mu = 0.0001
+    Big_R = len(rows_data) + 1
+    Big_C = len(cols_data) + 1
+    Big_M= Big_R+Big_C 
+    #print('Big_R=', Big_R)
+    #print('Big_C=', Big_C)
+
+    for col, _ in cols_data:
+        #print(f"Adding col density constraints for col {col}:")
+        col_edges = [u for u, v in edges if v == col]
+        #print(f"Col edges: {col_edges}") 
+        #print(f"lpCols[col][0]: {lpCols[col][0]}")             
+        # Constraint for col density upper bound
+        #print(f"Sum of edge variables: {lpSum(lpRows[row][0] for row in col_edges)}")
+        #print(f"Sum of row variables: {lpSum(lpRows[row][0] for  row, _ in rows_data)}")
+        model += (
+            lpSum(lpRows[row][0] for row in col_edges) - (1 - epsilon) * lpSum(lpRows[row][0] for row, _ in rows_data) >= 
+            (lpCols[col][0]-1) * Big_M
+        ), f"col_err_rate_1_{col}"
+
+        # Constraint for col density lower bound
+        
+        # model += (
+        #     lpSum(lpRows[row][0] for row in col_edges) - (1 - epsilon) * lpSum(lpRows[row][0] for row, _ in rows_data) <=
+        #     -mu + lpCols[col][0] * Big_M
+        # ), f"col_err_rate_0_{col}"
+
+def __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon):
+    """
+    Adds row density constraints to the model.
+
+    Arguments:
+    ----------
+    rows_data: list of tuples (row, degree) of rows in the matrix.
+    cols_data: list of tuples (col, degree) of columns in the matrix.
+    edges: list of tuples (row, col) corresponding to the zeros of the matrix.
+    model: LpProblem to add constraints to.
+    lpRows: dict of row variables and their degrees.
+    lpCols: dict of column variables and their degrees.
+    epsilon: float, error tolerance for density constraints.
+    """
+    mu = 0.0001
+    Big_R = len(rows_data) + 1
+    Big_C = len(cols_data) + 1
+    Big_M = Big_R+Big_C
+    #print('Big_R=', Big_R)
+    #print('Big_C=', Big_C)
+
+    for row, _ in rows_data:
+        #print(f"Adding row density constraints for row {row}:")
+        row_edges = [v for u, v in edges if u == row]
+        #print(f"Row edges: {row_edges}") 
+        #print(f"lpRows[row][0]: {lpRows[row][0]}")             
+        # Constraint for row density upper bound
+        #print(f"Sum of edge variables: {lpSum(lpCols[col][0] for col in row_edges)}")
+        #print(f"Sum of column variables: {lpSum(lpCols[col][0] for  col, _ in cols_data)}")
+        model += (
+            lpSum(lpCols[col][0] for col in row_edges) - (1 - epsilon) * lpSum(lpCols[col][0] for col, _ in cols_data) >= 
+            (lpRows[row][0]-1) * Big_M
+        ), f"row_err_rate_1_{row}"
+
+        # Constraint for row density lower bound
+        
+        # model += (
+        #     lpSum(lpCols[col][0] for col in row_edges) - (1 - epsilon) * lpSum(lpCols[col][0] for col, _ in cols_data) <=
+        #     -mu + lpRows[row][0] * Big_M
+        # ), f"row_err_rate_0_{row}"
 
 def König_V(rows_data, cols_data, edges):
     """
@@ -253,13 +799,13 @@ def minDel_Ones(rows_data, cols_data, edges, epsilon=0.3):
     nbi0 = len(edges)
     nbi1 = sum([degree for _,degree in rows_data])
     nbi2 = len(rows_data)*len(cols_data)-nbi0
-    print()
-    print('-' * 40)
-    print("nbi0 = ",nbi0)
-    print("nbi1 = ",nbi1)
-    print("nbi2 = ",nbi2)
-    print(nbi0, nbi1, nbi2)
-    print('-' * 40)
+    # print()
+    # print('-' * 40)
+    # print("nbi0 = ",nbi0)
+    # print("nbi1 = ",nbi1)
+    # print("nbi2 = ",nbi2)
+    # print(nbi0, nbi1, nbi2)
+    # print('-' * 40)
     if nbi0>nbi1:
         diff = nbi0-nbi1
         model += (lpSum(lpEdges) >= diff+(1-epsilon)*nbi1), f'sensitivity'
@@ -272,7 +818,7 @@ def minDel_Ones(rows_data, cols_data, edges, epsilon=0.3):
 # ============================================================================ #
 
 
-def max_Ones(rows_data, cols_data, edges, epsilon=0.1):
+def max_Ones(rows_data, cols_data, edges, epsilon):
     """
     ARGUMENTS:
     ----------
@@ -299,13 +845,11 @@ def max_Ones(rows_data, cols_data, edges, epsilon=0.1):
         for col, _ in cols_data:
             if (row, col) in edges:
                 lpCells[(row, col)] = (LpVariable(
-                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 0)
+                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 1)
             else:
                 lpCells[(row, col)] = (LpVariable(  
-                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 1)
-    y = LpVariable('yyy', cat=LpBinary,)
-    y_edge = LpVariable('y_edge', cat=LpBinary,)
-    big_m = 1000
+                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 0)
+
     # ------------------------------------------------------------------------ #
     # Objective function
     # ------------------------------------------------------------------------ #
@@ -319,36 +863,17 @@ def max_Ones(rows_data, cols_data, edges, epsilon=0.1):
     for row, col in lpCells:
         model += (lpRows[row][0] >= lpCells[(row, col)][0]), f'cell_{row}_{col}_1'
         model += (lpCols[col][0] >= lpCells[(row, col)][0]), f'ce ll_{row}_{col}_2'
-        if (row, col) in edges:
-            model += (lpRows[row][0]+lpCols[col][0] -1 <= lpCells[(row, col)][0]), f'cell_{row}_{col}_3'
+        #if (row, col) in edges:
+        model += (lpRows[row][0]+lpCols[col][0] -1 <= lpCells[(row, col)][0]), f'cell_{row}_{col}_3'
 
     model += (lpSum([(1-cellValue)*lpvar for lpvar, cellValue in lpCells.values()]) <= epsilon *
               lpSum([lpvar for lpvar, _ in lpCells.values()])), f'err_rate'
-
-    # # Testing various ideas for adding constraints 
-    #sum_r = lpSum([lpvar for lpvar, _ in lpRows.values()])
-    # sum_c = lpSum([lpvar for lpvar, _ in lpCols.values()])
-    # sum_edge = lpSum([lpvar for lpvar, _ in lpCells.values()])
-    #
-    # If sum of rows >= 3 then sum of columns <= 2
-    # model += sum_r >= 3+big_m*(1-y), 'left_side_big_m'
-    # model += sum_c <= 2+big_m*(1-y), 'right_side_big_m_col'
-        # model += sum_r <= 2+big_m*y, 'right_side_big_m'
-    # model += sum_edge >= 5 + big_m*(1-y_edge), 'edge_col'
-    # model += sum_r <= 4 + big_m*(1-y_edge), 'sum_r_sum_c'
-    #model += (sum_r <= 3, 'sum_r limitation')
-    #model += lpRows[1][0] + lpRows[5][0] <= lpCols[2][0] + lpCols[4][0],'constraint uncomp'
-    #model += lpRows[6][0] +  lpRows[4][0] <= lpCols[5][0] ,' row_4 implies col_5 '
-    # model += lpRows[1][0] <= lpCols[5][0] ,' row_1 implies col_5 '
-    # # End Testing various ideas for adding constraints 
-
-    #print(lpRows['Alabama'])
 
     return model
 
 
 
-def max_Ones_reduced(rows_data, cols_data, edges, epsilon=0.1):
+def max_Ones_comp(rows_data, cols_data, edges, epsilon):
     """
     ARGUMENTS:
     ----------
@@ -361,7 +886,7 @@ def max_Ones_reduced(rows_data, cols_data, edges, epsilon=0.1):
     # ------------------------------------------------------------------------ #
     # Model with maximization
     # ------------------------------------------------------------------------ #
-    model = LpProblem(name='maximize_ones_reduced', sense=LpMaximize)
+    model = LpProblem(name='maximize_ones_compacted', sense=LpMaximize)
 
     # ------------------------------------------------------------------------ #
     # Variables
@@ -375,52 +900,52 @@ def max_Ones_reduced(rows_data, cols_data, edges, epsilon=0.1):
         for col, _ in cols_data:
             if (row, col) in edges:
                 lpCells[(row, col)] = (LpVariable(
-                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 0)
+                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 1)
             else:
                 lpCells[(row, col)] = (LpVariable(  
-                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 1)
-    y = LpVariable('yyy', cat=LpBinary,)
-    y_edge = LpVariable('y_edge', cat=LpBinary,)
-    big_m = 1000
+                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 0)
+    # y = LpVariable('yyy', cat=LpBinary,)
+    # y_edge = LpVariable('y_edge', cat=LpBinary,)
+    # big_m = 1000
+
     # ------------------------------------------------------------------------ #
     # Objective function
     # ------------------------------------------------------------------------ #
     model += lpSum([cellValue*lpvar for lpvar,
-                   cellValue in lpCells.values()]), 'maximize_ones_reduced'
+                   cellValue in lpCells.values()]), 'maximize_ones_compacted'
 
     # ------------------------------------------------------------------------ #
     # Constraints
     # ------------------------------------------------------------------------ #
-
+    row_threshold = 2
+    col_threshold = 2
+    model += (lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold), "row_threshold"
+    model += (lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold), "col_threshold"
+    #
     for row, col in lpCells:
-        model += (lpRows[row][0] >= lpCells[(row, col)][0]), f'cell_{row}_{col}_1'
-        model += (lpCols[col][0] >= lpCells[(row, col)][0]), f'ce ll_{row}_{col}_2'
-       # model += (lpRows[row][0]+lpCols[col][0] -1 <= lpCells[(row, col)][0]), f'cell_{row}_{col}_3'
-        if (row, col) in edges:
+    #for row, col in edges:
+        #model += (lpRows[row][0] >= lpCells[(row, col)][0]), f'cell_{row}_{col}_1'
+        #model += (lpCols[col][0] >= lpCells[(row, col)][0]), f'ce ll_{row}_{col}_2'
+        model += (lpRows[row][0]+lpCols[col][0] -1 <= lpCells[(row, col)][0]), f'cell_{row}_{col}_3'
+      #  if (row, col) in edges:
     # for (row, col) in edges:
-             model += (lpRows[row][0]+lpCols[col][0] -1 <= lpCells[(row, col)][0]), f'cell_{row}_{col}_3'
+      #      model += (lpRows[row][0]+lpCols[col][0] -1 <= lpCells[(row, col)][0]), f'cell_{row}_{col}_3'
+              #compacting  with degree 
+        #########################################
+    for col, _ in cols_data:
+        col_edges = [u for u, v in edges if v == col]           
+        model += (
+            lpSum(lpCells[(row, col)][0] for row in col_edges) <= lpCols[col][1]*lpCols[col][0]
+        ), f"col_degre_{col}"
+    for row, _ in rows_data:
+        row_edges = [v for u, v in edges if u == row]           
+        model += (
+            lpSum(lpCells[(row, col)][0] for col in row_edges) <= lpRows[row][1]*lpRows[row][0]
+        ), f"row_degre_{row}"
+    #      #########################################
 
     model += (lpSum([(1-cellValue)*lpvar for lpvar, cellValue in lpCells.values()]) <= epsilon *
               lpSum([lpvar for lpvar, _ in lpCells.values()])), f'err_rate'
-
-    # # Testing various ideas for adding constraints 
-    #sum_r = lpSum([lpvar for lpvar, _ in lpRows.values()])
-    # sum_c = lpSum([lpvar for lpvar, _ in lpCols.values()])
-    # sum_edge = lpSum([lpvar for lpvar, _ in lpCells.values()])
-    #
-    # If sum of rows >= 3 then sum of columns <= 2
-    # model += sum_r >= 3+big_m*(1-y), 'left_side_big_m'
-    # model += sum_c <= 2+big_m*(1-y), 'right_side_big_m_col'
-        # model += sum_r <= 2+big_m*y, 'right_side_big_m'
-    # model += sum_edge >= 5 + big_m*(1-y_edge), 'edge_col'
-    # model += sum_r <= 4 + big_m*(1-y_edge), 'sum_r_sum_c'
-    #model += (sum_r <= 3, 'sum_r limitation')
-    #model += lpRows[1][0] + lpRows[5][0] <= lpCols[2][0] + lpCols[4][0],'constraint uncomp'
-    #model += lpRows[6][0] +  lpRows[4][0] <= lpCols[5][0] ,' row_4 implies col_5 '
-    # model += lpRows[1][0] <= lpCols[5][0] ,' row_1 implies col_5 '
-    # # End Testing various ideas for adding constraints 
-
-    #print(lpRows['Alabama'])
 
     return model
 
@@ -621,10 +1146,20 @@ def solve(path_to_data, model, epsilon=0.1):
         model = König_V(rows, cols, edges)
     elif model == 'König_E':
         model = König_E(rows, cols, edges)
+    elif model == 'AB_E':
+        model = AB_E(rows, cols, edges, epsilon)
+    elif model == 'AB_E_r':
+        model = AB_E_r(rows, cols, edges, epsilon)
+    elif model == 'AB_E_c_r':
+        model = AB_E_c_r(rows, cols, edges, epsilon)
+    elif model == 'AB_V':
+        model = AB_V(rows, cols, edges, epsilon)
+    elif model == 'AB_V_h':
+        model = AB_V_h(rows, cols, edges, epsilon)
     elif model == 'max_Ones':
         model = max_Ones(rows, cols, edges, epsilon)
-    elif model == 'max_Ones_reduced':
-        model = max_Ones_reduced(rows, cols, edges, epsilon)
+    elif model == 'max_Ones_comp':
+        model = max_Ones_comp(rows, cols, edges, epsilon)
     elif model == 'max_Surface':
         model = max_Surface(rows, cols, edges, epsilon)
     elif model == 'max_Vertices':
@@ -640,15 +1175,20 @@ def solve(path_to_data, model, epsilon=0.1):
     #solve the model using GUROBI_CMD. it is possible for the solver to take a long time
     #the time limit is set to 1 hour. The solver will be automatically stop after 1h.
     #model.solve(PULP_CBC_CMD(msg=True, timeLimit= 3600, gapRel = 0.5),)
-    model.solve(GUROBI_CMD(msg=True, timeLimit= 1800)#,gapRel=0.3)
+    model.solve(GUROBI_CMD(msg=True, timeLimit= 600)#, options=[("Heuristics", 0.0), ("NoRelHeurTime", 0)] )#,gapRel=0.3)
     )
     #model.solve(GUROBI_CMD(msg=True, timeLimit= 60, MIPGap = 0.03),)
-
+# Check status
+    #print("Model is . Exporting LP file for debugging...")
+    #model.writeLP("debug_model.lp")
+    print(f"Model status: {LpStatus[model.status]}")
+    if model.status == -1:
+         print("Model is infeasible. Exporting LP file for debugging...")
+         model.writeLP("debug_model.lp")
     #read the result from the solver
     rows_res = []
     cols_res = []
-    if model_name == 'max_Ones'  or model_name == 'max_Surface' or model_name == 'max_Vertices':
-    #or model_name == 'KP_QB':
+    if model_name == 'AB_V'  or model_name == 'AB_V_h'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_r' or model_name == 'AB_E_c_r':
         for var in model.variables():
             if var.varValue == 1:
                 if var.name[:3] == "row":
@@ -667,10 +1207,8 @@ def solve(path_to_data, model, epsilon=0.1):
 
     rows_res = [int(r) for r in rows_res]
     cols_res = [int(c) for c in cols_res]
-    # print('row_res')
-    # print(rows_res)
-    # print('cols_res')
-    # print(cols_res)
+    #print('row_res=', rows_res)
+    #print('cols_res=', cols_res)
     print()
     print('-' * 40)
     print(f"input data = {path_to_data}")
@@ -717,7 +1255,6 @@ def solve(path_to_data, model, epsilon=0.1):
     print(rows_res)
     print('cols_res')
     print(cols_res)
-
     #print(rows_res,cols_res)
     return rows_res, cols_res
 
@@ -745,8 +1282,16 @@ def get_data(path:str):
 
     df = df.reset_index(drop=True)
     df = df.T.reset_index(drop=True).T
-    edges = list(df[df == 0].stack().index)
-
+    edges = list(df[df == 1].stack().index)
+    #edges = list(df[df == 0].stack().index)
+    '''
+    print('-' * 40)
+    print('edges =', edges)
+    print('rows_data =', rows_data)
+    print('cols_data =', cols_data)
+    print()
+    print('-' * 40)
+    '''
     return rows_data, cols_data, edges, row_names, col_names, df
 
 def print_log_output(prob):
@@ -771,15 +1316,16 @@ def print_log_output(prob):
     print(f'Solve status: {LpStatus[prob.status]}')
     print(f'Objective value: {prob.objective.value()}')
 
-    print()
-    print('-' * 40)
-    print("Variables' values")
-    print('-' * 40)
-    print()
+    # print()
+    # print('-' * 40)
+    # print("Variables' values")
+    # print('-' * 40)
+    # print()
     # for v in prob.variables():
-    #   if v.varValue == 1 : 
-    #     print(v.name, v.varValue)
-    # #breakpoint()
+    #       if v.varValue == 1 : 
+    #         print(v.name, v.varValue)
+    #breakpoint()
+    #print('-' * 40)
 
 
 def parse_arguments():
@@ -791,9 +1337,12 @@ def parse_arguments():
         '--filepath', dest='filepath', required=True, default='',
         help='Select the data',
     )
-
+    # argparser.add_argument(
+    #     '--model', dest='model', required=False, default='AB_V',
+    #     help='Select the model to use',
+    # )
     argparser.add_argument(
-        '--model', dest='model', required=False, default='max_Ones',
+        '--model', dest='model', required=False, default='AB_V_h',
         help='Select the model to use',
     )
 
@@ -804,7 +1353,7 @@ def parse_arguments():
 
     arg = argparser.parse_args()
 
-    if arg.model not in ['König_V', 'König_E', 'max_Ones','max_Ones_reduced','max_Surface','max_Vertices','minDel_RC', 'minDel_Ones', 'KP_QB']:
+    if arg.model not in ['König_V', 'König_E', 'AB_E', 'AB_E_r', 'AB_E_c_r','AB_V','AB_V_h','max_Ones','max_Ones_comp','max_Surface','max_Vertices','minDel_RC', 'minDel_Ones', 'KP_QB']:
         argparser.print_help()
         sys.exit(1)
 
