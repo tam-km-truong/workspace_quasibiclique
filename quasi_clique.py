@@ -63,10 +63,17 @@ def AB_V(rows_data, cols_data, edges, epsilon):
     #                 f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 0)
                 
     # Objective function: Maximize sum of selected row and column variables
+    #  model += lpSum(
+    #     [lpvar for lpvar, _ in lpRows.values()] +
+    #     [lpvar for lpvar, _ in lpCols.values()]
+    # ), "max_sum_vertices"
+
     model += lpSum(
+        # [degreeValue*lpvar for lpvar, degreeValue in lpRows.values()] +
+        # [degreeValue*lpvar for lpvar, degreeValue in lpCols.values()] +
         [lpvar for lpvar, _ in lpRows.values()] +
         [lpvar for lpvar, _ in lpCols.values()]
-    ), "max_sum_vertices"
+    ), "max_degree_vertices"
 
     # Constraints for row and column thresholds
     row_threshold = 2
@@ -117,10 +124,17 @@ def AB_V_h(rows_data, cols_data, edges, epsilon):
     lpCols = {col: (LpVariable(f'col_{col}', cat='Integer',
                                lowBound=0, upBound=1), degree) for col, degree in cols_data}             
     # Objective function: Maximize sum of selected row and column variables
+    # model += lpSum(
+    #     [lpvar for lpvar, _ in lpRows.values()] +
+    #     [lpvar for lpvar, _ in lpCols.values()]
+    # ), "max_sum_vertices"
+
     model += lpSum(
+        # [degreeValue*lpvar for lpvar, degreeValue in lpRows.values()] +
+        # [degreeValue*lpvar for lpvar, degreeValue in lpCols.values()] +
         [lpvar for lpvar, _ in lpRows.values()] +
         [lpvar for lpvar, _ in lpCols.values()]
-    ), "max_sum_vertices"
+    ), "max_degree_vertices"
 
     # Constraints for row and column thresholds
     row_threshold = 2
@@ -446,9 +460,8 @@ def __col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilo
             lpSum(lpRows[row][0] for row in col_edges) - (1 - epsilon) * lpSum(lpRows[row][0] for row, _ in rows_data) >= 
             (lpCols[col][0]-1) * Big_M
         ), f"col_err_rate_1_{col}"
-
         # Constraint for col density lower bound
-        
+  #  for col, _ in cols_data:
         model += (
             lpSum(lpRows[row][0] for row in col_edges) - (1 - epsilon) * lpSum(lpRows[row][0] for row, _ in rows_data) <=
             -mu + lpCols[col][0] * Big_M
@@ -487,9 +500,8 @@ def __row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilo
             lpSum(lpCols[col][0] for col in row_edges) - (1 - epsilon) * lpSum(lpCols[col][0] for col, _ in cols_data) >= 
             (lpRows[row][0]-1) * Big_M
         ), f"row_err_rate_1_{row}"
-
         # Constraint for row density lower bound
-        
+   # for row, _ in rows_data:
         model += (
             lpSum(lpCols[col][0] for col in row_edges) - (1 - epsilon) * lpSum(lpCols[col][0] for col, _ in cols_data) <=
             -mu + lpRows[row][0] * Big_M
