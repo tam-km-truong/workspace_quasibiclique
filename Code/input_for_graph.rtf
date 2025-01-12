@@ -1,0 +1,96 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2639
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww16100\viewh16780\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs28 \cf0 def read_dimacs_file(file_path):\
+    """\
+    Reads a graph in the DIMACS format from a given file.\
+\
+    Parameters:\
+    - file_path: str, path to the DIMACS file.\
+\
+    Returns:\
+    - nodes: int, number of nodes in the graph.\
+    - edges: list of tuples, each tuple (u, v) represents an edge.\
+    """\
+    nodes = 0\
+    edges = []\
+\
+    with open(file_path, 'r') as file:\
+        for line in file:\
+            line = line.strip()\
+            if not line or line[0] == 'c':  # Ignore empty lines and comments\
+                continue\
+            \
+            parts = line.split()\
+            if parts[0] == 'p':  # Problem line\
+                if len(parts) != 4 or parts[1] != 'edge':\
+                    raise ValueError("Invalid problem line format.")\
+                nodes = int(parts[2])  # Number of nodes\
+                num_edges = int(parts[3])  # Number of edges (not used directly)\
+            \
+            elif parts[0] == 'e':  # Edge descriptor line\
+                if len(parts) != 3:\
+                    raise ValueError("Invalid edge descriptor format.")\
+                u, v = int(parts[1]), int(parts[2])\
+                edges.append((u, v))\
+\
+    return nodes, edges\
+\
+def build_adjacency_list(nodes, edges):\
+    """\
+    Builds an adjacency list from nodes and edges.\
+\
+    Parameters:\
+    - nodes: int, number of nodes.\
+    - edges: list of tuples, edges in the graph.\
+\
+    Returns:\
+    - adjacency_list: dict, adjacency list representation of the graph.\
+    """\
+    adjacency_list = \{i: [] for i in range(1, nodes + 1)\}\
+    \
+    for u, v in edges:\
+        adjacency_list[u].append(v)\
+        adjacency_list[v].append(u)  # Since the graph is undirected\
+    \
+    return adjacency_list\
+\
+\
+# Example usage:\
+if __name__ == "__main__":\
+    file_path = "graph.dimacs"  # Replace with the path to your DIMACS file\
+    nodes, edges = read_dimacs_file(file_path)\
+    print(f"Number of nodes: \{nodes\}")\
+    print(f"Edges: \{edges\}")\
+    \
+    adjacency_list = build_adjacency_list(nodes, edges)\
+    print("Adjacency list representation:")\
+    for node, neighbors in adjacency_list.items():\
+        print(f"\{node\}: \{neighbors\}")\
+\
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
+\
+\
+c This is a sample DIMACS file\
+p edge 5 4\
+e 1 2\
+e 2 3\
+e 3 4\
+e 4 5\
+\
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
+Number of nodes: 5\
+Edges: [(1, 2), (2, 3), (3, 4), (4, 5)]\
+Adjacency list representation:\
+1: [2]\
+2: [1, 3]\
+3: [2, 4]\
+4: [3, 5]\
+5: [4]\
+\
+\
+}

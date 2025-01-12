@@ -27,64 +27,7 @@ from pulp import (
 
 
 # ============================================================================ #
-#                     LP MODEL - maximize gaps                       #
-# ============================================================================ #
-
-def max_Gaps(rows_data, cols_data, edges, epsilon):
-    """<
-    Arguments:
-    ----------
-    rows_data: list of tuples (row, degree) of rows in the matrix.
-    cols_data: list of tuples (col, degree) of columns in the matrix.
-    edges: list of tuples (row, col) corresponding to the zeros of the matrix.
-    epsilon: float, error tolerance for density constraints.
-
-    Returns:
-    --------
-    LpProblem:
-        The ILP model.
-    """
-    model = LpProblem(name="max_Gaps", sense=LpMaximize)
-    Big_R = len(rows_data) + 1
-    Big_C = len(cols_data) + 1
-    mu = 0.0001
-    # Variables for rows and columns
-
-    lpRows = {row: (LpVariable(f'row_{row}', cat='Integer',
-                    lowBound=0, upBound=1), degree) for row, degree in rows_data}
-    lpCols = {col: (LpVariable(f'col_{col}', cat='Integer',
-                               lowBound=0, upBound=1), degree) for col, degree in cols_data}
-    lpGaps_R = {lr: (LpVariable(f'lr_{lr}', cat='Continuous',lowBound=-Big_R, upBound=Big_R)) for lr, _ in rows_data}
-    lpGaps_C = {lc: (LpVariable(f'lc_{lc}', cat='Continuous',lowBound=-Big_C, upBound=Big_C)) for lc, _ in cols_data}
-    lpGaps_R_p = {lrp: (LpVariable(f'lrp_{lrp}', cat='Continuous',lowBound=0, upBound=Big_R)) for lrp, _ in rows_data}
-    lpGaps_C_p = {lcp: (LpVariable(f'lcp_{lcp}', cat='Continuous',lowBound=0, upBound=Big_C)) for lcp, _ in cols_data}
-    #objective : max sum of gaps
-    model += lpSum(
-        #[lpvar for lpvar in lpGaps_R.values()] + 
-        [lpvar for lpvar in lpGaps_C.values()] + 
-        [lpvar for lpvar, _ in lpRows.values()] + [lpvar for lpvar, _ in lpCols.values()]
-    ), "max_gaps"
-    # Constraints for row and column thresholds
-    row_threshold = 1
-    col_threshold = 1
-    print()
-    print('-' * 40)
-    print('row_threshold=', row_threshold )
-    model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
-    print('col_threshold=', col_threshold )
-    model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
-    print()
-    print('-' * 40) 
-    # Add gaps constraints
-    __row_gaps(rows_data, cols_data, edges, model, lpRows, lpCols, lpGaps_R, lpGaps_C, lpGaps_R_p, lpGaps_C_p, epsilon)
-    __col_gaps(rows_data, cols_data, edges, model, lpRows, lpCols, lpGaps_R, lpGaps_C, lpGaps_R_p, lpGaps_C_p, epsilon)
-    #__col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
-    #__row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
-
-    return model 
-
-# ============================================================================ #
-#                     LP MODEL - max vertices                      #
+#                     LP MODEL - minimize gaps                       #
 # ============================================================================ #
 
 def AB_V(rows_data, cols_data, edges, epsilon):
@@ -128,7 +71,8 @@ def AB_V(rows_data, cols_data, edges, epsilon):
     model += lpSum(
         # [degreeValue*lpvar for lpvar, degreeValue in lpRows.values()] +
         # [degreeValue*lpvar for lpvar, degreeValue in lpCols.values()] +
-        [lpvar for lpvar, _ in lpRows.values()] + [ lpvar for lpvar, _ in lpCols.values()]
+        [lpvar for lpvar, _ in lpRows.values()] +
+        [lpvar for lpvar, _ in lpCols.values()]
     ), "max_degree_vertices"
 
     # Constraints for row and column thresholds
@@ -150,9 +94,9 @@ def AB_V(rows_data, cols_data, edges, epsilon):
     #     model += (lpRows[row][0]+lpCols[col][0] -1 <= lpCells[(row, col)][0]), f'cell_{row}_{col}_4'
     #just for testing     
     # Add row density constraints
-    #__row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    __row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
     __col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
-    __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    #__row_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
     #__col_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
 
     return model 
@@ -383,9 +327,9 @@ def AB_E_r(rows_data, cols_data, edges, epsilon):
 
 
     # Add row density constraints
-    __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    #__row_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
     #__col_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
-    #__row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+    __row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
     __col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
 
     return model 
@@ -483,54 +427,6 @@ def AB_E_c_r(rows_data, cols_data, edges, epsilon):
     return model 
 
 
-def __col_gaps(rows_data, cols_data, edges, model, lpRows, lpCols, lpGaps_R, lpGaps_C, lpGaps_R_p, lpGaps_C_p, epsilon):
-    """
-    Adds col density constraints to the model.
-
-    Arguments:
-    ----------
-    rows_data: list of tuples (row, degree) of rows in the matrix.
-    cols_data: list of tuples (col, degree) of columns in the matrix.
-    edges: list of tuples (row, col) corresponding to the zeros of the matrix.
-    model: LpProblem to add constraints to.
-    lpRows: dict of row variables and their degrees.
-    lpCols: dict of column variables and their degrees.
-    epsilon: float, error tolerance for density constraints.
-    """
-    mu = 0.001
-    Big_R = len(rows_data) + 1
-    Big_C = len(cols_data) + 1
-    Big_M =Big_R + Big_C
-    print('Big_R=', Big_R)
-    print('Big_C=', Big_C)
-    # for col, _ in cols_data:
-    #     model += (lpGaps_C_p[col] >= lpGaps_C[col])
-    #     model += (lpGaps_C_p[col] >= 0)
-    #     model += (lpGaps_C_p[col] <= lpCols[col][0] * Big_C)
-        #model += (lpGaps_C_p[col] <= -mu + lpCols[col][0] * Big_C)
-    for col, _ in cols_data:
-        #print(f"Adding col density constraints for col {col}:")
-        col_edges = [u for u, v in edges if v == col]
-        #print(f"Col edges: {col_edges}") 
-        #print(f"lpCols[col][0]: {lpCols[col][0]}")             
-        # Constraint for col density upper bound
-        #print(f"Sum of edge variables: {lpSum(lpRows[row][0] for row in col_edges)}")
-        #print(f"Sum of row variables: {lpSum(lpRows[row][0] for  row, _ in rows_data)}")
-        model += (lpSum(lpRows[row][0] for row in col_edges) == lpGaps_C[col]
-            #lpSum(lpRows[row][0] for row in col_edges) - (1 - epsilon) * lpSum(lpRows[row][0] for row, _ in rows_data) == lpGaps_C[col]
-        #    >= (lpCols[col][0]-1) * Big_M
-        ), f"col_gaps_{col}"
-        # Constraint for col density lower bound
-        model += (
-            lpSum(lpRows[row][0] for row in col_edges) - (1 - epsilon) * lpSum(lpRows[row][0] for row, _ in rows_data) >= 
-            (lpCols[col][0]-1) * Big_M
-        ), f"col_gaps_col_1_{col}"
-  #  for col, _ in cols_data:
-        model += (
-            lpSum(lpRows[row][0] for row in col_edges) - (1 - epsilon) * lpSum(lpRows[row][0] for row, _ in rows_data) <= -mu + lpCols[col][0] * Big_M
-            #-mu + lpCols[col][0] * Big_M
-        ), f"col_gaps_col_0_{col}"
-
 def __col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon):
     """
     Adds col density constraints to the model.
@@ -570,7 +466,6 @@ def __col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilo
             lpSum(lpRows[row][0] for row in col_edges) - (1 - epsilon) * lpSum(lpRows[row][0] for row, _ in rows_data) <=
             -mu + lpCols[col][0] * Big_M
         ), f"col_err_rate_0_{col}"
-
 
 def __row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon):
     """
@@ -652,54 +547,6 @@ def __col_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon):
         #     lpSum(lpRows[row][0] for row in col_edges) - (1 - epsilon) * lpSum(lpRows[row][0] for row, _ in rows_data) <=
         #     -mu + lpCols[col][0] * Big_M
         # ), f"col_err_rate_0_{col}"
-
-def __row_gaps(rows_data, cols_data, edges, model, lpRows, lpCols, lpGaps_R, lpGaps_C, lpGaps_R_p, lpGaps_C_p, epsilon):
-    """
-    Adds row density constraints to the model.
-
-    Arguments:
-    ----------
-    rows_data: list of tuples (row, degree) of rows in the matrix.
-    cols_data: list of tuples (col, degree) of columns in the matrix.
-    edges: list of tuples (row, col) corresponding to the zeros of the matrix.
-    model: LpProblem to add constraints to.
-    lpRows: dict of row variables and their degrees.
-    lpCols: dict of column variables and their degrees.
-    epsilon: float, error tolerance for density constraints.
-    """
-    mu = 0.001
-    Big_R = len(rows_data) + 1
-    Big_C = len(cols_data) + 1
-    Big_M = Big_R+Big_C
-    print('Big_R=', Big_R)
-    print('Big_C=', Big_C)
-    # for row, _ in rows_data: 
-    #     model += (lpGaps_R_p[row] >= lpGaps_R[row])
-    #     model += (lpGaps_R_p[row] >= 0)
-    #     model += (lpGaps_R_p[row] <= lpRows[row][0] * Big_R)
-    # #
-    for row, _ in rows_data:
-        #print(f"Adding row density constraints for row {row}:")
-        row_edges = [v for u, v in edges if u == row]
-        #print(f"Row edges: {row_edges}") 
-        #print(f"lpRows[row][0]: {lpRows[row][0]}")             
-        # Constraint for row density upper bound
-        #print(f"Sum of edge variables: {lpSum(lpCols[col][0] for col in row_edges)}")
-        #print(f"Sum of column variables: {lpSum(lpCols[col][0] for  col, _ in cols_data)}")
-        model += (lpSum(lpCols[col][0] for col in row_edges) == lpGaps_R[row]
-            # lpSum(lpCols[col][0] for col in row_edges) - (1 - epsilon) * lpSum(lpCols[col][0] for col, _ in cols_data) == lpGaps_R[row]
-            #>= (lpRows[row][0]-1) * Big_M
-        ), f"row_gaps_{row}"
-        # Constraint for row density lower bound  
-        model += (
-            lpSum(lpCols[col][0] for col in row_edges) - (1 - epsilon) * lpSum(lpCols[col][0] for col, _ in cols_data) >= 
-            (lpRows[row][0]-1) * Big_M
-        ), f"row_gap_err_1_{row}"
-        # Constraint for row density lower bound
-        # model += (
-        #     lpSum(lpCols[col][0] for col in row_edges) - (1 - epsilon) * lpSum(lpCols[col][0] for col, _ in cols_data) <=
-        #     -mu + lpRows[row][0] * Big_M
-        # ), f"row_err_rate_0_{row}"
 
 def __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon):
     """
@@ -1311,8 +1158,6 @@ def solve(path_to_data, model, epsilon=0.1):
         model = König_V(rows, cols, edges)
     elif model == 'König_E':
         model = König_E(rows, cols, edges)
-    elif model == 'max_Gaps':
-        model = max_Gaps(rows, cols, edges, epsilon)
     elif model == 'AB_E':
         model = AB_E(rows, cols, edges, epsilon)
     elif model == 'AB_E_r':
@@ -1342,12 +1187,12 @@ def solve(path_to_data, model, epsilon=0.1):
     #solve the model using GUROBI_CMD. it is possible for the solver to take a long time
     #the time limit is set to 1 hour. The solver will be automatically stop after 1h.
     #model.solve(PULP_CBC_CMD(msg=True, timeLimit= 3600, gapRel = 0.5),)
-    model.solve(GUROBI_CMD(msg=True, timeLimit= 1800, options=[("MIPGap", 0.05)])#, options=[("Heuristics", 0.0), ("NoRelHeurTime", 0)] )#,gapRel=0.3)
+    model.solve(GUROBI_CMD(msg=True, timeLimit= 600)#, options=[("Heuristics", 0.0), ("NoRelHeurTime", 0)] )#,gapRel=0.3)
     )
     #model.solve(GUROBI_CMD(msg=True, timeLimit= 60, MIPGap = 0.03),)
 # Check status
-    print("Model is . Exporting LP file for debugging...")
-    model.writeLP("debug_model.lp")
+    #print("Model is . Exporting LP file for debugging...")
+    #model.writeLP("debug_model.lp")
     print(f"Model status: {LpStatus[model.status]}")
     if model.status == -1:
          print("Model is infeasible. Exporting LP file for debugging...")
@@ -1355,7 +1200,7 @@ def solve(path_to_data, model, epsilon=0.1):
     #read the result from the solver
     rows_res = []
     cols_res = []
-    if model_name == 'AB_V'  or model_name == 'max_Gaps' or model_name == 'AB_V_h'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_r' or model_name == 'AB_E_c_r':
+    if model_name == 'AB_V'  or model_name == 'AB_V_h'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_r' or model_name == 'AB_E_c_r':
         for var in model.variables():
             if var.varValue == 1:
                 if var.name[:3] == "row":
@@ -1374,8 +1219,8 @@ def solve(path_to_data, model, epsilon=0.1):
 
     rows_res = [int(r) for r in rows_res]
     cols_res = [int(c) for c in cols_res]
-    print('row_res=', rows_res)
-    print('cols_res=', cols_res)
+    #print('row_res=', rows_res)
+    #print('cols_res=', cols_res)
     print()
     print('-' * 40)
     print(f"input data = {path_to_data}")
@@ -1423,9 +1268,6 @@ def solve(path_to_data, model, epsilon=0.1):
     print('cols_res')
     print(cols_res)
     #print(rows_res,cols_res)
-    #Weight =  lpSum (lpRows[row][0] * lpCols[col][0] for (row,col) in edges
-    #)
-    #print('Weight = ', Weight)
     return rows_res, cols_res
 
   
@@ -1486,16 +1328,16 @@ def print_log_output(prob):
     print(f'Solve status: {LpStatus[prob.status]}')
     print(f'Objective value: {prob.objective.value()}')
 
-    # print()
-    # print('-' * 40)
-    # print("Variables' values")
-    # print('-' * 40)
-    # print()
-    # for v in prob.variables():
-    #      # if v.varValue == 1 : 
-    #         print(v.name, v.varValue)
-    # #breakpoint()
-    # print('-' * 40)
+    print()
+    print('-' * 40)
+    print("Variables' values")
+    print('-' * 40)
+    print()
+    for v in prob.variables():
+          if v.varValue == 1 : 
+            print(v.name, v.varValue)
+    #breakpoint()
+    print('-' * 40)
 
 
 def parse_arguments():
@@ -1523,7 +1365,7 @@ def parse_arguments():
 
     arg = argparser.parse_args()
 
-    if arg.model not in ['König_V', 'König_E', 'AB_E', 'AB_E_r', 'AB_E_c_r','AB_V','AB_V_h',  'max_Gaps', 'max_Ones','max_Ones_comp','max_Surface','max_Vertices','minDel_RC', 'minDel_Ones', 'KP_QB']:
+    if arg.model not in ['König_V', 'König_E', 'AB_E', 'AB_E_r', 'AB_E_c_r','AB_V','AB_V_h', 'max_Ones','max_Ones_comp','max_Surface','max_Vertices','minDel_RC', 'minDel_Ones', 'KP_QB']:
         argparser.print_help()
         sys.exit(1)
 
