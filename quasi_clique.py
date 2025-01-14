@@ -150,7 +150,7 @@ def AB_V(rows_data, cols_data, edges, epsilon):
     #     model += (lpRows[row][0]+lpCols[col][0] -1 <= lpCells[(row, col)][0]), f'cell_{row}_{col}_4'
     #just for testing     
     # Add row density constraints
-    #__row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
+#__row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
     __col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
     __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
     #__col_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
@@ -1342,8 +1342,7 @@ def solve(path_to_data, model, epsilon=0.1):
     #solve the model using GUROBI_CMD. it is possible for the solver to take a long time
     #the time limit is set to 1 hour. The solver will be automatically stop after 1h.
     #model.solve(PULP_CBC_CMD(msg=True, timeLimit= 3600, gapRel = 0.5),)
-    model.solve(GUROBI_CMD(msg=True, timeLimit= 1800, options=[("MIPGap", 0.05)])#, options=[("Heuristics", 0.0), ("NoRelHeurTime", 0)] )#,gapRel=0.3)
-    )
+    model.solve(GUROBI_CMD(msg=True, timeLimit= 300))#, options=[("MIPGap", 0.05)])#, options=[("Heuristics", 0.0), ("NoRelHeurTime", 0)] )#,gapRel=0.3)
     #model.solve(GUROBI_CMD(msg=True, timeLimit= 60, MIPGap = 0.03),)
 # Check status
     print("Model is . Exporting LP file for debugging...")
@@ -1371,7 +1370,6 @@ def solve(path_to_data, model, epsilon=0.1):
                     cols_res = cols_res + [var.name[4:]]
 
     print_log_output(model)
-
     rows_res = [int(r) for r in rows_res]
     cols_res = [int(c) for c in cols_res]
     print('row_res=', rows_res)
