@@ -25,7 +25,7 @@ CellChoicesLP = list[list[LpVariable]]
 def max_ones(
     bin_matrix: BinMatrix,
     epsilon: float,
-) -> tuple[LpProblem, RowColumnChoicesLP, RowColumnChoicesLP, CellChoicesLP]:
+) -> tuple[LpProblem, RowColumnChoicesLP, RowColumnChoicesLP]:
     """Maximize the number of ones in the matrix.
 
     Parameters
@@ -43,9 +43,6 @@ def max_ones(
         Row choices
     RowColumnChoicesLP
         Column choices
-    CellChoicesLP
-        Cell choices
-
     """
     prob = LpProblem(name=QBCExactModels.MAX_ONES.value, sense=LpMaximize)
 
@@ -55,8 +52,8 @@ def max_ones(
     (
         row_choices,
         column_choices,
-        cell_choices,
-    ) = __row_column_cell_choices_variables(bin_matrix)
+    #   cell_choices,
+    ) = __row_column_variables(bin_matrix)
 
     #
     # Objective function
@@ -95,16 +92,78 @@ def max_ones(
     #__select_cell_select_its_row_column( bin_matrix, prob, row_choices,column_choices, cell_choices,)
     #__select_no_more_epsilon_zeros(prob, bin_matrix, epsilon, cell_choices)
     __row_density(bin_matrix, prob, row_choices, column_choices, cell_choices, epsilon)
+    #__row_density_iff(bin_matrix, prob, row_choices, column_choices, epsilon)
+    __col_density_iff(bin_matrix, prob, row_choices, column_choices, epsilon)
 
-    return prob, row_choices, column_choices, cell_choices
+    return prob, row_choices, column_choices 
+
+def __col_density_iff(bin_matrix: BinMatrix,
+        prob: LpProblem,
+        row_choices: RowColumnChoicesLP,
+        column_choices: RowColumnChoicesLP,
+        epsilon: float):
+    mu = 0.001
+    Big_M = bin_matrix.number_of_columns() + 1 
+    print()
+    print('-' * 40)
+    print("Big_M' value", Big_M)
+    print(" mu' value", mu)
+    print('-' * 40)
+    print()  
+    for v in range(bin_matrix.number_of_columns()): 
+        prob += (
+            (v-1) * Big_M <= 
+             lpSum(
+              bin_matrix[u, v] * row_choices[u] 
+              for u in range(bin_matrix.number_of_rows())
+             ) - epsilon * lpSum(row_choices[u] for u in range(bin_matrix.number_of_rows()) 
+            ), f"col_err_rate_1_{v}" 
+        )
+        prob += (
+             lpSum(
+              bin_matrix[u, v] * row_choices[u] 
+              for u in range(bin_matrix.number_of_rows())
+             ) - epsilon * lpSum(row_choices[u] for u in range(bin_matrix.number_of_rows()))
+                 <= -mu + v * Big_M, f"col_err_rate_0_{v}"  
+        )
+
+
+def __col_density(bin_matrix: BinMatrix,
+        prob: LpProblem,
+        row_choices: RowColumnChoicesLP,
+        column_choices: RowColumnChoicesLP,
+        epsilon: float):
+    mu = 0.001
+    Big_M = bin_matrix.number_of_columns() + 1 
+    print()
+    print('-' * 40)
+    print("Big_M' value", Big_M)
+    print(" mu' value", mu)
+    print('-' * 40)
+    print()  
+    for v in range(bin_matrix.number_of_columns()): 
+        prob += (
+            (v-1) * Big_M <= 
+             lpSum(
+              bin_matrix[u, v] * row_choices[u] 
+              for u in range(bin_matrix.number_of_rows())
+             ) - epsilon * lpSum(row_choices[u] for u in range(bin_matrix.number_of_rows()) 
+            ), f"col_err_rate_1_{v}" 
+        )
+        # prob += (
+        #      lpSum(
+        #       bin_matrix[u, v] * row_choices[u] 
+        #       for u in range(bin_matrix.number_of_rows())
+        #      ) - epsilon * lpSum(row_choices[u] for u in range(bin_matrix.number_of_rows()))
+        #          <= -mu + v * Big_M, f"col_err_rate_0_{v}"  
+        # )
 
 def __row_density(bin_matrix: BinMatrix,
         prob: LpProblem,
         row_choices: RowColumnChoicesLP,
         column_choices: RowColumnChoicesLP,
-        cell_choices: CellChoicesLP, 
         epsilon: float):
-    mu = 0.01
+    mu = 0.001
     Big_M = bin_matrix.number_of_rows() + 1 
     print()
     print('-' * 40)
@@ -129,6 +188,35 @@ def __row_density(bin_matrix: BinMatrix,
             ) <= -mu + u * Big_M,  f"row_err_rate_0_{u}" 
         )
 
+def __row_density_iff(bin_matrix: BinMatrix,
+        prob: LpProblem,
+        row_choices: RowColumnChoicesLP,
+        column_choices: RowColumnChoicesLP,
+        epsilon: float):
+    mu = 0.001
+    Big_M = bin_matrix.number_of_rows() + 1 
+    print()
+    print('-' * 40)
+    print("Big_M' value", Big_M)
+    print(" mu' value", mu)
+    print('-' * 40)
+    print()  
+    for u in range(bin_matrix.number_of_rows()): 
+        prob += (
+            (u-1) * Big_M <= 
+             lpSum(
+              bin_matrix[u, v] * column_choices[v] 
+              for v in range(bin_matrix.number_of_columns())
+             ) - epsilon * lpSum(column_choices[v] for v in range(bin_matrix.number_of_columns()) 
+            ), f"row_err_rate_1_{u}" 
+        )
+        # prob += (
+        #      lpSum(
+        #       bin_matrix[u, v] * column_choices[v] 
+        #       for v in range(bin_matrix.number_of_columns())
+        #      ) - epsilon * lpSum(column_choices[v] for v in range(bin_matrix.number_of_columns()) 
+        #     ) <= -mu + u * Big_M,  f"row_err_rate_0_{u}" 
+        # )
 # TODO add these options to the other models
 def max_ones_compact(
     bin_matrix: BinMatrix,
@@ -360,6 +448,21 @@ def __row_column_cell_choices_variables(
     ]
 
     return row_choices, column_choices, cell_choices
+
+def __row_column_variables(
+    bin_matrix: BinMatrix,
+) -> tuple[RowColumnChoicesLP, RowColumnChoicesLP]:
+    row_choices = [
+        LpVariable(f"xu_{u}", cat=LpInteger, lowBound=0, upBound=1)
+        for u in range(bin_matrix.number_of_rows())
+    ]
+    column_choices = [
+        LpVariable(f"xv_{v}", cat=LpInteger, lowBound=0, upBound=1)
+        for v in range(bin_matrix.number_of_columns())
+    ]
+
+    return row_choices, column_choices 
+
 
 
 # ============================================================================ #

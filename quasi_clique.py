@@ -701,7 +701,56 @@ def __row_gaps(rows_data, cols_data, edges, model, lpRows, lpCols, lpGaps_R, lpG
         #     -mu + lpRows[row][0] * Big_M
         # ), f"row_err_rate_0_{row}"
 
-def __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon):
+def __row_gaps(rows_data, cols_data, edges, model, lpRows, lpCols, lpGaps_R, lpGaps_C, lpGaps_R_p, lpGaps_C_p, epsilon):
+    """
+    Adds row density constraints to the model.
+
+    Arguments:
+    ----------
+    rows_data: list of tuples (row, degree) of rows in the matrix.
+    cols_data: list of tuples (col, degree) of columns in the matrix.
+    edges: list of tuples (row, col) corresponding to the zeros of the matrix.
+    model: LpProblem to add constraints to.
+    lpRows: dict of row variables and their degrees.
+    lpCols: dict of column variables and their degrees.
+    epsilon: float, error tolerance for density constraints.
+    """
+    mu = 0.001
+    Big_R = len(rows_data) + 1
+    Big_C = len(cols_data) + 1
+    Big_M = Big_R+Big_C
+    print('Big_R=', Big_R)
+    print('Big_C=', Big_C)
+    # for row, _ in rows_data: 
+    #     model += (lpGaps_R_p[row] >= lpGaps_R[row])
+    #     model += (lpGaps_R_p[row] >= 0)
+    #     model += (lpGaps_R_p[row] <= lpRows[row][0] * Big_R)
+    # #
+    for row, _ in rows_data:
+        #print(f"Adding row density constraints for row {row}:")
+        row_edges = [v for u, v in edges if u == row]
+        #print(f"Row edges: {row_edges}") 
+        #print(f"lpRows[row][0]: {lpRows[row][0]}")             
+        # Constraint for row density upper bound
+        #print(f"Sum of edge variables: {lpSum(lpCols[col][0] for col in row_edges)}")
+        #print(f"Sum of column variables: {lpSum(lpCols[col][0] for  col, _ in cols_data)}")
+        model += (lpSum(lpCols[col][0] for col in row_edges) == lpGaps_R[row]
+            # lpSum(lpCols[col][0] for col in row_edges) - (1 - epsilon) * lpSum(lpCols[col][0] for col, _ in cols_data) == lpGaps_R[row]
+            #>= (lpRows[row][0]-1) * Big_M
+        ), f"row_gaps_{row}"
+        # Constraint for row density lower bound  
+        model += (
+            lpSum(lpCols[col][0] for col in row_edges) - (1 - epsilon) * lpSum(lpCols[col][0] for col, _ in cols_data) >= 
+            (lpRows[row][0]-1) * Big_M
+        ), f"row_gap_err_1_{row}"
+        # Constraint for row density lower bound
+        # model += (
+        #     lpSum(lpCols[col][0] for col in row_edges) - (1 - epsilon) * lpSum(lpCols[col][0] for col, _ in cols_data) <=
+        #     -mu + lpRows[row][0] * Big_M
+        # ), f"row_err_rate_0_{row}"
+
+
+def __common_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon):
     """
     Adds row density constraints to the model.
 
