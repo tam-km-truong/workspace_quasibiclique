@@ -1115,9 +1115,13 @@ def solve(path_to_data, model, epsilon=0.1):
     * model: the model to be use.
     * epsilon: percentage of errors (accepted edges) in the final result submatrix
     """
-    
-
-    rows, cols, edges, row_names, col_names, df = get_data(path_to_data)
+    p = path_to_data
+    if p.lower().endswith('.txt'):
+        rows, cols, edges, row_names, col_names, df = get_data_txt_file(path_to_data)
+    elif p.lower().endswith('.csv'):
+        rows, cols, edges, row_names, col_names, df = get_data(path_to_data)
+    else:
+        raise ValueError('Input need to be a matrix csv file, or a text file with a specific layout')
 
 
     # print()
