@@ -1294,6 +1294,31 @@ def get_data(path:str):
     '''
     return rows_data, cols_data, edges, row_names, col_names, df
 
+def get_data_txt_file(path):
+    file = open(path,'r')
+    content = file.readlines()
+    name = content[0][2:-1]
+    num_row = int(content[1][7:-1])
+    num_col = int(content[2][7:-1])
+    num_edge = int(content[3][7:-1])
+    deg_row = [0]*num_row
+    deg_col = [0]*num_col
+    edges = []
+    df = pd.DataFrame([[0]*num_row]*num_col)
+    for line in content[4:]:
+        #regex split with mult delimiter
+        splitted_line = re.split('\t|\n',line)
+        u, v = int(splitted_line[0]),int(splitted_line[1])
+        edges = edges + [(u,v)]
+        deg_row[u] = deg_row[u] + 1
+        deg_col[v] = deg_col[v] + 1
+        df.iloc[u,v] = 1 
+        
+    rows_data = list(zip(range(num_row), deg_row))
+    cols_data = list(zip(range(num_col), deg_col))
+
+    return rows_data, cols_data, edges, range(num_row), range(num_col), df
+
 def print_log_output(prob):
     """Print the log output and problem solutions.
     ARGUMENTS:
