@@ -1394,8 +1394,8 @@ def solve(path_to_data, model, epsilon=0.1):
     model.solve(GUROBI_CMD(msg=True, timeLimit= 300))#, options=[("MIPGap", 0.05)])#, options=[("Heuristics", 0.0), ("NoRelHeurTime", 0)] )#,gapRel=0.3)
     #model.solve(GUROBI_CMD(msg=True, timeLimit= 60, MIPGap = 0.03),)
 # Check status
-    print("Model is . Exporting LP file for debugging...")
-    model.writeLP("debug_model.lp")
+   # print("Model is . Exporting LP file for debugging...")
+    #model.writeLP("debug_model.lp")
     print(f"Model status: {LpStatus[model.status]}")
     if model.status == -1:
          print("Model is infeasible. Exporting LP file for debugging...")
