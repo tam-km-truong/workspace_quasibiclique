@@ -662,7 +662,7 @@ def König_E(rows_data, cols_data, edges):
               
     #model += (lpRows['row_0'] + lpRows['row_2'] <= 1,'constraint uncomp')
     #model += (lpRows[0][0] + lpRows[2][0] <= 1,'constraint uncomp')
-    model += (lpSum([lpvar for lpvar, _ in lpRows.values()])  <= 2,'row_limits_bis',    )
+    #model += (lpSum([lpvar for lpvar, _ in lpRows.values()])  <= 2,'row_limits_bis',    )
     #model += (lpSum([lpvar for lpvar, _ in lpCols.values()])  <= 2,'col_limits_bis',    )
     
     
@@ -742,7 +742,7 @@ def minDel_RC(rows_data, cols_data, edges, epsilon=0.3):
 # ============================================================================ #
 
 
-def minDel_Ones(rows_data, cols_data, edges, epsilon=0.3):
+def minDel_Ones(rows_data, cols_data, edges, epsilon):
     """
     Implement the LP model for deleting minimum rows and columns. 
     In this model, we introduce epsilon with the goal of alowing errors in the result. 
@@ -772,10 +772,11 @@ def minDel_Ones(rows_data, cols_data, edges, epsilon=0.3):
     # ------------------------------------------------------------------------ #
     # Objective function
     # ------------------------------------------------------------------------ #
-    model += lpSum([degree*lpvar for lpvar, degree in lpRows.values()] +
-                   [degree*lpvar for lpvar, degree in lpCols.values()]), 'min_weighted_rows/cols'
-    # model += lpSum([lpvar for lpvar, _ in lpRows.values()] +
-    #                [lpvar for lpvar, _ in lpCols.values()]), 'min_weighted_rows/cols'
+    model += lpSum([degree*lpvar for lpvar, degree in lpRows.values()]
+               +   [degree*lpvar for lpvar, degree in lpCols.values()]), 'min_weighted_rows/cols'
+    #model += lpSum([lpvar for lpvar, _ in lpRows.values()]), 'min_weighted_rows/cols'
+                   
+    #               + [lpvar for lpvar, _ in lpCols.values()]), 'min_weighted_rows/cols'
 
     # ------------------------------------------------------------------------ #
     # Constraints
@@ -1125,27 +1126,11 @@ def solve(path_to_data, model, epsilon=0.1):
     else:
         raise ValueError('Input need to be a matrix csv file, or a text file with a specific layout')
 
-
-    # print()
-    # print('-' * 40)
-    # print('Initial Stats')
-    # print("Perimeter of initial matrix : ", len(rows), "+", len(cols), "=", len(rows) + len(cols))
-    
     nbi_0 = 0
     nbi_1 = 0
     for _, degree in rows:
         nbi_1 = nbi_1 + degree
-    
     nbi_0 = len(rows)*len(cols) - nbi_1
-
-    # print("number zero initial = ",nbi_0)     
-    # print("number one initial = ",nbi_1)            
-    # print("epsilon = ",epsilon)
-    # print("Initial sparsity = ", nbi_0/(len(rows) * len(cols)))
-    # print("Initial density = ", 1-(nbi_0/(len(rows) * len(cols))))
-    # print('-' * 40)
-    # print()
-
 
     model_name = model
     if model == 'König_V':
@@ -1194,6 +1179,9 @@ def solve(path_to_data, model, epsilon=0.1):
     #read the result from the solver
     rows_res = []
     cols_res = []
+    rows_res_name = []
+    cols_res_name = []
+
     if model_name == 'AB_V'  or model_name == 'AB_V_h'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_r' or model_name == 'AB_E_c_r':
         for var in model.variables():
             #if var.varValue == 1:
@@ -1236,12 +1224,24 @@ def solve(path_to_data, model, epsilon=0.1):
     print('total_error=', total_error)
     print()
     print('-' * 40)
-    # for r in rows_res:
-    #     print(f"Type: {type(r)}, Value: {r}")
+    #
+    
     print_log_output(model)
 
+    ''' 
+    print()
+    print('-' * 40)
+    print('row_res')
+    print(rows_res)
+    print('cols_res')
+    print(cols_res)
+    print()
+    print('-' * 40)
+    '''
+    #
     rows_res = [int(r) for r in rows_res]
     cols_res = [int(c) for c in cols_res]
+
     # rows_res = [r.varValue for r in rows_res if r.varValue is not None]
     # cols_res = [c.varValue for c in cols_res if c.varValue is not None]
     # rows_res = [ r.varValue for r in rows_res if isinstance(r, LpVariable) and r.varValue is not None]
@@ -1281,17 +1281,24 @@ def solve(path_to_data, model, epsilon=0.1):
         print("Final sparsity", nb_0/(len(rows_res) * len(cols_res)))
         print("Final density", 1-(nb_0/(len(rows_res) * len(cols_res))))
 
-    rows_res = [row_names[r] for r in rows_res]
-    cols_res = [col_names[c] for c in cols_res]
+    rows_res = [int(r) for r in rows_res]
+    cols_res = [int(c) for c in cols_res]
+    rows_res_name = [row_names[r] for r in rows_res]
+    cols_res_name = [col_names[c] for c in cols_res]
     print()
     print('-' * 40)
-    print("solution as rows and columns = ")
+    print("solution as row and column names = ")
 
-    print('row_res')
+    print('row_res_name')
+    print(rows_res_name)
+    print('cols_res_name')
+    print(cols_res_name)
+    print("solution as row and column indices = ")
+    print('row_res_indices')
     print(rows_res)
-    print('cols_res')
+    print('cols_res_indices')
     print(cols_res)
-    #print(rows_res,cols_res)
+
     return rows_res, cols_res
 
   
@@ -1318,9 +1325,9 @@ def get_data(path:str):
 
     df = df.reset_index(drop=True)
     df = df.T.reset_index(drop=True).T
-    edges = list(df[df == 1].stack().index)
-    #edges = list(df[df == 0].stack().index)
-    ''' 
+    #edges = list(df[df == 1].stack().index)
+    edges = list(df[df == 0].stack().index)
+     
     print('-' * 40)
     print('edges =', edges)
     print('rows_data =', rows_data)
@@ -1329,7 +1336,7 @@ def get_data(path:str):
     print('col_names =', col_names)
     print()
     print('-' * 40)
-    '''
+    
 
     return rows_data, cols_data, edges, row_names, col_names, df
 
