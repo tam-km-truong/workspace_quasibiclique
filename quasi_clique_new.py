@@ -171,7 +171,13 @@ def AB_E(rows_data, cols_data, edges, epsilon):
     LpProblem:
         The ILP model.
     """
+    epsilon = 0.1 
     model = LpProblem(name="AB_E", sense=LpMaximize)
+    print()
+    print(f"******** I am solving model = ******** with epsilon = ", model.name, epsilon)
+    print('rows_data =', rows_data)
+    print('cols_data =', cols_data)
+    print('edges =', edges)
 
     # Variables for rows and columns
 
@@ -211,8 +217,8 @@ def AB_E(rows_data, cols_data, edges, epsilon):
     #), "max_sum_vertices"
 
     # Constraints for row and column thresholds
-    row_threshold = 2
-    col_threshold = 2
+    row_threshold = 1
+    col_threshold = 1
     model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
     model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
     # print()
@@ -1118,66 +1124,29 @@ def max_Vertices(rows_data, cols_data, edges, epsilon=0.1):
 
     return model
 
-# ============================================================================ #
-#                         LP MODEL - KNAPSACK MODEL                            #
-# ============================================================================ #
-# def KP_QBr(rows_data,  edges, epsilon=0.1):
-#     """
-#     Knapsack problem model
-#     """
-#     print('-' * 40)
-#     print('INput data in KP ***************')
-#     print()
-#     print('edges =', edges)
-#     print('rows_data =', rows_data)
-#     print('cols_data =', cols_data)
-#     print('-' * 40)
-    
-#     # ------------------------------------------------------------------------ #
-#     # Model with minimization
-#     # ------------------------------------------------------------------------ #
-#     model = LpProblem(name='knapsack_problem', sense=LpMinimize)
 
-#     # ------------------------------------------------------------------------ #
-#     # Variables
-#     # ------------------------------------------------------------------------ #
-#     lpRows = [(LpVariable(f'row_{row}', cat='Integer',
-#                           lowBound=0, upBound=1), degree) for row, degree in rows_data]
-#     lpCols = [(LpVariable(f'col_{col}', cat='Integer',
-#                           lowBound=0, upBound=1), degree) for col, degree in cols_data]
-
-#     # ------------------------------------------------------------------------ #
-#     # Objective function (ONLY includes rows, NOT columns)
-#     # ------------------------------------------------------------------------ #
-#     model += lpSum([degree * lpvar for lpvar, degree in lpRows]), 'knapsack'
-
-#     # ------------------------------------------------------------------------ #
-#     # Constraints (NO `lpCols` in "sensitivity" constraint)
-#     # ------------------------------------------------------------------------ #
-#     nb_edges = len(edges)
-#     row_length = len(rows_data)
-
-#     # ✅ Only `lpRows` variables appear in this constraint
-#     model += lpSum([(row_length - degree) * lpvar for lpvar, degree in lpRows]) >= (1 - epsilon) * nb_edges, 'sensitivity'
-
-#     return model
-
-def KP_QBr(rows_data, edges, epsilon=0.1):
+def KP_QBr(rows_data, col_length, nb_edges_0, epsilon=0.1):
     """
     In this model, we use knapsack model
     ARGUMENTS:
     ----------
     * rows_data: list of the tuples (row, degree) of rows the matrix.
-    * cols_data: list of the tuples (col, degree) of columns the matrix.
+    * edges: list of tuples (row, col) corresponding to the zeros of the matrix.
     * epsilon: percentage of accepted undesired cell over accepted desired cell
     """
-    # print('-' * 40)
-    # print('INput data in KP ***************')
+    
+    # print('Input data in row KP ***************')
     # print()
     # print('edges =', edges)
     # print('rows_data =', rows_data)
-    # #print('cols_data =', cols_data)
     # print('-' * 40)
+    #nb_edges = len(edges) # corresponds to total number of zeros in the matrix 
+    row_length = len(rows_data)
+    print('-' * 40)
+    print(" input #  of edges_0 in rowKP=", nb_edges_0)
+    print("input # of rows in rowKP=", row_length)
+    print(" input # of cols in rowKP=", col_length)
+    print('-' * 40) 
     
     # ------------------------------------------------------------------------ #
     # Model with minimization
@@ -1192,10 +1161,7 @@ def KP_QBr(rows_data, edges, epsilon=0.1):
                     lowBound=0, upBound=1), degree) for row, degree in rows_data]
     # lpCols = [(LpVariable(f'col_{col}', cat='Integer',
     #                 lowBound=0, upBound=1), degree) for col, degree in cols_data]
-    # Assign initial values correctly
-    # for var, _ in lpCols:  # Unpack tuple (variable, degree)
-    #    var.varValue = 0  # Set initial value
-    # ------------------------------------------------------------------------ #
+    #------------------------------------------------------------------------ #
     # Objective function
     # ------------------------------------------------------------------------ #
     model += lpSum([degree*lpvar for lpvar, degree in lpRows]), 'knapsack' # + lpSum([0*lpvar for lpvar, degree in lpCols]), 'knapsack'
@@ -1204,39 +1170,30 @@ def KP_QBr(rows_data, edges, epsilon=0.1):
     # ------------------------------------------------------------------------ #
     # Constraints
     # ------------------------------------------------------------------------ #
-    nb_edges = len(edges)
-    print("# of edges in KP=", len(edges))
-    print("edges in KP=", edges)
-    row_length = len(rows_data)
-    #col_length = len(cols_data)
-    # Ensure col_* variables are included in the model
-    # for var, _ in lpCols:
-    #     model += var == 0, f"force_col_{var.name}"  # Dummy constraint
 
-    model += lpSum([(row_length - degree) * lpvar for lpvar, degree in lpRows]) >= (1 - epsilon) * nb_edges, 'sensitivity'
-
-    #model += lpSum([(row_length-degree)*lpvar for lpvar, degree in lpRows]) >= (1-epsilon) * nb_edges, f'sensitivity'
-    # +       lpSum([(col_length-degree)*lpvar for lpvar, degree in lpCols])  >= (1-epsilon) * nb_edges), f'sensitivity'
-    #
-
+    # # delete  at least (1-eps)*nb_edges  zeros
+    model += lpSum([(col_length - degree) * lpvar for lpvar, degree in lpRows]) >= (1 - epsilon) * nb_edges_0, 'sensitivity'
 
     return model
 
-def KP_QBc(cols_data, edges, epsilon=0.1):
+def KP_QBc(cols_data, row_length, nb_edges_0, epsilon=0.1):
     """
     In this model, we use knapsack model
     ARGUMENTS:
     ----------
     * rows_data: list of the tuples (row, degree) of rows the matrix.
-    * cols_data: list of the tuples (col, degree) of columns the matrix.
+    * edges: list of tuples (row, col) corresponding to the zeros of the matrix.
     * epsilon: percentage of accepted undesired cell over accepted desired cell
     """
-    print('-' * 40)
-    print('INput data in KPc ***************')
-    print()
-    print('edges =', edges)
-    print('cols_data =', cols_data)
-    print('-' * 40)
+    #nb_edges = len(edges)# corresponds to total number of zeros in the matrix 
+    col_length = len(cols_data)
+    # print('-' * 40)
+    # print('Input data in col KP ***************')
+    # print()
+    # print(' # nb_edges_0 =',  nb_edges_0)
+    # print(' # cols in col KP =', col_length)
+    # print(' # rows in col KP  =', row_length)
+    # print('-' * 40)
     
     # ------------------------------------------------------------------------ #
     # Model with minimization
@@ -1263,17 +1220,8 @@ def KP_QBc(cols_data, edges, epsilon=0.1):
     # ------------------------------------------------------------------------ #
     # Constraints
     # ------------------------------------------------------------------------ #
-    nb_edges = len(edges)
-    col_length = len(cols_data)
-    # Ensure col_* variables are included in the model
-    # for var, _ in lpCols:
-    #     model += var == 0, f"force_col_{var.name}"  # Dummy constraint
 
-    model += lpSum([(col_length - degree) * lpvar for lpvar, degree in lpCols]) >= (1 - epsilon) * nb_edges, 'sensitivity'
-
-    #model += lpSum([(row_length-degree)*lpvar for lpvar, degree in lpRows]) >= (1-epsilon) * nb_edges, f'sensitivity'
-    # +       lpSum([(col_length-degree)*lpvar for lpvar, degree in lpCols])  >= (1-epsilon) * nb_edges), f'sensitivity'
-    #
+    model += lpSum([(row_length - degree) * lpvar for lpvar, degree in lpCols]) >= (1 - epsilon) * nb_edges_0, 'sensitivity'
 
 
     return model
@@ -1303,18 +1251,24 @@ def solve(path_to_data, model, epsilon=0.1):
         num_row = len(row_names)
         num_col = len(col_names)
         CompEdges = get_complement_edges(num_row, num_col, edges)
+        nb_eges_0 = len(CompEdges)
         print("Complement Edges:", CompEdges)      
     elif p.lower().endswith('.csv'):
-        rows, cols, edges, row_names, col_names, df = get_data(path_to_data, model)
+        rows, cols, edges_0, edges_1, row_names, col_names, df = get_data(path_to_data, model)
+        nb_eges_0 = len(edges_0)
+        nb_eges_1 = len(edges_1)
     else:
         raise ValueError('Input need to be a matrix csv file, or a text file with a specific layout')
     
     print('-' * 40)
-    print("Input data :")
-    print("Rows Data:", rows)
-    print("Columns Data:", cols)
-    print("Original Edges:", edges) 
-    print("Adjacency Matrix:\n", df)
+    print("Input Rows Data:", rows)
+    print("Input Columns Data:", cols)
+    if p.lower().endswith('.txt'):
+        print("Complement Edges:", CompEdges) 
+    if p.lower().endswith('.csv'):
+        print("Original Edges_0:", edges_0)
+        print("Original Edges_1:", edges_1) 
+    #print("Adjacency Matrix:\n", df)
     print('rows_names =', row_names)
     print('col_names =', col_names) 
     print('-' * 40)
@@ -1331,41 +1285,41 @@ def solve(path_to_data, model, epsilon=0.1):
     elif model == 'König_E':
         model = König_E(rows, cols, edges)
     elif model == 'AB_E':
-        model = AB_E(rows, cols, edges, epsilon)
+        model = AB_E(rows, cols, edges_1, epsilon)
     elif model == 'AB_E_r':
-        model = AB_E_r(rows, cols, edges, epsilon)
+        model = AB_E_r(rows, cols, edges_1, epsilon)
     elif model == 'AB_E_c_r':
-        model = AB_E_c_r(rows, cols, edges, epsilon)
+        model = AB_E_c_r(rows, cols, edges_1, epsilon)
     elif model == 'AB_V':
-        model = AB_V(rows, cols, edges, epsilon)
+        model = AB_V(rows, cols, edges_1, epsilon)
     elif model == 'AB_V_h':
-        model = AB_V_h(rows, cols, edges, epsilon)
+        model = AB_V_h(rows, cols, edges_1, epsilon)
     elif model == 'max_Ones':
-        model = max_Ones(rows, cols, edges, epsilon)
+        model = max_Ones(rows, cols, edges_1, epsilon)
     elif model == 'max_Ones_comp':
-        model = max_Ones_comp(rows, cols, edges, epsilon)
+        model = max_Ones_comp(rows, cols, edges_1, epsilon)
     elif model == 'max_Surface':
-        model = max_Surface(rows, cols, edges, epsilon)
+        model = max_Surface(rows, cols, edges_1, epsilon)
     elif model == 'max_Vertices':
-        model = max_Vertices(rows, cols, edges, epsilon)
+        model = max_Vertices(rows, cols, edges_1, epsilon)
     elif p.lower().endswith('.txt'):
         if   model == 'minDel_RC':
              model = minDel_RC(rows, cols, CompEdges, epsilon)
         elif model == 'minDel_Ones':
              model = minDel_Ones(rows, cols, CompEdges, epsilon)
         elif model == 'KP_QBr':
-             model = KP_QBr(rows, CompEdges, epsilon)
+             model = KP_QBr(rows, len(cols), nb_eges_0, epsilon)
         elif model == 'KP_QBc':
-             model = KP_QBc(cols, CompEdges, epsilon)  
+             model = KP_QBc(cols, len(rows), nb_eges_0, epsilon)  
     elif p.lower().endswith('.csv'):
         if   model == 'minDel_RC':
              model = minDel_RC(rows, cols, edges, epsilon)
         elif model == 'minDel_Ones':
              model = minDel_Ones(rows, cols, edges, epsilon)
         elif model == 'KP_QBr':
-             model = KP_QBr(rows, edges, epsilon)
+             model = KP_QBr(rows, len(cols), nb_eges_0, epsilon)
         elif model == 'KP_QBc':
-             model = KP_QBc(cols, edges, epsilon)
+             model = KP_QBc(cols, len(rows), nb_eges_0, epsilon)
                     
     #create the model using one of the previously implemented models
 
@@ -1421,7 +1375,7 @@ def solve(path_to_data, model, epsilon=0.1):
         print('I solved model name =', model.name)
         if model.name == "row_knapsack_problem":
             for var in model.variables():
-                print('row_knapsack var name =', var.name,'var value =', var.varValue)
+                #print('row_knapsack var name =', var.name,'var value =', var.varValue)
                 if var.varValue == 0:
                     if var.name[:3] == "row":
                         rows_res = rows_res + [var.name[4:]]
@@ -1438,7 +1392,7 @@ def solve(path_to_data, model, epsilon=0.1):
                         return model 
         if model.name == "column_knapsack_problem":
             for var in model.variables():
-                print('column_knapsack var name =', var.name,'var value =', var.varValue)
+                #print('column_knapsack var name =', var.name,'var value =', var.varValue)
                 if var.varValue == 0:
                     if var.name[:3] == "col":
                         cols_res = cols_res + [var.name[4:]]
@@ -1479,17 +1433,17 @@ def solve(path_to_data, model, epsilon=0.1):
     
 
     print()
-    print('-after KP ****')
-   #print('rows=', rows)
-    #print('cols=', cols)
+    print("\n-- Debugging Step: -after KP **** --")
+    # print('rows=', rows)
+    # print('cols=', cols)
     print('len_rows_res=', len(rows_res))
     print('row_res=', rows_res)
     print('len_rows_del=', len(rows_del))
     print('rows_del=',rows_del)
     print('len_cols_res=', len(cols_res))
-    #print('cols_res=', cols_res)
+    print('cols_res=', cols_res)
     print('len_cols_del=', len(cols_del))
-    #print('cols_del=',cols_del)
+    print('cols_del=',cols_del)
     print()
     print('-' * 40)
     
@@ -1549,31 +1503,45 @@ def solve(path_to_data, model, epsilon=0.1):
     print('cols_res_name')
     print(cols_res_name)
     print("solution as row and column indices = ")
-    print('row_res_indices')
+    print('row_res')
     print(rows_res)
-    print('cols_res_indices')
+    print('cols_res')
     print(cols_res)
 
- # Example usage suggested by AI :
-    print("******Example usage suggested by AI*********")
-    #
-    print('cols=')
-    print(cols)
-    print('rows=')
-    print(rows)
-    print('rows_del=')
-    print(rows_del)
-    print('edges for KP=')
-    print(edges)
+    # print("\n-- Debugging Step  --")
+    # print("****** exit   *********")
+    # return rows_res, cols_res
+    # print("****** exit   *********")
+
+    # Example usage suggested by AI :
+    # print("\n-- Debugging Step  --")
+    # print("******Example usage suggested by AI*********")
+    # #
+    # print('cols=')
+    # print(cols)
+    # print('rows=')
+    # print(rows)
+    # print('rows_del=')
+    # print(rows_del)
+    # print('edges_0 for KP=')
+    # print(edges_0)
+    # print('edges_1 for KP=')
+    # print(edges_1)
 
 
-    cols_data_new, edges_new = update_data(rows, cols, edges, rows_del)
+    rows_rem, cols_rem, edges_0_rem, edges_1_rem = update_data(rows, cols, edges_0, edges_1, rows_del, cols_del, rows_res, cols_res)
 
-    print("Updated Columns Data:", cols_data_new)
-    print("Updated  Edges:", edges_new)
 
-    model = KP_QBc(cols_data_new, edges_new, epsilon)
-    model.solve(GUROBI_CMD(msg=True, timeLimit= 600))
+
+    print("Remaining Columns after first KP :", cols_rem)
+    print("Remaining  Edges_0 after first KP:", edges_0_rem)
+    print("Remaining  Edges_1 after first KP :", edges_1_rem)
+
+    nb_edges_0_rem = len(edges_0_rem)
+    nb_remaining_rows = len(rows) - len(rows_del)
+    print("nb_remaining_row:", nb_remaining_rows)
+    model = KP_QBc(cols_rem, nb_remaining_rows, nb_edges_0_rem, epsilon)
+    model.solve(GUROBI_CMD(msg=True, timeLimit= 300))
     # Check status
     print("Model is . Exporting LP file for debugging...")
     model.writeLP("debug_model_col.lp")
@@ -1582,40 +1550,61 @@ def solve(path_to_data, model, epsilon=0.1):
          print("Model is infeasible. Exporting LP file for debugging...")
          model.writeLP("debug_model.lp")
     #read the result from the solver
+    cols_res=[]
     if model.name == "column_knapsack_problem":
             for var in model.variables():
-                print('column_knapsack var name =', var.name,'var value =', var.varValue)
-                # if var.varValue == 0:
-                #     if var.name[:3] == "col":
-                #         cols_res = cols_res + [var.name[4:]]
-                #     elif var.name[:3] == "row":
-                # #    cols_res = cols_res + [var.name[4:]]
-                #         print('Something wrong. var name =', var.name,'var value =', var.varValue)
-                #         return model 
-                # else: # i.e. var.varValue == 1:
-                #     if var.name[:3] == "col":
-                #         cols_del = cols_del + [var.name[4:]]
-                #     elif var.name[:3] == "row":
-                #         #cols_del = cols_del + [var.name[4:]]
-                #         print('Something wrong. var name =', var.name,'var value =', var.varValue)
-                #         return model 
+                #print('column_knapsack var name =', var.name,'var value =', var.varValue)
+                if var.varValue == 0:
+                    if var.name[:3] == "col":
+                        cols_res = cols_res + [var.name[4:]]
+                    elif var.name[:3] == "row":
+                #    cols_res = cols_res + [var.name[4:]]
+                        print('Something wrong. var name =', var.name,'var value =', var.varValue)
+                        return model 
+                else: # i.e. var.varValue == 1:
+                    if var.name[:3] == "col":
+                        cols_del = cols_del + [var.name[4:]]
+                    elif var.name[:3] == "row":
+                        #cols_del = cols_del + [var.name[4:]]
+                        print('Something wrong. var name =', var.name,'var value =', var.varValue)
+                        return model 
                     
+    print_log_output(model)                
+    print('after col kp solution !!!!!!!!!!!! ')
+    print('cols_res =', cols_res)
+    print('cols_del =', cols_del)
+    print('rows_res =', rows_res)
+    print('rows_del =', rows_del)
+   
+
+    rows_rem, cols_rem, edges_0_rem, edges_1_rem = update_data(rows, cols, edges_0, edges_1, rows_del, cols_del, rows_res, cols_res)
+
+    print()
+    print('after update_data !!!!!!!!!!!! ')
+    print('cols_rem =', cols_rem)
+    print('cols_res =', cols_res)
+    print('rows_rem =', rows_rem)
+    print('rows_res =', rows_res)
+    print('edges_0_rem =', edges_0_rem)
+    print('edges_1_rem =', edges_1_rem)
 
 
-    nb_0 = len(rows_res)*len(cols_res)-df.iloc[rows_res,cols_res].sum().sum()
-    nb_1 =  df.iloc[rows_res,cols_res].sum().sum()
-    
-    # if len(rows_res) == 0:
-    #     nb_1 = df.iloc[cols_res].values.sum()
-    #     nb_0 = len(cols_res)* df.shape[1] - nb_1
-    # else:
-    #     if len(cols_res) == 0: 
-    #         nb_1 = df.iloc[rows_res].values.sum()
-    #         nb_0 = len(rows_res) * df.shape[1] - nb_1
-    #     else: 
-    #         nb_0 = len(rows_res)*len(cols_res)-df.iloc[rows_res,cols_res].sum().sum()
-    #         nb_1 =  nbi_1 - df.iloc[rows_res,cols_res].sum().sum()
-    #len(rows_res)*len(cols_res)-nb_0 
+    #df.iloc[list(map(int, rows_res)) list(map(int, cols_res))]
+    nb_0 = len(rows_res)*len(cols_res)-df.iloc[list(map(int, rows_res)), list(map(int, cols_res))].sum().sum()
+    nb_1 =  df.iloc[list(map(int, rows_res)), list(map(int, cols_res))].sum().sum()
+
+    model = AB_E(rows_rem, cols_rem, edges_1_rem, 0)
+
+    model.solve(GUROBI_CMD(msg=True, timeLimit= 100))
+    # Check status
+    # print(f"model =", model_name)
+    # print("Model is: ", model_name) 
+    print_log_output(model)
+    model.writeLP("debug_model_AB_E.lp")
+    print(f"Model status: {LpStatus[model.status]}")
+    if model.status == -1:
+         print("Model is infeasible. Exporting LP file for debugging...")
+         model.writeLP("debug_model.lp")
     if model_name == 'AB_V'  or model_name == 'AB_V_h'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_r' or model_name == 'AB_E_c_r': 
 
         print("Final Perimeter : ", len(rows_res), "+", len(cols_res), "=", len(rows_res) + len(cols_res))
@@ -1646,52 +1635,82 @@ def solve(path_to_data, model, epsilon=0.1):
 
     return rows_res, cols_res
 
-def update_data(rows_data, cols_data, edges, rows_del):
+def update_data(rows_data, cols_data, edges_0, edges_1, rows_del, cols_del, rows_res, cols_res):
     # Convert rows_del to a set for faster lookup
+    print("\n-- Update Debugging Step: edges  --")
+    print("input edges_0 =", edges_0)
+    print("input edges_1 =", edges_1)
     rows_del_set = set(map(int, rows_del))
-    print("\n-- Debugging Step: rows in rows_del_set --")
+    print("\n-- Update Debugging Step: input rows_del_set --")
+    print("rows_del =", rows_del)
     print("rows_del_set =", rows_del_set)
+    print("rows_res =", rows_res)
+    cols_del_set = set(map(int, cols_del))
+    print("\n-- Update Debugging Step: input cols_del_set --")
+    print("cols_del =", cols_del)
+    print("cols_del_set =", cols_del_set)
+    print("cols_res =", cols_res)
 
     # Step 1: Compute edges_row (edges connected to rows in rows_del)
-    edges_row_del= [edge for edge in edges if edge[0] in rows_del_set]
+    edges_0_row_del= [edge for edge in edges_0 if edge[0] in rows_del_set]
+    edges_1_row_del= [edge for edge in edges_1 if edge[0] in rows_del_set]
+    edges_0_col_del= [edge for edge in edges_0 if edge[1] in cols_del_set]
+    edges_1_col_del= [edge for edge in edges_1 if edge[1] in cols_del_set]
 
-    print("\n-- Debugging Step: Edges to be removed --")
-    print("Edges_row_deleted =", edges_row_del)
+    print("\n-- Debugging Step: Edges to be removed NEW NEW  --")
+    print("edges_0_row_del =", edges_0_row_del)
+    print("edges_1_row_del =", edges_1_row_del)
+    print("edges_0_col_del =", edges_0_col_del)
+    print("edges_1_col_del =", edges_1_col_del)
+    
 
     # Step 2: Compute edges_new (remaining edges)
-    edges_new = [edge for edge in edges if edge[0] not in rows_del_set]
+    edges_0_row_rem = [edge for edge in edges_0 if edge[0] not in rows_del_set]
+    edges_1_row_rem = [edge for edge in edges_1 if edge[0] not in rows_del_set]
+    edges_0_col_rem = [edge for edge in edges_0 if edge[0] not in cols_del_set]
+    edges_1_col_rem = [edge for edge in edges_1 if edge[0] not in cols_del_set]
 
     print("\n-- Debugging Step: Remaining Edges --")
-    print("Remainig Edges_new =", edges_new)
+    print("Remainig Edges_0_row =",  edges_0_row_rem)
+    print("Remainig Edges_1_row =",  edges_1_row_rem)
+    print("Remainig Edges_0_col =",  edges_0_col_rem)
+    print("Remainig Edges_1_col =",  edges_1_col_rem) 
 
  # Step 3: Update column degrees in cols_data
-    print("cols_data =", cols_data)
+    print("input cols_data =", cols_data)
     col_degree_map = {col: degree for col, degree in cols_data}
-    print("OLD col_degree_map =", col_degree_map)
+    print("input col_degree_map =", col_degree_map)
+    print("input rows_data =", rows_data)
+    row_degree_map = {row: degree for row, degree in rows_data}
+    print("input row_degree_map =", row_degree_map)
+
 
     # Reduce the count of columns based on removed edges (only affected columns)
-    for _, col in edges_row_del :  # Loop only through removed edges
+    for row, _ in edges_1_row_del :  # Loop only through removed edges
+        row_degree_map[row] = max(0, row_degree_map[row] - 1)  # Reduce degree only if that row was involved
+    for _, col in edges_1_row_del :  # Loop only through removed edges
         col_degree_map[col] = max(0, col_degree_map[col] - 1)  # Reduce degree only if that column was involved
 
-    print("\n-- Debugging Step: Updated Column Degrees --")
+    print("\n-- Debugging Step: Updated ROW/Column Degrees --")
+    print("Updated row_degree_map =", row_degree_map)
     print("Updated col_degree_map =", col_degree_map)
 
     # Rebuild cols_data with updated degrees
-    cols_data_new = [(col, degree) for col, degree in col_degree_map.items()]
-    print("cols_data_new =", cols_data_new)
+    cols_rem = [(col, degree) for col, degree in col_degree_map.items()]
+    print("cols_data_new =", cols_rem)
+    cols_res_int = set(map(int, cols_res))
+    cols_last = [tup for tup in cols_rem if tup[0] in cols_res_int]
+    rows_rem = [(row, degree) for row, degree in row_degree_map.items()]
+    print("rows_data_new =", rows_rem)
+    rows_res_int = set(map(int, rows_res))
+    rows_last = [tup for tup in rows_rem if tup[0] in rows_res_int]
 
+    edges_0_row_last = [edge for edge in edges_0_row_rem if edge[0] in rows_rem]
+    edges_1_row_last = [edge for edge in edges_1_row_rem if edge[0] in rows_rem]
+    edges_0_col_last = [edge for edge in edges_0_col_rem  if edge[0] in cols_rem]
+    edges_1_col_last = [edge for edge in edges_1_col_rem  if edge[0]  in cols_rem]
 
-    # # Step 3: Update column degrees in cols_data
-    # print("cols_data =", cols_data)
-    # col_degree_map = {col: degree for col, degree in cols_data}
-    # print("cols_degremap =", col_degree_map)
-
-    # # Reduce the count of columns based on removed edges
-    # for r  in rows_del_set:
-    #     for col in col_degree_map:
-    #         col_degree_map[col] = max(0, col_degree_map[col] - 1)  # Ensure non-negative
-
-    return cols_data_new, edges_new
+    return rows_last, cols_last, edges_0_row_rem, edges_1_row_rem  
 
 # # Given Input Data
 # rows_data = [(0, 2), (1, 2), (2, 2)]
@@ -1712,7 +1731,8 @@ def get_data(path:str, model):
 
     rows_data = []
     cols_data = []
-    edges = []
+    edges_0 = []
+    edges_1 = []
     model_name = model
     df = pd.read_csv(path, header=0 ,index_col=0 )
     df[df == -1] = 0
@@ -1731,27 +1751,34 @@ def get_data(path:str, model):
 
     df = df.reset_index(drop=True)
     df = df.T.reset_index(drop=True).T
+    edges_1 = list(df[df == 1].stack().index)
+    edges_0 = list(df[df == 0].stack().index)
+
+    '''
     if model_name == 'AB_V'  or model_name == 'AB_V_h'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_r' or model_name == 'AB_E_c_r':
 
         edges = list(df[df == 1].stack().index)
     else:
         edges = list(df[df == 0].stack().index)
-     
-    # print('-get data-' * 40)
-    # print('edges =', edges)
+    '''
+    print()
+    print('-' * 40)
+    print("\n-- Debugging Step: -get data- --")
+    print('edges_0 =', edges_0)
+    print('edges_1 =', edges_1)
     # print('rows =')
     # print(rows)
     # print('cols =')
     # print( cols)
-    # print('rows_data =', rows_data)
-    # print('cols_data =', cols_data)
+    print('rows_data =', rows_data)
+    print('cols_data =', cols_data)
     # print('rows_names =', row_names)
     # print('col_names =', col_names)
-    # print()
-    # print('-' * 40)
+    print()
+    print('-' * 40)
     
 
-    return rows_data, cols_data, edges, row_names, col_names, df
+    return rows_data, cols_data, edges_0, edges_1, row_names, col_names, df
 
 # def get_data_txt_file(path, model=None):
 #     with open(path, 'r') as file:
