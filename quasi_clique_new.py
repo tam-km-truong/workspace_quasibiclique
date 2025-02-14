@@ -32,17 +32,13 @@ from pulp import (
 )
 
 
-# ============================================================================ #
-#                     LP MODEL - König theorem classical                        #
-# ============================================================================ #
-
 def AB_V(rows_data, cols_data, edges, epsilon):
-    """<
+    """
     Arguments:
     ----------
     rows_data: list of tuples (row, degree) of rows in the matrix.
     cols_data: list of tuples (col, degree) of columns in the matrix.
-    edges: list of tuples (row, col) corresponding to the zeros of the matrix.
+    edges: list of tuples (row, col) corresponding to the ones of the matrix.
     epsilon: float, error tolerance for density constraints.
 
     Returns:
@@ -68,20 +64,9 @@ def AB_V(rows_data, cols_data, edges, epsilon):
     lpSlack_row = {row: (LpVariable(f'slackRow_{row}', cat='Continuous')) for row, _ in rows_data}
     lpSlack_col= {col: (LpVariable(f'slackCol_{col}', cat='Continuous')) for col, _ in cols_data}
 
-    obj_rowsum =  LpVariable(f"obj_rowsum", cat=LpContinuous)
-    obj_colsum =  LpVariable(f"obj_colsum", cat=LpContinuous)
+    #obj_rowsum =  LpVariable(f"obj_rowsum", cat=LpContinuous)
+    #obj_colsum =  LpVariable(f"obj_colsum", cat=LpContinuous)
 
-    lpCells = {} #can be improved because we dont need quadratic variable. This state is temperary 
-    for row, _ in rows_data:
-        for col, _ in cols_data:
-            if (row, col) in edges:
-                lpCells[(row, col)] = (LpVariable(
-                    #f'cell_{row}_{col}', cat='Continuous', lowBound=0, upBound=1), 1)
-                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 1)
-            else:
-                lpCells[(row, col)] = (LpVariable(  
-                    #f'cell_{row}_{col}', cat='Continuous', lowBound=0, upBound=1), 0)
-                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 0)
     # Objective function: Maximize sum of selected row and column variables
     model += lpSum(
         [lpvar for lpvar, _ in lpRows.values()] +
@@ -93,8 +78,8 @@ def AB_V(rows_data, cols_data, edges, epsilon):
     col_threshold = 2
     model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
     model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
-    model += obj_rowsum == lpSum(lpSum_row), "obj_sum_row"
-    model += obj_colsum == lpSum(lpSum_col), "obj_sum_col"
+    #model += obj_rowsum == lpSum(lpSum_row), "obj_sum_row"
+    #model += obj_colsum == lpSum(lpSum_col), "obj_sum_col"
     # print()
     # print('-' * 40)
     # print('row_threshold=', row_threshold )
@@ -122,13 +107,15 @@ def AB_V_h(rows_data, cols_data, edges, epsilon):
     ----------
     rows_data: list of tuples (row, degree) of rows in the matrix.
     cols_data: list of tuples (col, degree) of columns in the matrix.
-    edges: list of tuples (row, col) corresponding to the zeros of the matrix.
+    edges: list of tuples (row, col) corresponding to the ones of the matrix.
     epsilon: float, error tolerance for density constraints.
 
     Returns:
     --------
     LpProblem:
         The ILP model.
+
+    This is a variant of AB_V !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     """
     model = LpProblem(name="AB_V_h", sense=LpMaximize)
 
@@ -141,8 +128,7 @@ def AB_V_h(rows_data, cols_data, edges, epsilon):
     # Objective function: Maximize sum of selected row and column variables
     model += lpSum(
         [lpvar for lpvar, _ in lpRows.values()] +
-        [lpvar for lpvar, _ in lpCols.values()], "max_sum_vertices"
-    )
+        [lpvar for lpvar, _ in lpCols.values()]), "max_sum_vertices"
 
     # Constraints for row and column thresholds
     row_threshold = 2
@@ -221,11 +207,6 @@ def AB_E(rows_data, cols_data, edges, epsilon):
     #
     model += lpSum([cellValue*lpvar for lpvar,
                    cellValue in lpCells.values()]), 'maximize_weight'
-    # 
-    #model += lpSum(
-    #    [lpvar for lpvar, _ in lpRows.values()] +
-    #    [lpvar for lpvar, _ in lpCols.values()]
-    #), "max_sum_vertices"
 
     # Constraints for row and column thresholds
     row_threshold = 1
@@ -256,7 +237,7 @@ def AB_E(rows_data, cols_data, edges, epsilon):
 
     return model 
 
-def AB_E_r(rows_data, cols_data, edges, epsilon):
+def AB_E_h(rows_data, cols_data, edges, epsilon):
     """
     Arguments:
     ----------
@@ -269,8 +250,11 @@ def AB_E_r(rows_data, cols_data, edges, epsilon):
     --------
     LpProblem:
         The ILP model.
+    
+    Goal : compute heuristically a good solution to be used as warm start 
+    Particularities : no quadratic variables
     """
-    model = LpProblem(name="AB_E_r", sense=LpMaximize)
+    model = LpProblem(name="AB_E_h", sense=LpMaximize)
 
     # Variables for rows and columns
 
@@ -287,18 +271,7 @@ def AB_E_r(rows_data, cols_data, edges, epsilon):
     obj_rowsum =  LpVariable(f"obj_rowsum", cat=LpContinuous)
     obj_colsum =  LpVariable(f"obj_colsum", cat=LpContinuous)
 
-    lpCells = {} #can be improved because we dont need quadratic variable. This state is temporary 
-    for row, _ in rows_data:
-        for col, _ in cols_data:
-            if (row, col) in edges:
-                lpCells[(row, col)] = (LpVariable(
-                    #f'cell_{row}_{col}', cat='Continuous', lowBound=0, upBound=1), 1)
-                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 1)
-            else:
-                lpCells[(row, col)] = (LpVariable(  
-                    #f'cell_{row}_{col}', cat='Continuous', lowBound=0, upBound=1), 0)
-                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 0)
-    # print()
+    # # print()
     # print('-' * 40)
     # print('lpCells=')
     # print(lpCells)
@@ -306,17 +279,7 @@ def AB_E_r(rows_data, cols_data, edges, epsilon):
     # print('-' * 40)
     # Objective function: Maximize sum of selected row and column variables
     #
-    model += lpSum(lpSum_row) + lpSum(lpSum_col), "max_sum_rows_columns"
-    # +lpSum(
-    #     [lpvar for lpvar, _ in lpRows.values()] +
-    #     [lpvar for lpvar, _ in lpCols.values()]), "max_sum_vertices_rows_columns"
-    #model += lpSum([cellValue*lpvar for lpvar, cellValue in lpCells.values()]), 'maximize_weight'
-    # 
-    #model += lpSum(
-    #    [lpvar for lpvar, _ in lpRows.values()] +
-    #    [lpvar for lpvar, _ in lpCols.values()]
-    #), "max_sum_vertices"
-
+    model += lpSum(lpSum_row) + lpSum(lpSum_col), "max_sum_rows_columns" 
     # Constraints for row and column thresholds
     row_threshold = 2
     col_threshold = 2
@@ -330,7 +293,7 @@ def AB_E_r(rows_data, cols_data, edges, epsilon):
 
     return model
 
-def AB_E_c_r(rows_data, cols_data, edges, epsilon):
+def AB_E_r(rows_data, cols_data, edges, epsilon):
     """
     Arguments:
     ----------
@@ -343,12 +306,14 @@ def AB_E_c_r(rows_data, cols_data, edges, epsilon):
     --------
     LpProblem:
         The ILP model.
+    
+    This is an improved model from Chnag et al. 
     """
     # TEMP FORCING - to be canceled 
-    #epsilon=0.1
+    epsilon=0.1
     # FORCING - to be canceled 
 
-    model = LpProblem(name="AB_E_c_r", sense=LpMaximize)
+    model = LpProblem(name="AB_E_r", sense=LpMaximize)
 
     # Variables for rows and columns
 
@@ -377,12 +342,6 @@ def AB_E_c_r(rows_data, cols_data, edges, epsilon):
     #
     model += lpSum([cellValue*lpvar for lpvar,
                    cellValue in lpCells.values()]), 'maximize_weight'
-    # 
-    #model += lpSum(
-    #    [lpvar for lpvar, _ in lpRows.values()] +
-    #    [lpvar for lpvar, _ in lpCols.values()]
-    #), "max_sum_vertices"
-
     # Constraints for row and column thresholds
     row_threshold = 2
     col_threshold = 2
@@ -465,12 +424,6 @@ def __col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_
             # lpSum_col[col] - (1 - epsilon) * lpSum(lpRows[row][0] for row, _ in rows_data) 
             # >= (lpCols[col][0]-1) * Big_M, f"col_err_rate_1_{col}"
         )
-        # Constraint for col density lower bound
-        
-        # model += (
-        #     lpSum_col[col] - (1 - epsilon) * lpSum(lpRows[row][0] for row, _ in rows_data) <=
-        #     -mu + lpCols[col][0] * Big_M
-        # ), f"col_err_rate_0_{col}"
 
 def __row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_row, lpSlack_row, epsilon):
     """
@@ -510,12 +463,6 @@ def __row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_
             lpSlack_row[row] >= (lpRows[row][0]-1) * Big_M, f"row_err_rate_1_{row}"
         )
 
-        # Constraint for row density lower bound
-        
-        # model += (
-        #     lpSum(lpCols[col][0] for col in row_edges) - (1 - epsilon) * lpSum(lpCols[col][0] for col, _ in cols_data) <=
-        #     -mu + lpRows[row][0] * Big_M
-        # ), f"row_err_rate_0_{row}"
 
 def __col_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon):
     """
@@ -1313,15 +1260,15 @@ def solve(path_to_data, model, epsilon=0.1):
 
     model_name = model
     if model == 'König_V':
-        model = König_V(rows, cols, edges)
+        model = König_V(rows, cols, edges_0)
     elif model == 'König_E':
-        model = König_E(rows, cols, edges)
+        model = König_E(rows, cols, edges_0)
     elif model == 'AB_E':
         model = AB_E(rows, cols, edges_1, epsilon)
+    elif model == 'AB_E_h':
+        model = AB_E_h(rows, cols, edges_1, epsilon)
     elif model == 'AB_E_r':
         model = AB_E_r(rows, cols, edges_1, epsilon)
-    elif model == 'AB_E_c_r':
-        model = AB_E_c_r(rows, cols, edges_1, epsilon)
     elif model == 'AB_V':
         model = AB_V(rows, cols, edges_1, epsilon)
     elif model == 'AB_V_h':
@@ -1345,9 +1292,9 @@ def solve(path_to_data, model, epsilon=0.1):
              model = KP_QBc(cols, row_length, nb_eges_0, epsilon)  
     elif p.lower().endswith('.csv'):
         if   model == 'minDel_RC':
-             model = minDel_RC(rows, cols, edges, epsilon)
+             model = minDel_RC(rows, cols, edges_0, epsilon)
         elif model == 'minDel_Ones':
-             model = minDel_Ones(rows, cols, edges, epsilon)
+             model = minDel_Ones(rows, cols, edges_0,  epsilon)
         elif model == 'KP_QBr':
              model = KP_QBr(rows, col_length, nb_eges_0, epsilon)
         elif model == 'KP_QBc':
@@ -1384,7 +1331,7 @@ def solve(path_to_data, model, epsilon=0.1):
     cols_del_name = []
     obj_total =  0.0
 
-    if model_name == 'AB_V'  or model_name == 'AB_V_h'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_r' or model_name == 'AB_E_c_r': 
+    if model_name == 'AB_V'  or model_name == 'AB_V_h'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_h' or model_name == 'AB_E_r': 
         print('I solved model name =', model.name)
         for var in model.variables():
             #if var.varValue == 1:
@@ -1571,7 +1518,7 @@ def solve(path_to_data, model, epsilon=0.1):
     # print('-' * 40)
     # print()
 
-    if model_name == 'AB_V'  or model_name == 'AB_V_h'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_r' or model_name == 'AB_E_c_r': 
+    if model_name == 'AB_V'  or model_name == 'AB_V_h'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_h' or model_name == 'AB_E_r': 
           print('Exit from the exact  approches  and return rows_res, cols_res')
           return rows_res, cols_res  
             
@@ -1649,11 +1596,11 @@ def solve(path_to_data, model, epsilon=0.1):
     print("nb_remaining_row:", len(rows_rem) )
     print("number current zeros  = ", nb_0,"number current ones = ",nb_1, "current surface  = ", surface, "epsilon = ", epsilon)
     print("current sparsity = ", nb_0/surface, "current density = ", nb_1/surface )
-    print('End current Stats (I will call AB_E with rows_rem, cols_rem and edges_1_rem ')
+    print('End current Stats (I will call AB_AB_E_c_r with rows_rem, cols_rem and edges_1_rem ')
     print('-' * 40)
     print()
            
-    model = AB_E_c_r(rows_rem, cols_rem, edges_1_rem, epsilon=0.1)
+    model = AB_E_r(rows_rem, cols_rem, edges_1_rem, epsilon=0.1)
     #model = AB_V(rows_rem, cols_rem, edges_1_rem, epsilon=0.1)
 
     model.solve(GUROBI_CMD(msg=True, timeLimit= 600))
@@ -1682,7 +1629,7 @@ def solve(path_to_data, model, epsilon=0.1):
     cols_del_name = []
     obj_total =  0.0
 
-    if  model.name == 'AB_E' or model.name == 'AB_E_c_r' or model.name == 'AB_V': 
+    if  model.name == 'AB_E' or model.name == 'AB_E_r' or model.name == 'AB_V': 
         print('I solved model name =', model.name)
         for var in model.variables():
             if var.name[:3] == "row" or var.name[:3] == "col":
@@ -1700,7 +1647,7 @@ def solve(path_to_data, model, epsilon=0.1):
                         cols_del = cols_del + [var.name[4:]]
     else:
         sys.exit("Terminating program due to inexpected end. EXIT 2 ")
-    if  model.name == 'AB_E' or  model.name == 'AB_E_c_r' or model.name == 'AB_V': 
+    if  model.name == 'AB_E' or  model.name == 'AB_E_r' or model.name == 'AB_V': 
         rows_next, cols_next, edges_1_next, nb_edges_0_next, density = update_data(rows_rem, cols_rem, edges_1_rem, rows_res, cols_res)
         size = len(rows_next) * len(cols_next)
         print('-' * 40)
@@ -1952,7 +1899,7 @@ def get_data(path:str, model):
     edges_0 = list(df[df == 0].stack().index)
 
     '''
-    if model_name == 'AB_V'  or model_name == 'AB_V_h'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_r' or model_name == 'AB_E_c_r':
+    if model_name == 'AB_V'  or model_name == 'AB_V_h'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_h' or model_name == 'AB_E_r':
 
         edges = list(df[df == 1].stack().index)
     else:
@@ -2128,7 +2075,7 @@ def parse_arguments():
     #     help='Select the model to use',
     # )
     argparser.add_argument(
-        '--model', dest='model', required=False, default='AB_V_h',
+        '--model', dest='model', required=False, default='AB_E_r',
         help='Select the model to use',
     )
 
@@ -2139,7 +2086,7 @@ def parse_arguments():
 
     arg = argparser.parse_args()
 
-    if arg.model not in ['König_V', 'König_E', 'AB_E', 'AB_E_r', 'AB_E_c_r','AB_V','AB_V_h','max_Ones','max_Ones_comp','max_Surface','max_Vertices','minDel_RC', 'minDel_Ones', 'KP_QBr', 'KP_QBc']:
+    if arg.model not in ['König_V', 'König_E', 'AB_E', 'AB_E_h', 'AB_E_r','AB_V','AB_V_h','max_Ones','max_Ones_comp','max_Surface','max_Vertices','minDel_RC', 'minDel_Ones', 'KP_QBr', 'KP_QBc']:
         argparser.print_help()
         sys.exit(1)
 
