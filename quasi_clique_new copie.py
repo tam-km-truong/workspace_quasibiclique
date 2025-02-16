@@ -11,7 +11,8 @@ Install Pandas, using PyPI or Conda. A detailed installation tutorial can be fin
 
 import sys
 import re
-
+import argparse 
+parser = argparse.ArgumentParser()
 from argparse import ArgumentParser
 
 import pandas as pd
@@ -32,17 +33,13 @@ from pulp import (
 )
 
 
-# ============================================================================ #
-#                     LP MODEL - König theorem classical                        #
-# ============================================================================ #
-
 def AB_V(rows_data, cols_data, edges, epsilon):
-    """<
+    """
     Arguments:
     ----------
     rows_data: list of tuples (row, degree) of rows in the matrix.
     cols_data: list of tuples (col, degree) of columns in the matrix.
-    edges: list of tuples (row, col) corresponding to the zeros of the matrix.
+    edges: list of tuples (row, col) corresponding to the ones of the matrix.
     epsilon: float, error tolerance for density constraints.
 
     Returns:
@@ -68,20 +65,9 @@ def AB_V(rows_data, cols_data, edges, epsilon):
     lpSlack_row = {row: (LpVariable(f'slackRow_{row}', cat='Continuous')) for row, _ in rows_data}
     lpSlack_col= {col: (LpVariable(f'slackCol_{col}', cat='Continuous')) for col, _ in cols_data}
 
-    obj_rowsum =  LpVariable(f"obj_rowsum", cat=LpContinuous)
-    obj_colsum =  LpVariable(f"obj_colsum", cat=LpContinuous)
+    #obj_rowsum =  LpVariable(f"obj_rowsum", cat=LpContinuous)
+    #obj_colsum =  LpVariable(f"obj_colsum", cat=LpContinuous)
 
-    lpCells = {} #can be improved because we dont need quadratic variable. This state is temperary 
-    for row, _ in rows_data:
-        for col, _ in cols_data:
-            if (row, col) in edges:
-                lpCells[(row, col)] = (LpVariable(
-                    #f'cell_{row}_{col}', cat='Continuous', lowBound=0, upBound=1), 1)
-                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 1)
-            else:
-                lpCells[(row, col)] = (LpVariable(  
-                    #f'cell_{row}_{col}', cat='Continuous', lowBound=0, upBound=1), 0)
-                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 0)
     # Objective function: Maximize sum of selected row and column variables
     model += lpSum(
         [lpvar for lpvar, _ in lpRows.values()] +
@@ -93,8 +79,8 @@ def AB_V(rows_data, cols_data, edges, epsilon):
     col_threshold = 2
     model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
     model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
-    model += obj_rowsum == lpSum(lpSum_row), "obj_sum_row"
-    model += obj_colsum == lpSum(lpSum_col), "obj_sum_col"
+    #model += obj_rowsum == lpSum(lpSum_row), "obj_sum_row"
+    #model += obj_colsum == lpSum(lpSum_col), "obj_sum_col"
     # print()
     # print('-' * 40)
     # print('row_threshold=', row_threshold )
@@ -122,14 +108,17 @@ def AB_V_h(rows_data, cols_data, edges, epsilon):
     ----------
     rows_data: list of tuples (row, degree) of rows in the matrix.
     cols_data: list of tuples (col, degree) of columns in the matrix.
-    edges: list of tuples (row, col) corresponding to the zeros of the matrix.
+    edges: list of tuples (row, col) corresponding to the ones of the matrix.
     epsilon: float, error tolerance for density constraints.
 
     Returns:
     --------
     LpProblem:
         The ILP model.
+
+    This is a variant of AB_V !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     """
+    debug = 0
     model = LpProblem(name="AB_V_h", sense=LpMaximize)
 
     # Variables for rows and columns
@@ -141,20 +130,20 @@ def AB_V_h(rows_data, cols_data, edges, epsilon):
     # Objective function: Maximize sum of selected row and column variables
     model += lpSum(
         [lpvar for lpvar, _ in lpRows.values()] +
-        [lpvar for lpvar, _ in lpCols.values()], "max_sum_vertices"
-    )
+        [lpvar for lpvar, _ in lpCols.values()]), "max_sum_vertices"
 
     # Constraints for row and column thresholds
     row_threshold = 2
     col_threshold = 2
-    print()
-    print('-' * 40)
-    print('row_threshold=', row_threshold )
+    if debug >= 2:
+        print()
+        print('-' * 40)
+        print('row_threshold=', row_threshold )
+        print('col_threshold=', col_threshold )
+        print()
+        print('-' * 40)
     model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
-    print('col_threshold=', col_threshold )
     model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
-    print()
-    print('-' * 40)
     # Add row density constraints
     #__row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
     #__col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon)
@@ -179,15 +168,17 @@ def AB_E(rows_data, cols_data, edges, epsilon):
         The ILP model.
     """
     #epsilon = 0.0 # forcing for solving benchmarks 
+    debug = 0 
 
     model = LpProblem(name="AB_E", sense=LpMaximize)
-    print()
-    print('-' * 40) 
-    print(f"******** Solving model AB_E ********", model.name, " with epsilon = ", epsilon)
-    print('epsilon =', epsilon)
-    print(' # rows_data =', len(rows_data),' # cols_data =', len(cols_data), ' # edges =', len(edges)) 
-    print('-' * 40) 
-    print()
+    if debug >= 2:
+        print()
+        print('-' * 40) 
+        print(f"******** Solving model AB_E ********", model.name, " with epsilon = ", epsilon)
+        print('epsilon =', epsilon)
+        print(' # rows_data =', len(rows_data),' # cols_data =', len(cols_data), ' # edges =', len(edges)) 
+        print('-' * 40) 
+        print()
 
     # Variables for rows and columns
 
@@ -221,11 +212,6 @@ def AB_E(rows_data, cols_data, edges, epsilon):
     #
     model += lpSum([cellValue*lpvar for lpvar,
                    cellValue in lpCells.values()]), 'maximize_weight'
-    # 
-    #model += lpSum(
-    #    [lpvar for lpvar, _ in lpRows.values()] +
-    #    [lpvar for lpvar, _ in lpCols.values()]
-    #), "max_sum_vertices"
 
     # Constraints for row and column thresholds
     row_threshold = 1
@@ -256,7 +242,7 @@ def AB_E(rows_data, cols_data, edges, epsilon):
 
     return model 
 
-def AB_E_r(rows_data, cols_data, edges, epsilon):
+def AB_E_h(rows_data, cols_data, edges, epsilon):
     """
     Arguments:
     ----------
@@ -269,8 +255,11 @@ def AB_E_r(rows_data, cols_data, edges, epsilon):
     --------
     LpProblem:
         The ILP model.
+    
+    Goal : compute heuristically a good solution to be used as warm start 
+    Particularities : no quadratic variables
     """
-    model = LpProblem(name="AB_E_r", sense=LpMaximize)
+    model = LpProblem(name="AB_E_h", sense=LpMaximize)
 
     # Variables for rows and columns
 
@@ -287,18 +276,7 @@ def AB_E_r(rows_data, cols_data, edges, epsilon):
     obj_rowsum =  LpVariable(f"obj_rowsum", cat=LpContinuous)
     obj_colsum =  LpVariable(f"obj_colsum", cat=LpContinuous)
 
-    lpCells = {} #can be improved because we dont need quadratic variable. This state is temporary 
-    for row, _ in rows_data:
-        for col, _ in cols_data:
-            if (row, col) in edges:
-                lpCells[(row, col)] = (LpVariable(
-                    #f'cell_{row}_{col}', cat='Continuous', lowBound=0, upBound=1), 1)
-                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 1)
-            else:
-                lpCells[(row, col)] = (LpVariable(  
-                    #f'cell_{row}_{col}', cat='Continuous', lowBound=0, upBound=1), 0)
-                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 0)
-    # print()
+    # # print()
     # print('-' * 40)
     # print('lpCells=')
     # print(lpCells)
@@ -306,17 +284,7 @@ def AB_E_r(rows_data, cols_data, edges, epsilon):
     # print('-' * 40)
     # Objective function: Maximize sum of selected row and column variables
     #
-    model += lpSum(lpSum_row) + lpSum(lpSum_col), "max_sum_rows_columns"
-    # +lpSum(
-    #     [lpvar for lpvar, _ in lpRows.values()] +
-    #     [lpvar for lpvar, _ in lpCols.values()]), "max_sum_vertices_rows_columns"
-    #model += lpSum([cellValue*lpvar for lpvar, cellValue in lpCells.values()]), 'maximize_weight'
-    # 
-    #model += lpSum(
-    #    [lpvar for lpvar, _ in lpRows.values()] +
-    #    [lpvar for lpvar, _ in lpCols.values()]
-    #), "max_sum_vertices"
-
+    model += lpSum(lpSum_row) + lpSum(lpSum_col), "max_sum_rows_columns" 
     # Constraints for row and column thresholds
     row_threshold = 2
     col_threshold = 2
@@ -330,7 +298,7 @@ def AB_E_r(rows_data, cols_data, edges, epsilon):
 
     return model
 
-def AB_E_c_r(rows_data, cols_data, edges, epsilon):
+def AB_E_r(rows_data, cols_data, edges, epsilon):
     """
     Arguments:
     ----------
@@ -343,12 +311,14 @@ def AB_E_c_r(rows_data, cols_data, edges, epsilon):
     --------
     LpProblem:
         The ILP model.
+    
+    This is an improved model from Chnag et al. 
     """
     # TEMP FORCING - to be canceled 
-    #epsilon=0.1
+    epsilon=0.1
     # FORCING - to be canceled 
 
-    model = LpProblem(name="AB_E_c_r", sense=LpMaximize)
+    model = LpProblem(name="AB_E_r", sense=LpMaximize)
 
     # Variables for rows and columns
 
@@ -377,23 +347,18 @@ def AB_E_c_r(rows_data, cols_data, edges, epsilon):
     #
     model += lpSum([cellValue*lpvar for lpvar,
                    cellValue in lpCells.values()]), 'maximize_weight'
-    # 
-    #model += lpSum(
-    #    [lpvar for lpvar, _ in lpRows.values()] +
-    #    [lpvar for lpvar, _ in lpCols.values()]
-    #), "max_sum_vertices"
-
     # Constraints for row and column thresholds
     row_threshold = 2
     col_threshold = 2
-    print()
-    print('-' * 40)
-    print('row_threshold=', row_threshold )
+    if debug >= 2:
+        print()
+        print('-' * 40)
+        print('row_threshold=', row_threshold )
+        print('col_threshold=', col_threshold )
+        print()
+        print('-' * 40)
     model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
-    print('col_threshold=', col_threshold )
     model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
-    print()
-    print('-' * 40)
     #for row, col in edges:
     for row, col in lpCells:
         model += (lpRows[row][0] >= lpCells[(row, col)][0]), f'cell_{row}_{col}_1'
@@ -465,12 +430,6 @@ def __col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_
             # lpSum_col[col] - (1 - epsilon) * lpSum(lpRows[row][0] for row, _ in rows_data) 
             # >= (lpCols[col][0]-1) * Big_M, f"col_err_rate_1_{col}"
         )
-        # Constraint for col density lower bound
-        
-        # model += (
-        #     lpSum_col[col] - (1 - epsilon) * lpSum(lpRows[row][0] for row, _ in rows_data) <=
-        #     -mu + lpCols[col][0] * Big_M
-        # ), f"col_err_rate_0_{col}"
 
 def __row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_row, lpSlack_row, epsilon):
     """
@@ -510,12 +469,6 @@ def __row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_
             lpSlack_row[row] >= (lpRows[row][0]-1) * Big_M, f"row_err_rate_1_{row}"
         )
 
-        # Constraint for row density lower bound
-        
-        # model += (
-        #     lpSum(lpCols[col][0] for col in row_edges) - (1 - epsilon) * lpSum(lpCols[col][0] for col, _ in cols_data) <=
-        #     -mu + lpRows[row][0] * Big_M
-        # ), f"row_err_rate_0_{row}"
 
 def __col_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon):
     """
@@ -599,306 +552,6 @@ def __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, epsilon):
         #     -mu + lpRows[row][0] * Big_M
         # ), f"row_err_rate_0_{row}"
 
-def König_V(rows_data, cols_data, edges):
-    """
-    ARGUMENTS:
-    ----------
-    * rows_data: list of the tuples (row, degree) of rows the matrix.
-    * cols_data: list of the tuples (col, degree) of columns the matrix.
-    * edges: list of tuples (row,col) corresponding to the zeros of the matrix.
-    """
-
-    # ------------------------------------------------------------------------ #
-    # Model with minimization
-    # ------------------------------------------------------------------------ #
-    model = LpProblem(name='König_V', sense=LpMinimize)
-
-    # ------------------------------------------------------------------------ #
-    # Variables
-    # ------------------------------------------------------------------------ #
-    lpRows = {row: (LpVariable(f'row_{row}', 
-    cat='Continous',
-                    lowBound=0, upBound=1), degree) for row, degree in rows_data} 
-    #cat='Binary', lowBound=0), degree) for row, degree in rows_data}
-    lpCols = {col: (LpVariable(f'col_{col}', cat='Continous',
-                    lowBound=0, upBound=1), degree) for col, degree in cols_data}
-    # ------------------------------------------------------------------------ #
-    # Objective function
-    # ------------------------------------------------------------------------ #
-    # model += lpSum([degree*lpvar for lpvar, degree in lpRows.values()] +
-    #                [degree*lpvar for lpvar, degree in lpCols.values()]), 'min_weighted_cover'
-
-    model += lpSum([lpvar for lpvar, _ in lpRows.values()] +
-                   [lpvar for lpvar, _ in lpCols.values()]), 'min_vertices'
-
-    # ------------------------------------------------------------------------ #
-    # Constraints
-    # ------------------------------------------------------------------------ #
-    for row, col in edges:
-        model += (lpRows[row][0]+lpCols[col][0] >= 1), f'edge_{row}_{col}'
-    #model += (lpRows['r1'] + lpRows['r2'] <= 1,'constraint uncomp')
-
-    return model
-# ============================================================================ #
-#                     LP MODEL - König with degrees                       #
-# ============================================================================ #
-
-
-def König_E(rows_data, cols_data, edges):
-    """
-    ARGUMENTS:
-    ----------
-    * rows_data: list of the tuples (row, degree) of rows the matrix.
-    * cols_data: list of the tuples (col, degree) of columns the matrix.
-    * edges: list of tuples (row,col) corresponding to the zeros  of the matrix.
-    """
-
-    # ------------------------------------------------------------------------ #
-    # Model with minimization
-    # ------------------------------------------------------------------------ #
-    model = LpProblem(name='König_E', sense=LpMinimize)
-
-    # ------------------------------------------------------------------------ #
-    # Variables
-    # ------------------------------------------------------------------------ #
-    lpRows = {row: (LpVariable(f'row_{row}', 
-    cat='Continous',
-                    lowBound=0, upBound=1), degree) for row, degree in rows_data}
-    lpCols = {col: (LpVariable(f'col_{col}', 
-    cat='Continous', lowBound=0, upBound=1), degree) for col, degree in cols_data}
-    # ------------------------------------------------------------------------ #
-    # Objective function
-    # ------------------------------------------------------------------------ #
-    model += lpSum([degree*lpvar for lpvar, degree in lpRows.values()] +
-                   [degree*lpvar for lpvar, degree in lpCols.values()]), 'min_degrees'
-
-    # model += lpSum([lpvar for lpvar, _ in lpRows.values()] +
-    #                [lpvar for lpvar, _ in lpCols.values()]), 'min_vertices'
-
-    # ------------------------------------------------------------------------ #
-    # Constraints
-    # ------------------------------------------------------------------------ #
-    for row, col in edges:
-        model += (lpRows[row][0]+lpCols[col][0] >= 1), f'edge_{row}_{col}'
-
-    #model += (lpSum(lpRows[row][0] for row, _ in rows_data)  <= 3, 'row_limits')
-              
-    #model += (lpRows['row_0'] + lpRows['row_2'] <= 1,'constraint uncomp')
-    #model += (lpRows[0][0] + lpRows[2][0] <= 1,'constraint uncomp')
-    #model += (lpSum([lpvar for lpvar, _ in lpRows.values()])  <= 2,'row_limits_bis',    )
-    #model += (lpSum([lpvar for lpvar, _ in lpCols.values()])  <= 2,'col_limits_bis',    )
-    
-    
-    return model
-
-
-# ============================================================================ #
-#                LP MODEL - Deleting rows/columns for zeros eliminating                    #
-# ============================================================================ #
-
-def  minDel_RC(rows_data, cols_data, edges, epsilon=0.3): 
-#     bigraph: ZerosBiGraph,
-#     epsilon: float,
-# ) -> tuple[LpProblem, VertexChoicesLP, EdgeChoicesLP]:
-    """Minimizing the number of deleted rows.
-    Implement the LP model for deleting minimum rows and columns. 
-    In this model, we introduce epsilon with the goal of alowing errors in the result. 
-    ARGUMENTS:
-    ----------
-    * rows_data: list of the tuples (row, degree) of rows the matrix.
-    * cols_data: list of the tuples (col, degree) of columns the matrix.
-    * edges: list of tuple (row,col) corresponding to the zeros  of the matrix.
-    * epsilon: a percentage of the zeros that will be accepted in the final matrix 
-    """
-
-
-    model = LpProblem(name='minDel_rows', sense=LpMinimize)
-
-    # 
-    #
-    # Variables
-    #
-    # u_vertex_choices = __u_vertex_choices_variables(bigraph)
-    # edge_choices = __edge_choices_variables(bigraph)
-    lpRows = {row: (LpVariable(f'row_{row}', cat='Integer',
-                    lowBound=0, upBound=1), degree) for row, degree in rows_data}
-    lpCols = {col: (LpVariable(f'col_{col}', cat='Integer',
-                    lowBound=0, upBound=1), degree) for col, degree in cols_data}
-    lpEdges = {(row, col): LpVariable(f'edge_{row}_{col}', cat='Integer',
-                                      lowBound=0, upBound=1) for row, col in edges}
-
-    #
-    # Objective function
-    #
-    model += lpSum([lpvar for lpvar, _ in lpRows.values()] ), 'min_sum_vertices'
-
-    # 
-    #
-    # Constraints
-    #
-    for row, col in edges:
-        model += lpRows[row][0] >= lpEdges[(row, col)], f'edge_{row}_{col}'
-        
-    #__select_edge_select_u_endpoint(prob, bigraph, u_vertex_choices, edge_choices)
-
-    #__at_most_epsilon_remaining_zeros(prob, bigraph, epsilon, edge_choices)
-    model += (
-            lpSum(
-                [degree*lpvar for lpvar, degree in lpRows.values()]
-                    # var * deg
-                    # for var, deg in zip(u_vertex_choices, bigraph.u_bipart_degrees())
-                
-                )
-            # + lpSum(
-            #     (
-            #         var * deg
-            #         for var, deg in zip(v_vertex_choices, bigraph.v_bipart_degrees())
-            #     ),
-            # )
-            >= (1 - epsilon) * len(edges)
-        ), "sensitivity"
-
-    return model 
-
-def minDel_RC_original(rows_data, cols_data, edges, epsilon=0.3):
-    """
-    Implement the LP model for deleting minimum rows and columns. 
-    In this model, we introduce epsilon with the goal of alowing errors in the result. 
-    ARGUMENTS:
-    ----------
-    * rows_data: list of the tuples (row, degree) of rows the matrix.
-    * cols_data: list of the tuples (col, degree) of columns the matrix.
-    * edges: list of tuple (row,col) corresponding to the zeros  of the matrix.
-    * epsilon: a percentage of the zeros that will be accepted in the final matrix 
-    """
-
-    # ------------------------------------------------------------------------ #
-    # Model with minimization
-    # ------------------------------------------------------------------------ #
-    model = LpProblem(name='minDel_rows_cols', sense=LpMinimize)
-
-    # ------------------------------------------------------------------------ #
-    # Variables
-    # ------------------------------------------------------------------------ #
-    lpRows = {row: (LpVariable(f'row_{row}', cat='Integer',
-                    lowBound=0, upBound=1), degree) for row, degree in rows_data}
-    lpCols = {col: (LpVariable(f'col_{col}', cat='Integer',
-                    lowBound=0, upBound=1), degree) for col, degree in cols_data}
-    lpEdges = {(row, col): LpVariable(f'edge_{row}_{col}', cat='Integer',
-                                      lowBound=0, upBound=1) for row, col in edges}
-
-    # ------------------------------------------------------------------------ #
-    # Objective function
-    # ------------------------------------------------------------------------ #
-    # model += lpSum([degree*lpvar for lpvar, degree in lpRows.values()] +
-    #                [degree*lpvar for lpvar, degree in lpCols.values()]), 'precise_min_weighted_cover'
-    model += lpSum([lpvar for lpvar, _ in lpRows.values()] +
-                   [lpvar for lpvar, _ in lpCols.values()]), 'min_sum_vertices'
-
-    # ------------------------------------------------------------------------ #
-    # Constraints
-    # ------------------------------------------------------------------------ #
-    for row, col in edges:
-        model += (lpRows[row][0]+lpCols[col][0] >=
-                  lpEdges[(row, col)]), f'edge_{row}_{col}'
-        
-    adjustment_ = 1
-
-    model += (lpSum(lpEdges) >= (1-epsilon*adjustment_) * len(edges)), f'sensitivity'
-
-    # nbi0 = len(edges)
-    # nbi1 = sum([degree for _,degree in rows_data])
-    # nbi2 = len(rows_data)*len(cols_data)-nbi0
-    # print()
-    # print('-' * 40)
-    # print("nbi0 = ",nbi0)
-    # print("nbi1 = ",nbi1)
-    # print("nbi2 = ",nbi2)
-    # print(nbi0, nbi1, nbi2)
-    # print('-' * 40)
-    # if nbi0>nbi1:
-    #     diff = nbi0-nbi1
-    #     model += (lpSum(lpEdges) >= diff+(1-epsilon)*nbi1), f'sensitivity'
-    # else:
-    #     model += (lpSum(lpEdges) >= (1-epsilon) * len(edges)), f'sensitivity'
-
-    return model
-#==========================================================================#
-#                LP MODEL - Deleting rows/columns for zeros eliminating                    #
-# ============================================================================ #
-
-
-def minDel_Ones(rows_data, cols_data, edges, epsilon):
-    """
-    Implement the LP model for deleting minimum rows and columns. 
-    In this model, we introduce epsilon with the goal of alowing errors in the result. 
-    ARGUMENTS:
-    ----------
-    * rows_data: list of the tuples (row, degree) of rows the matrix.
-    * cols_data: list of the tuples (col, degree) of columns the matrix.
-    * edges: list of tuple (row,col) corresponding to the zeros  of the matrix. 
-    * epsilon: a percentage of zeros that will be tolerated in the final matrix 
-    """
-
-    # ------------------------------------------------------------------------ #
-    # Model with minimization
-    # ------------------------------------------------------------------------ #
-    model = LpProblem(name='minDel_Ones', sense=LpMinimize)
-
-    # ------------------------------------------------------------------------ #
-    # Variables
-    # ------------------------------------------------------------------------ #
-    lpRows = {row: (LpVariable(f'row_{row}', cat='Integer',
-                    lowBound=0, upBound=1), degree) for row, degree in rows_data}
-    lpCols = {col: (LpVariable(f'col_{col}', cat='Integer',
-                    lowBound=0, upBound=1), degree) for col, degree in cols_data}
-    lpEdges = {(row, col): LpVariable(f'edge_{row}_{col}', cat='Integer',
-                                      lowBound=0, upBound=1) for row, col in edges}
-
-    # ------------------------------------------------------------------------ #
-    # Objective function
-    # ------------------------------------------------------------------------ #
-    model += lpSum([degree*lpvar for lpvar, degree in lpRows.values()]
-               +   [degree*lpvar for lpvar, degree in lpCols.values()]), 'min_weighted_rows/cols'
-    #model += lpSum([lpvar for lpvar, _ in lpRows.values()]), 'min_weighted_rows/cols'
-                   
-    #               + [lpvar for lpvar, _ in lpCols.values()]), 'min_weighted_rows/cols'
-
-    # ------------------------------------------------------------------------ #
-    # Constraints
-    # ------------------------------------------------------------------------ ##
-    # for row, col in edges:
-    #     model += (lpRows[row][0]+lpCols[col][0] >=
-    #               lpEdges[(row, col)]), f'edge_{row}_{col}'
-        
-    # adjustment_ = 1
-
-    # model += (lpSum(lpEdges) >= (1-epsilon*adjustment_) * len(edges)), f'sensitivity'
-
-    # return model
-
-    for row, col in edges:
-        model += (lpRows[row][0]+lpCols[col][0] >=
-                  lpEdges[(row, col)]), f'edge_{row}_{col}'
-        
-
-    nbi0 = len(edges)
-    nbi1 = sum([degree for _,degree in rows_data])
-    nbi2 = len(rows_data)*len(cols_data)-nbi0
-    # print()
-    # print('-' * 40)
-    # print("nbi0 = ",nbi0)
-    # print("nbi1 = ",nbi1)
-    # print("nbi2 = ",nbi2)
-    # print(nbi0, nbi1, nbi2)
-    # print('-' * 40)
-    # if nbi0>nbi1:
-    #     diff = nbi0-nbi1
-    #     model += (lpSum(lpEdges) >= diff+(1-epsilon)*nbi1), f'sensitivity'
-    # else:
-    model += (lpSum(lpEdges) >= (1-epsilon) * len(edges)), f'sensitivity'
-
-    return model
 # # ============================================================================ #
 #                     LP MODEL - MAXIMIZE DESIRED CELL                         #
 # ============================================================================ #
@@ -1036,111 +689,7 @@ def max_Ones_comp(rows_data, cols_data, edges, epsilon):
     return model
 
 
-def max_Surface(rows_data, cols_data, edges, epsilon=0.1):
-    """
-    ARGUMENTS:
-    ----------
-    * rows_data: list of the tuples (row, degree) of rows the matrix.
-    * cols_data: list of the tuples (col, degree) of columns the matrix.
-    * edges: list of tuple (row,col) corresponding to the zeros  of the matrix. 
-    * epsilon: percentage of accepted zeros 
-    """
-
-    # ------------------------------------------------------------------------ #
-    # Model with maximization
-    # ------------------------------------------------------------------------ #
-    model = LpProblem(name='maximize_surface', sense=LpMaximize)
-
-    # ------------------------------------------------------------------------ #
-    # Variables
-    # ------------------------------------------------------------------------ #
-    lpRows = {row: (LpVariable(f'row_{row}', cat='Integer',
-                    lowBound=0, upBound=1), degree) for row, degree in rows_data}
-    lpCols = {col: (LpVariable(f'col_{col}', cat='Integer',
-                               lowBound=0, upBound=1), degree) for col, degree in cols_data}
-    lpCells = {}
-    for row, _ in rows_data:
-        for col, _ in cols_data:
-            if (row, col) in edges:
-                lpCells[(row, col)] = (LpVariable(
-                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 0)
-            else:
-                lpCells[(row, col)] = (LpVariable(  
-                    f'cell_{row}_{col}', cat='Integer', lowBound=0, upBound=1), 1)
-
-    # ------------------------------------------------------------------------ #
-    # Objective function
-    # ------------------------------------------------------------------------ #
-    model += lpSum([lpvar for lpvar,_ in lpCells.values()]), 'maximize_surface_matrix'
-
-    # ------------------------------------------------------------------------ #
-    # Constraints
-    # ------------------------------------------------------------------------ #
- 
-    for row, col in lpCells:
-        model += (lpRows[row][0] >= lpCells[(row, col)][0]), f'cell_{row}_{col}_1'
-        model += (lpCols[col][0] >= lpCells[(row, col)][0]), f'cell_{row}_{col}_2'
-        model += (lpRows[row][0]+lpCols[col][0] -1 <= lpCells[(row, col)][0]), f'cell_{row}_{col}_3'
-
-    model += (lpSum([(1-cellValue)*lpvar for lpvar, cellValue in lpCells.values()]) <= epsilon *
-              lpSum([lpvar for lpvar, _ in lpCells.values()])), f'err_rate'
-
-    #model += (lpRows['r1'] + lpRows['r2'] <= 1,'constraint uncomp')
-
-    return model
-
-def max_Vertices(rows_data, cols_data, edges, epsilon=0.1):
-    """
-    ARGUMENTS:
-    ----------
-    * rows_data: list of the tuples (row, degree) of rows the matrix.
-    * cols_data: list of the tuples (col, degree) of columns the matrix.
-    * edges: list of tuple of the coordination (row,col) of zeros of the matrix.
-    * epsilon: percentage of accepted zeros 
-    """
-
-    # ------------------------------------------------------------------------ #
-    # Model with maximization
-    # ------------------------------------------------------------------------ #
-    model = LpProblem(name='maximize_sum_of_rows_cols', sense=LpMaximize)
-
-    # ------------------------------------------------------------------------ #
-    # Variables
-    # ------------------------------------------------------------------------ #
-    lpRows = {row: (LpVariable(f'row_{row}', cat='Binary'), degree) for row, degree in rows_data}
-    lpCols = {col: (LpVariable(f'col_{col}', cat='Binary'), degree) for col, degree in cols_data}
-    lpCells = {}
-    for row, _ in rows_data:
-        for col, _ in cols_data:
-            if (row, col) in edges:
-                lpCells[(row, col)] = (LpVariable(f'cell_{row}_{col}', cat='Binary'), 0)
-            else:
-                lpCells[(row, col)] = (LpVariable(f'cell_{row}_{col}', cat='Binary'), 1)
-
-    # ------------------------------------------------------------------------ #
-    # Objective function
-    # ------------------------------------------------------------------------ #
-    model += lpSum([lpvar for lpvar, _ in lpRows.values()] +
-                   [lpvar for lpvar, _ in lpCols.values()]), 'max_sum_vertices'
-
-    # ------------------------------------------------------------------------ #
-    # Constraints
-    # ------------------------------------------------------------------------ #
- 
-    for row, col in lpCells:
-        model += (lpRows[row][0] >= lpCells[(row, col)][0]), f'cell_{row}_{col}_1'
-        model += (lpCols[col][0] >= lpCells[(row, col)][0]), f'cell_{row}_{col}_2'
-        model += (lpRows[row][0]+lpCols[col][0] -1 <= lpCells[(row, col)][0]), f'cell_{row}_{col}_3'
-
-    model += (lpSum([(1-cellValue)*lpvar for lpvar, cellValue in lpCells.values()]) <= epsilon *
-              lpSum([lpvar for lpvar, _ in lpCells.values()])), f'err_rate'
-
-    #model += (lpRows['r1'] + lpRows['r2'] <= 1,'constraint uncomp')
-
-    return model
-
-
-def KP_QBr(rows_data, col_length, nb_edges_0, epsilon=0.1):
+def KP_QBr(rows_data, col_length, nb_edges_0, debug, epsilon=0.1):
     """
     In this model, we use knapsack model
     ARGUMENTS:
@@ -1150,12 +699,13 @@ def KP_QBr(rows_data, col_length, nb_edges_0, epsilon=0.1):
     * epsilon: percentage of accepted undesired cell over accepted desired cell
     """
     row_length = len(rows_data) #number of rows 
-    total_degree_0 = sum((col_length - degree) for _, degree in rows_data)
-    print('I am currently solving row KP_QBr with Input data : ***************')
-    print()
-    print('edges =',nb_edges_0, "epsilon=", epsilon, "number of columns =", col_length, "number of rows =", row_length,"total_degree_0=", total_degree_0, "RHS=" , (1-epsilon)* nb_edges_0)
+    if debug >=2:
+        total_degree_0 = sum((col_length - degree) for _, degree in rows_data)
+        print('I am currently solving row KP_QBr with Input data : ***************')
+        print()
+        print('edges =',nb_edges_0, "epsilon=", epsilon, "number of columns =", col_length, "number of rows =", row_length,"total_degree_0=", total_degree_0, "RHS=" , (1-epsilon)* nb_edges_0)
     #print('rows_data =', rows_data)
-    print('-' * 40) 
+        print('-' * 40) 
     
     # ------------------------------------------------------------------------ #
     # Model with minimization
@@ -1185,7 +735,7 @@ def KP_QBr(rows_data, col_length, nb_edges_0, epsilon=0.1):
 
     return model
 
-def KP_QBc(cols_data, row_length, nb_edges_0, epsilon=0.1):
+def KP_QBc(cols_data, row_length, nb_edges_0, debug, epsilon=0.1):
     """
     In this model, we use knapsack model
     ARGUMENTS:
@@ -1195,13 +745,15 @@ def KP_QBc(cols_data, row_length, nb_edges_0, epsilon=0.1):
     * epsilon: percentage of accepted undesired cell over accepted desired cell
     """
     col_length = len(cols_data) # # of columns 
-    total_degree_0 = sum((row_length - degree) for _, degree in cols_data)
-    print('-' * 40)
-    print('I will solve column KP_QBc with Input data : ***************')
-    print()
-    print('nb_edges_0 =',nb_edges_0, "epsilon=", epsilon,"# of rows =", row_length, "# of columns=", col_length, "total_degree_0=", total_degree_0, "RHS=" , (1-epsilon)* nb_edges_0)
+    if debug >=2:
+        total_degree_0 = sum((row_length - degree) for _, degree in cols_data)
+        print('-' * 40)
+        print('I will solve column KP_QBc with Input data : ***************')
+        print()
+        print(" input cols_data =", cols_data)
+        print('nb_edges_0 =',nb_edges_0, "epsilon=", epsilon,"# of rows =", row_length, "# of columns=", col_length, "total_degree_0=", total_degree_0, "RHS=" , (1-epsilon)* nb_edges_0)
     #print('cols_data =', cols_data)
-    print('-' * 40)
+        print('-' * 40)
     
     # ------------------------------------------------------------------------ #
     # Model with minimization
@@ -1233,132 +785,27 @@ def KP_QBc(cols_data, row_length, nb_edges_0, epsilon=0.1):
 
 
     return model
-# ============================================================================ #
-#                                    SOLVING                                   #
-# ============================================================================ #
+
+#============================================================================
+#  greedy approaches
+#============================================================================
 
 
-def solve(path_to_data, model, epsilon=0.1):
-    """
-    Function to solve the maximum biclique problem, this function reads the data,
-    create a LP model using the data and return a list of rows and a list of 
-    columns as a result. 
-    ARGUMENTS:
-    ----------
-    * path_to_data: the path to the csv file.
-    * model: the model to be use.
-    * epsilon: percentage of errors (accepted edges) in the final result submatrix
-    """
-    obj_total =  0.0 
-    slack_total =  0.0 
-    total_error = 0.0 
-    p = path_to_data
-    if p.lower().endswith('.txt'):
-        rows, cols, edges_1, row_names, col_names, df = get_data_txt_file(path_to_data, model)
-        # Get complement edges
-        col_length = len(cols)
-        row_length = len(rows)
-        CompEdges = get_complement_edges(row_length, col_length, edges_1)
-        nb_eges_0 = len(CompEdges)
-        print("Complement Edges:", CompEdges)      
-    elif p.lower().endswith('.csv'):
-        rows, cols, edges_0, edges_1, row_names, col_names, df = get_data(path_to_data, model)
-        nb_eges_0 = len(edges_0)
-        nb_eges_1 = len(edges_1)
-        col_length = len(cols)
-        row_length = len(rows) 
-    else:
-        raise ValueError('Input need to be a matrix csv file, or a text file with a specific layout')
-    
-    print('-' * 40)
-    print("Input number Rows Data:", len(rows))
-    print("Input Columns Data:", len(cols))
-    if p.lower().endswith('.txt'):
-        print(" number Complement Edges:", len(CompEdges) )
-    if p.lower().endswith('.csv'):
-        print("Original Edges_0:", len(edges_0))
-        print("Original Edges_1:", len(edges_1) )
-    #print("Adjacency Matrix:\n", df)
-    print('row_length =', row_length)
-    print('col_length =', col_length) 
-    print('-' * 40)
-          
-    nbi_0 = 0
-    nbi_1 = 0
-    for _, degree in rows:
-        nbi_1 = nbi_1 + degree
-    nbi_0 = len(rows)*len(cols) - nbi_1
 
-    print('Initial Stats')
-    print(f"input data = {path_to_data}")
-   # print(f"model.name ={model.name}")
-    print("Size of current matrix : ", len(rows), "*", len(cols), "=", len(rows) * len(cols))
-    
-    nb_0 = 0
-    nb_1 = 0
-    for _, degree in rows: #number of ones counting 
-        nb_1 = nb_1 + degree
-    
-    nb_0 = len(rows)*len(cols) - nb_1 #number of zeros counting 
-
-    print("number input zeros  = ",nb_0)     
-    print("number input ones = ",nb_1)            
-    print("epsilon = ",epsilon)
-    print("Input sparsity = ", nb_0/(len(rows) * len(cols)))
-    print("Input density = ", nb_1/(len(rows) * len(cols)))
-    print('End Initial Stats')
-    print('-' * 40)
-    print()
-            
-
-    model_name = model
-    if model == 'König_V':
-        model = König_V(rows, cols, edges)
-    elif model == 'König_E':
-        model = König_E(rows, cols, edges)
-    elif model == 'AB_E':
-        model = AB_E(rows, cols, edges_1, epsilon)
-    elif model == 'AB_E_r':
-        model = AB_E_r(rows, cols, edges_1, epsilon)
-    elif model == 'AB_E_c_r':
-        model = AB_E_c_r(rows, cols, edges_1, epsilon)
-    elif model == 'AB_V':
-        model = AB_V(rows, cols, edges_1, epsilon)
-    elif model == 'AB_V_h':
-        model = AB_V_h(rows, cols, edges_1, epsilon)
-    elif model == 'max_Ones':
-        model = max_Ones(rows, cols, edges_1, epsilon)
-    elif model == 'max_Ones_comp':
-        model = max_Ones_comp(rows, cols, edges_1, epsilon)
-    elif model == 'max_Surface':
-        model = max_Surface(rows, cols, edges_1, epsilon)
-    elif model == 'max_Vertices':
-        model = max_Vertices(rows, cols, edges_1, epsilon)
-    elif p.lower().endswith('.txt'):
-        if   model == 'minDel_RC':
-             model = minDel_RC(rows, cols, CompEdges, epsilon)
-        elif model == 'minDel_Ones':
-             model = minDel_Ones(rows, cols, CompEdges, epsilon)
-        elif model == 'KP_QBr':
-             model = KP_QBr(rows, col_length, nb_eges_0, epsilon)
-        elif model == 'KP_QBc':
-             model = KP_QBc(cols, row_length, nb_eges_0, epsilon)  
-    elif p.lower().endswith('.csv'):
-        if   model == 'minDel_RC':
-             model = minDel_RC(rows, cols, edges, epsilon)
-        elif model == 'minDel_Ones':
-             model = minDel_Ones(rows, cols, edges, epsilon)
-        elif model == 'KP_QBr':
-             model = KP_QBr(rows, col_length, nb_eges_0, epsilon)
-        elif model == 'KP_QBc':
-             model = KP_QBc(cols, row_length, nb_eges_0, epsilon)
-
-    #create the model using one of the previously implemented models
-
-    #solve the model using GUROBI_CMD. it is possible for the solver to take a long time
-    #the time limit is set to 1 hour. The solver will be automatically stop after 1h.
+def zero_deleter(rows, cols, row_names, col_names, edges_1, nb_edges_0, epsilon, debug): 
+    # here we first call KP by rows, then KP by columns 
+    rows_res = []
+    cols_res = []
+    rows_res_name = []
+    cols_res_name = []
+    rows_del = []
+    rows_del_name = []
+    cols_del = []
+    cols_del_name = []
+    col_length = len(cols)
+    model = KP_QBr(rows, col_length, nb_edges_0, debug, epsilon)
     #model.solve(PULP_CBC_CMD(msg=True, timeLimit= 3600, gapRel = 0.5),)
-    model.solve(GUROBI_CMD(msg=True, timeLimit= 600)#, options=[("Heuristics", 0.0), ("NoRelHeurTime", 0)] )#,gapRel=0.3)
+    model.solve(GUROBI_CMD(msg=False, timeLimit= 600)#, options=[("Heuristics", 0.0), ("NoRelHeurTime", 0)] )#,gapRel=0.3)
     )
     #model.solve(GUROBI_CMD(msg=True, timeLimit= 60, MIPGap = 0.03),)
     # Check status
@@ -1372,7 +819,342 @@ def solve(path_to_data, model, epsilon=0.1):
          model.writeLP("debug_model.lp")
          sys.exit("Terminating program due to infeasibility. EXIT 1")
     print_log_output(model)
-    print(f"Reading and analyse of the obtained results")
+    if debug >=1:
+        print('I solved model name =', model.name)
+        if model.name == "row_knapsack_problem":
+            for var in model.variables():
+                #print('row_knapsack var name =', var.name,'var value =', var.varValue)
+                if var.varValue == 0:
+                    if var.name[:3] == "row":
+                        rows_res = rows_res + [var.name[4:]]
+                    elif var.name[:3] == "col":
+                        print('Something wrong. var name =', var.name,'var value =', var.varValue)
+                        sys.exit("Terminating program. EXIT 7 ")
+                else: # i.e. var.varValue == 1:
+                    if var.name[:3] == "row":
+                        rows_del = rows_del + [var.name[4:]]
+                    elif var.name[:3] == "col":
+                        print('Something wrong. var name =', var.name,'var value =', var.varValue)
+                        sys.exit("Terminating program. EXIT 7 ")
+        if model.name == "column_knapsack_problem":
+            for var in model.variables():
+                #print('column_knapsack var name =', var.name,'var value =', var.varValue)
+                if var.varValue == 0:
+                    if var.name[:3] == "col":
+                        cols_res = cols_res + [var.name[4:]]
+                    elif var.name[:3] == "row":
+                #    cols_res = cols_res + [var.name[4:]]
+                        print('Something wrong. var name =', var.name,'var value =', var.varValue)
+                        return model 
+                else: # i.e. var.varValue == 1:
+                    if var.name[:3] == "col":
+                        cols_del = cols_del + [var.name[4:]]
+                    elif var.name[:3] == "row":
+                        #cols_del = cols_del + [var.name[4:]]
+                        print('Something wrong. var name =', var.name,'var value =', var.varValue)
+                        return model 
+    if model.name == "row_knapsack_problem":
+         cols_res = [str(c) for c, _ in cols]
+         cols_res = [int(c) for c in cols_res]
+         cols_res_name = [col_names[c] for c in cols_res]
+    if model.name == "column_knapsack_problem":
+         rows_res = [str(c) for c, _ in rows]
+         rows_res = [int(r) for r in rows_res]
+         rows_res_name = [row_names[r] for r in rows_res]
+
+    #rows_res = [str(c) for c, _ in rows_res]
+    rows_res = [int(r) for r in rows_res]
+    rows_res_name = [row_names[r] for r in rows_res]
+    #cols_res = [str(c) for c, _ in cols]
+    #cols_res = [int(c) for c in cols_res]
+    #cols_res_name = [col_names[c] for c in cols_res]
+    rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density  = update_data(rows, cols, edges_1, rows_res, cols_res, debug) 
+    if debug >=1:
+        print()
+        print('-' * 40)
+        print(f" updated data after solving model = {model.name}", " gamma =  ", gamma)
+        nb_edges_1 = len(edges_1_rem)
+        print("Number of Remaining  Rows  :", len(rows_rem))
+        print("Number of Remaining number Columns :", len(cols_rem))
+        print("Remaining  number Edges_0 : ", nb_edges_0_rem, "Remaining  number Edges_1 : ", nb_edges_1, "Density :", density )
+        if debug >= 2:
+            print("Remaining  Rows before colling KP col :", rows_rem)
+            print("Remaining Columns  before colling KP col :", cols_rem)
+        print('-' * 40)
+        print()
+    nb_rows_rem = len(rows_rem)
+       
+    model = KP_QBc(cols_rem, nb_rows_rem, nb_edges_0_rem, debug, epsilon) 
+
+    model.solve(GUROBI_CMD(msg=False, timeLimit= 600))
+    # Check status
+    if model.status == 9 : #GRB.TIME_LIMIT:
+        print("Gurobi stopped due to time limit!")
+    print("Gurobi Model Status:", model.status, "-", gp.GRB.Status.__dict__.get(model.status, "Unknown"))
+    print("Model.status is ", model.status, "Exporting LP file for debugging...")
+    model.writeLP("debug_model_col.lp")
+    print(f"Model status: {LpStatus[model.status]}")
+    if model.status == -1:
+         print("Model is infeasible. Exporting LP file for debugging...")
+         model.writeLP("debug_model.lp")
+         sys.exit("Terminating program due to infeasibility. EXIT 7")
+    #read the result from the solver
+    cols_res=[]
+    cols_del=[]
+    if model.name == "column_knapsack_problem":
+            for var in model.variables():
+                if var.varValue == 0:
+                    #print('column_knapsack var name =', var.name,'var value =', var.varValue)
+                    if var.name[:3] == "col":
+                        cols_res = cols_res + [var.name[4:]]
+                    elif var.name[:3] == "row":
+                #    cols_res = cols_res + [var.name[4:]]
+                        print('Something wrong. var name =', var.name,'var value =', var.varValue)
+                        return model 
+                else: # i.e. var.varValue == 1:
+                    if var.name[:3] == "col":
+                        cols_del = cols_del + [var.name[4:]]
+                    elif var.name[:3] == "row":
+                        #cols_del = cols_del + [var.name[4:]]
+                        print('Something wrong. var name =', var.name,'var value =', var.varValue)
+                        return model 
+    # update  edges      
+    print_log_output(model) 
+    if debug >= 2:
+        print()
+        print('-' * 40)           
+        print('after col kp solution !!!!!!!!!!!! ')
+        print(' number of cols_res =', len(cols_res))
+        print(' number of  cols_del =', len(cols_del)) 
+        print(' number of  rows_res =', len(rows_res))
+        print('  rows_res =', rows_res) 
+        print(' number of rows_del =', len(rows_del))
+        print(' number of edges_1_rem =', len(edges_1_rem))
+        print(' edges_1_rem =',edges_1_rem) 
+    #sys.exit("Terminating program due to inexpected end. EXIT after col KP ")
+
+    rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density = update_data(rows_rem, cols_rem, edges_1_rem, rows_res, cols_res, debug)
+    if debug >= 2:
+        print()
+        print(f"model = {model.name}", "epsilon =  ", epsilon)
+        print('after update_data !!!!!!!!!!!! ')
+        print(' number of cols_rem =', len(cols_rem))
+        print('number of cols_res =', len(cols_res))
+        print('number of rows_rem =', len(rows_rem))
+        print('number of rows_res =', len(rows_res)) 
+        print('number of nb_edges_0_rem =', nb_edges_0_rem)
+        print('number of edges_1_input =', len(edges_1_rem))
+        print('number of edges_1_remaining =', len(edges_1_rem))
+        print('density =', density) 
+    nb_0 = 0
+    nb_1 = 0
+    for _, degree in rows_rem: #number of ones counting 
+        nb_1 = nb_1 + degree
+    surface = len(rows_rem)*len(cols_rem)
+    nb_0 = surface - nb_1 #number of zeros counting 
+    if debug >= 2:
+        print('-' * 40)
+        print("nb_remaining_row:", len(rows_rem) )
+        print("number current zeros  = ", nb_0,"number current ones = ",nb_1, "current surface  = ", surface, "epsilon = ", epsilon)
+        print("current sparsity = ", nb_0/surface, "current density = ", nb_1/surface )
+        print('End current Stats (I will call AB_AB_E_c_r with rows_rem, cols_rem and edges_1_rem ')
+        print('-' * 40)
+        print()
+           
+    #sys.exit("Terminating program after KP col")    
+    return rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density 
+
+
+# ============================================================================ #
+#                                    SOLVING                                   #
+# ============================================================================ #
+
+
+def solve(path_to_data, model, epsilon=1.0, gamma=0.1, debug=0):
+    """
+    Function to solve the maximum biclique problem, this function reads the data,
+    create a LP model using the data and return a list of rows and a list of 
+    columns as a result. 
+    ARGUMENTS:
+    ----------
+    * path_to_data: the path to the csv file.
+    * model: the model to be use.
+    * epsilon: rate of zero deletion used in all greedy approaches 
+    * gamma: error tolerance (percentage of accepted zeros) in the final result submatrix
+    """
+    print(" DEBUG  = !!!!!!!!!!!!!!!!", debug)
+    obj_total =  0.0 
+    slack_total =  0.0 
+    total_error = 0.0 
+    # start reading input data
+    p = path_to_data
+    if p.lower().endswith('.txt'):
+        rows, cols, edges_1, row_names, col_names, df = get_data_txt_file(path_to_data)
+        # Get complement edges
+        edges_0 = get_complement_edges(len(rows), len(cols), edges_1)
+    elif p.lower().endswith('.csv'):
+        rows, cols, edges_0, edges_1, row_names, col_names, df = get_data(path_to_data) 
+    else:
+        raise ValueError('Input need to be a matrix csv file, or a text file with a specific layout')
+    
+    nb_eges_0 = len(edges_0)
+    nb_eges_1 = len(edges_1)
+    col_length = len(cols)
+    row_length = len(rows)
+    
+    if debug >= 1:
+            print('-' * 40)
+            if p.lower().endswith('.txt'):
+                print(" Input Data in txt files :")
+            if p.lower().endswith('.csv'):
+                print(" Input Data in csv files :")
+            print("Number Rows Data :", row_length )
+            print("Number Cols Data :", col_length )
+            print("Number Edges_1 :", len(edges_1))
+            print("Number Edges_0 :", len(edges_0))
+            if debug >= 2:
+                print(" Rows Data :", rows )
+                print(" Cols Data :", cols )
+                print(" Edges_1 :", edges_1)
+                print(" Edges_0 :", edges_0)
+                if debug == 3:
+                    print("Adjacency Matrix:\n", df)
+            print('-' * 40)
+    # end  reading input data
+
+    nbi_0 = 0
+    nbi_1 = 0
+    for _, degree in rows:
+        nbi_1 = nbi_1 + degree
+    nbi_0 = len(rows)*len(cols) - nbi_1
+    density = nbi_1/(len(rows) * len(cols))
+    print('Initial Stats')
+    print(f"input data = {path_to_data}")
+    print(f"model.name ={model}")
+    print("Size of current matrix : ", len(rows), "*", len(cols), "=", len(rows) * len(cols))
+    print("number input zeros  = ",nbi_0)     
+    print("number input ones = ",nbi_1)            
+    print("epsilon = ",epsilon, " gamma=", gamma)
+    print("Input sparsity = ", nbi_0/(len(rows) * len(cols)))
+    print("Input density = ", density, " (1-gamma) = ", (1-gamma))
+    print('End Initial Stats')
+    print('-' * 40)
+    print()
+    # end fetching input data
+    # start solving the problem  
+    #testing = 1
+    #if testing !=1:
+    nb_edges_0 = len(edges_0)
+    model_name = "AB_E_r" # ?????????????????? why fixed 
+    rows_in = rows
+    cols_in = cols
+    edges_1_in = edges_1
+    nb_edges_0_in =  nb_edges_0 
+    row_names_in = row_names
+    col_names_in = col_names
+    if density < (1-gamma):
+        print('calling greedy approaches for zero deletion')
+        #sys.exit("Terminating program because not done EXIT 0")
+        i = 1
+        while density < 0.87:
+            print()
+            print("I am in the while loop with i=", i , "density=", density)
+            print()
+            rows_res, cols_res, edges_1_res, nb_edges_0_res, density = zero_deleter(rows_in, cols_in, row_names, col_names, edges_1_in, nb_edges_0_in, epsilon, debug)
+            rows_in = rows_res
+            cols_in = cols_res
+            edges_1_in = edges_1_res
+            nb_edges_0_in =  nb_edges_0_res
+            rows_res_in = [str(c) for c, _ in rows_in]
+            rows_res_in = [int(r) for r in rows_res_in]
+            row_names_in = [row_names[r] for r in rows_res_in]
+            cols_res_in = [str(c) for c, _ in cols_in]
+            cols_res_in = [int(r) for r in cols_res_in]
+            col_names_in = [col_names[r] for r in cols_res_in]
+            i+=1
+        else:
+            print("exit while loop. Density =", density, "is no longer less than ", 0.7, " i= ", i )
+            #cols_in_set = set(map(int, cols_in))
+            #rows_in_set = set(map(int, rows_in))
+            #row_names_in = [row_names[r] for r in rows_in]
+            #col_names_in = [col_names[c] for c in cols_in]
+            if debug >= 2: 
+                print('-' * 40)
+                print()
+                print(' End of greedy approaches')
+                print("rows_in =", rows_in)
+                print("cols_in =", cols_in)
+                print("edges_1_in =", edges_1_in)
+                print("row_names_in, =", row_names_in)
+                print("col_names_in, =", col_names_in)
+            #sys.exit("Terminating program in while loop and because of density. we printed the current data")  
+    #else: 
+    print('-' * 40)
+    print()
+    print(' Calling exact approaches for QB clique discovery with gamma =', gamma)
+    print('-' * 40)
+    print()
+    if debug >= 2: 
+            print(' Calling exact approaches for QB clique discovery with gamma =', gamma)
+            print('-' * 40)
+            print()
+            print(' Start exact approaches')
+            print("rows_in =", rows_in)
+            print("cols_in =", cols_in)
+            print("edges_1_in =", edges_1_in)
+            print("row_names_in =", row_names_in)
+            print("col_names_in =", col_names_in)
+    #sys.exit("Terminating program before calling exact exit 10 !!!!")  
+    rows_res, cols_res, density, nb_edges_1 = exact(model_name, rows_in, cols_in, row_names_in, col_names_in, edges_1_in, gamma, debug)
+    if debug >=0:
+        print('-' * 40)
+        print()
+        print('Exit from the exact  approach ',  model_name,' with gamma=', gamma, 'Found matrix with rows_res of lenght =',len(rows_res), ' and cols_res of lenght =',len(cols_res), 'and density =', density, 'and nb_edges_1 =', nb_edges_1)
+    if debug >=2:
+        print(" Remaining Rows  :", rows_res )
+        print(" Remaining  Cols  :", cols_res )
+        #sys.exit("Terminating program because not done EXIT -1 ")
+
+def exact(model_name, rows, cols, row_names, col_names, edges_1, gamma, debug):     
+    if model_name == 'AB_E':
+        model = AB_E(rows, cols, edges_1, gamma)
+    elif model_name == 'AB_E_h':
+        model = AB_E_h(rows, cols, edges_1, gamma)
+    elif model_name == 'AB_E_r':
+        model = AB_E_r(rows, cols, edges_1, gamma)
+    elif model_name == 'AB_V':
+        model = AB_V(rows, cols, edges_1, gamma)
+    elif model_name == 'AB_V_h':
+        model = AB_V_h(rows, cols, edges_1, gamma)
+    elif model_name == 'max_Ones':
+        model = max_Ones(rows, cols, edges_1, gamma)
+    elif model_name == 'max_Ones_comp':
+        model = max_Ones_comp(rows, cols, edges_1, gamma)
+    # elif model_name == 'KP_QBr':
+    #     model = KP_QBr(rows, col_length, nb_eges_0, epsilon)
+    # elif model_namel == 'KP_QBc':
+    #     model = KP_QBc(cols, row_length, nb_eges_0, epsilon)  
+    #create the model using one of the previously implemented models
+
+    #solve the model using GUROBI_CMD. it is possible for the solver to take a long time
+    #the time limit is set to 1 hour. The solver will be automatically stop after 1h.
+    #model.solve(PULP_CBC_CMD(msg=True, timeLimit= 3600, gapRel = 0.5),)
+    model.solve(GUROBI_CMD(msg=False, timeLimit= 600)#, options=[("Heuristics", 0.0), ("NoRelHeurTime", 0)] )#,gapRel=0.3)
+    )
+    #model.solve(GUROBI_CMD(msg=False, timeLimit= 60, MIPGap = 0.03),)
+    # Check status
+    if model.status == 9:  # GRB.TIME_LIMIT:
+        print("Gurobi stopped due to time limit!")
+    print("Model is . Exporting LP file for debugging...")
+    model.writeLP("debug_model_row.lp")
+    print(f"Model status: {LpStatus[model.status]}")
+    if model.status == -1:
+         print("Model is infeasible. Exporting LP file for debugging...")
+         model.writeLP("debug_model.lp")
+         sys.exit("Terminating program due to infeasibility. EXIT 1")
+    print_log_output(model)
+   #if debug >= 1:
+       # print('I solved model name =', model.name, "Reading and analyse of the obtained results")
     #read the results from the solver
     rows_res = []
     cols_res = []
@@ -1384,9 +1166,7 @@ def solve(path_to_data, model, epsilon=0.1):
     cols_del_name = []
     obj_total =  0.0
 
-    if model_name == 'AB_V'  or model_name == 'AB_V_h'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_r' or model_name == 'AB_E_c_r': 
-        print('I solved model name =', model.name)
-        for var in model.variables():
+    for var in model.variables():
             #if var.varValue == 1:
             if var.varValue !=  0:
                 # if var.name[:10] == "obj_colsum":
@@ -1409,80 +1189,6 @@ def solve(path_to_data, model, epsilon=0.1):
                     rows_res = rows_res + [var.name[4:]]
                 elif var.name[:3] == "col":
                     cols_res = cols_res + [var.name[4:]]
-    else:
-        print('I solved model name =', model.name)
-        if model.name == "row_knapsack_problem":
-            for var in model.variables():
-                #print('row_knapsack var name =', var.name,'var value =', var.varValue)
-                if var.varValue == 0:
-                    if var.name[:3] == "row":
-                        rows_res = rows_res + [var.name[4:]]
-                    elif var.name[:3] == "col":
-                #    cols_res = cols_res + [var.name[4:]]
-                        print('Something wrong. var name =', var.name,'var value =', var.varValue)
-                        return model 
-                else: # i.e. var.varValue == 1:
-                    if var.name[:3] == "row":
-                        rows_del = rows_del + [var.name[4:]]
-                    elif var.name[:3] == "col":
-                        #cols_del = cols_del + [var.name[4:]]
-                        print('Something wrong. var name =', var.name,'var value =', var.varValue)
-                        return model 
-        if model.name == "column_knapsack_problem":
-            for var in model.variables():
-                #print('column_knapsack var name =', var.name,'var value =', var.varValue)
-                if var.varValue == 0:
-                    if var.name[:3] == "col":
-                        cols_res = cols_res + [var.name[4:]]
-                    elif var.name[:3] == "row":
-                #    cols_res = cols_res + [var.name[4:]]
-                        print('Something wrong. var name =', var.name,'var value =', var.varValue)
-                        return model 
-                else: # i.e. var.varValue == 1:
-                    if var.name[:3] == "col":
-                        cols_del = cols_del + [var.name[4:]]
-                    elif var.name[:3] == "row":
-                        #cols_del = cols_del + [var.name[4:]]
-                        print('Something wrong. var name =', var.name,'var value =', var.varValue)
-                        return model 
-                    
-
-    # if obj_total != 0.0: 
-    #     total_error = -slack_total/obj_total
-    
-    # print()
-    # print('-' * 40)
-    # print('obj_total=', obj_total)
-    # print('slack_total=', slack_total)
-    # print('total_error=', total_error)
-    # print()
-    # print('-' * 40)
-    # #
-    if model.name == "row_knapsack_problem":
-         cols_res = [str(c) for c, _ in cols]
-         cols_res = [int(c) for c in cols_res]
-         cols_res_name = [col_names[c] for c in cols_res]
-    if model.name == "column_knapsack_problem":
-         rows_res = [str(c) for c, _ in rows]
-         rows_res = [int(r) for r in rows_res]
-         rows_res_name = [row_names[r] for r in rows_res]
-    
-
-    print()
-    #print("\n-- Debugging Step: -after row KP solving **** --")
-    # print('rows=', rows)
-    # print('cols=', cols)
-    print('len_rows_res=', len(rows_res))
-    print('row_res=', len(rows_res))
-    print('len_rows_del=', len(rows_del))
-    print('rows_del=',len(rows_del))
-    print('len_cols_res=', len(cols_res))
-    print('cols_res=', len(cols_res))
-    print('len_cols_del=', len(cols_del))
-    print('cols_del=', len(cols_del))
-    print()
-    print('-' * 40)
-    
 
     if not rows_res:  # Equivalent to checking len(rows_res) == 0
        print("matrix degenerated (all rows or all columns have been deleted)")
@@ -1507,22 +1213,65 @@ def solve(path_to_data, model, epsilon=0.1):
     # rows_res = [ r.varValue for r in rows_res if isinstance(r, LpVariable) and r.varValue is not None]
     # cols_res = [ c.varValue for c in cols_res if isinstance(c, LpVariable) and c.varValue is not None]
 
+    rows_res = [str(c) for c in rows_res]
     rows_res = [int(r) for r in rows_res]
+    cols_res = [str(c) for c in cols_res]
     cols_res = [int(c) for c in cols_res]
-    rows_res_name = [row_names[r] for r in rows_res]
-    cols_res_name = [col_names[c] for c in cols_res]
+    print(" I am in exact ")
+    print("rows_res, =", rows_res)
+    print("cols_res, =", cols_res)
+    print("row_names, =", row_names)
+    print("col_names, =", col_names)
 
+    # # Convert from 1-based to 0-based indices
+    # row_names_res = [row_names[r - 1] for r in rows_res if 1 <= r <= len(row_names)]
+    # col_names_res = [col_names[c - 1] for c in cols_res if 1 <= c <= len(col_names)]
+    # Convert from 1-based to 0-based indices carefully
+    # row_names_res = [row_names[r - 1] for r in rows_res if 0 < r <= len(row_names)]
+    # col_names_res = [col_names[c - 1] for c in cols_res if 0 < c <= len(col_names)]
+
+    # Convert from 0-based to the original row/column names
+    row_names_res = [row_names[r] for r in rows_res if 0 <= r < len(row_names)]
+    col_names_res = [col_names[c] for c in cols_res if 0 <= c < len(col_names)]
+
+    # Print results
+    print("row_names_res =", row_names_res)
+    print("col_names_res =", col_names_res)
+
+    #rows_res_name = [row_names[r] for r in rows_res]
+    #cols_res_name = [col_names[c] for c in cols_res]
     print()
-    print('-' * 40)
-    print("Stats of the computed solution. Remaining rows and columns names =  ")
-    print(' number of row_res_name', len(rows_res_name), '  number of cols_res_name', len(cols_res_name))
-    row_length = len(rows_res)
-    col_length = len(cols_res)
-    print("size of the found matrix = row_length(",row_length, ") * col_length = (",col_length, ")= (", row_length*col_length, ") solution as row and column indices = ")
-    print('  number of row_res', len(rows_res))
-    print('  number of cols_res', len(cols_res))
+    if debug >= 2: 
+    #print("\n-- Debugging Step: -after row KP solving **** --")
+    # print('rows=', rows)
+    # print('cols=', cols)
+        print("\n-- Debugging Step: checking extracted solution after solving model**** --", model.name )
+        print('len_rows_res=', len(rows_res))
+        print('row_res=', rows_res)
+        print('len_rows_del=', len(rows_del))
+        print('rows_del=',len(rows_del))
+        print('len_cols_res=', len(cols_res))
+        print('cols_res=', cols_res)
+        print('len_cols_del=', len(cols_del))
+        print('cols_del=', len(cols_del))
+        print("nb row_names, =", len(row_names))
+        print("row_names_res =", row_names_res)
+        print("col_names_res =", col_names_res)
+        print(" nb col_names, =", len(col_names)) 
+        print()
+        print('-' * 40)
+    
+    # print()
+    # print('-' * 40)
+    # print("Stats of the computed solution. Remaining rows and columns names =  ")
+    # print(' number of row_res_name', len(rows_res_name), '  number of cols_res_name', len(cols_res_name))
+    # row_length = len(rows_res)
+    # col_length = len(cols_res)
+    # print("size of the found matrix = row_length(",row_length, ") * col_length = (",col_length, ")= (", row_length*col_length, ") solution as row and column indices = ")
+    # print('  number of row_res', len(rows_res))
+    # print('  number of cols_res', len(cols_res))
 
-    print("\n-- Debugging Step  -- Start of updating data ")
+    #print("\n-- Debugging Step  -- Start of updating data ")
     # print("****** exit   *********")
     # return rows_res, cols_res
     # print("****** exit   *********")
@@ -1543,41 +1292,34 @@ def solve(path_to_data, model, epsilon=0.1):
     # print(edges_1)
 
 
-    rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density  = update_data(rows, cols, edges_1, rows_res, cols_res)
-
-    print()
-    print('-' * 40)
-    print(f" We solved model = {model.name}", "epsilon =  ", epsilon)
+    rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density  = update_data(rows, cols, edges_1, rows_res, cols_res, debug) 
     nb_edges_1 = len(edges_1_rem)
-    print("Number of Remaining  Rows  :", len(rows_rem))
-    print("Number of Remaining number Columns :", len(cols_rem))
-    print("Remaining  number Edges_0 P:", nb_edges_0_rem, "Remaining  number Edges_1 :", nb_edges_1, "Density :", density )
-    #print("Remaining  Edges_1 after first KP :", edges_1_rem)
-    print('-' * 40)
-    print()
-    #nb_edges_0_rem = len(edges_0_rem)
+    if debug >=1:
+        print()
+        print('-' * 40)
+        print(f" results from updating data after solving model = {model.name}", " gamma =  ", gamma)
+        print("Number of Remaining  Rows  :", len(rows_rem))
+        print("Number of Remaining number Columns :", len(cols_rem))
+        print("Remaining  number Edges_0 P:", nb_edges_0_rem, "Remaining  number Edges_1 :", nb_edges_1, "Density :", density )
+        print('-' * 40)
+        print()
     nb_rows_rem = len(rows_rem) # - len(rows_del)
-    # nb_0 = 0
-    # nb_1 = 0
-    # for _, degree in rows_rem: #number of ones counting 
-    #     nb_1 = nb_1 + degree
-    # surface = len(rows_rem)*len(cols_rem)
-    # nb_0 = surface - nb_1 #number of zeros counting 
-    # print('-' * 40)
-    # print("nb_remaining_row_1:",  nb_rows_rem, "nb_remaining_row_2:", len(rows_rem) )
-    # print("number current zeros  = ", nb_0,"number current ones = ",nb_1, "current surface  = ", surface, "epsilon = ", epsilon)
-    # print("current sparsity = ", nb_0/surface, "current density = ", nb_1/surface )
-    # print('End current Stats')
-    # print('-' * 40)
-    # print()
-
-    if model_name == 'AB_V'  or model_name == 'AB_V_h'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_r' or model_name == 'AB_E_c_r': 
-          print('Exit from the exact  approches  and return rows_res, cols_res')
-          return rows_res, cols_res  
-            
-    #sys.exit("Terminating program  befre calling KP_QBc.")
+    # if model_name == 'AB_V'  or model_name == 'AB_V_h'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_h' or model_name == 'AB_E_r': 
+    if debug >=2:
+          print('-' * 40)
+          print()
+          print('Exit from the exact  approach ',  model_name,' with gamma=', gamma, 'Found matrix with rows_res of lenght =',len(rows_rem), ' and cols_res of lenght =',len(cols_rem), 'and density =', density)
+          if debug >= 2:
+                    print(" Density of the found matrix =  :", density )
+                    print(" Remaining Rows  :", rows_res )
+                    print(" Remaining  Cols  :", cols_res )
+                    print(" Remaining Rows with degree :", rows_rem )
+                    print(" Remaining  Cols with degree :", cols_rem )
+    return rows_rem, cols_rem, density, nb_edges_1    
+     
+    sys.exit("Terminating program  before calling KP_QBc.")
     model = KP_QBc(cols_rem, nb_rows_rem, nb_edges_0_rem, epsilon)
-    model.solve(GUROBI_CMD(msg=True, timeLimit= 600))
+    model.solve(GUROBI_CMD(msg=False, timeLimit= 600))
     # Check status
     if model.status == 9 : #GRB.TIME_LIMIT:
         print("Gurobi stopped due to time limit!")
@@ -1616,11 +1358,11 @@ def solve(path_to_data, model, epsilon=0.1):
     print('after col kp solution !!!!!!!!!!!! ')
     print(' number of cols_res =', len(cols_res))
     print(' number of  cols_del =', len(cols_del)) 
-    print(' number of  rows_res =', len(rows_res))
+    print(' number of  rows_rem =', len(rows_rem))
     print(' number of rows_del =', len(rows_del))
     #sys.exit("Terminating program due to inexpected end. EXIT after col KP ")
 
-    rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density = update_data(rows, cols, edges_1, rows_res, cols_res)
+    rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density = update_data(rows, cols, edges_1, rows_res, cols_res, debug) 
 
     print()
     print(f"model = {model.name}", "epsilon =  ", epsilon)
@@ -1649,14 +1391,14 @@ def solve(path_to_data, model, epsilon=0.1):
     print("nb_remaining_row:", len(rows_rem) )
     print("number current zeros  = ", nb_0,"number current ones = ",nb_1, "current surface  = ", surface, "epsilon = ", epsilon)
     print("current sparsity = ", nb_0/surface, "current density = ", nb_1/surface )
-    print('End current Stats (I will call AB_E with rows_rem, cols_rem and edges_1_rem ')
+    print('End current Stats (I will call AB_E_r with rows_rem, cols_rem and edges_1_rem ')
     print('-' * 40)
     print()
            
-    model = AB_E_c_r(rows_rem, cols_rem, edges_1_rem, epsilon=0.1)
+    model = AB_E_r(rows_rem, cols_rem, edges_1_rem, epsilon=0.1)
     #model = AB_V(rows_rem, cols_rem, edges_1_rem, epsilon=0.1)
 
-    model.solve(GUROBI_CMD(msg=True, timeLimit= 600))
+    model.solve(GUROBI_CMD(msg=False, timeLimit= 600))
     # Check status
     # if model.status == GRB.Status.TIME_LIMIT:
     #     print("Gurobi stopped due to time limit!")
@@ -1670,7 +1412,9 @@ def solve(path_to_data, model, epsilon=0.1):
          model.writeLP("debug_model.lp")
          sys.exit("Terminating program due to infeasibility. EXIT 8")
     print_log_output(model)
-    print(f"Reading and analyse of the obtained results")
+
+    if debug >=1:
+        print(f"Extracting of the computed results")
     #read the results from the solver
     rows_res = []
     cols_res = []
@@ -1682,7 +1426,7 @@ def solve(path_to_data, model, epsilon=0.1):
     cols_del_name = []
     obj_total =  0.0
 
-    if  model.name == 'AB_E' or model.name == 'AB_E_c_r' or model.name == 'AB_V': 
+    if  model.name == 'AB_E' or model.name == 'AB_E_r'  or model.name == 'AB_E_h' or model.name == 'AB_V': 
         print('I solved model name =', model.name)
         for var in model.variables():
             if var.name[:3] == "row" or var.name[:3] == "col":
@@ -1700,8 +1444,8 @@ def solve(path_to_data, model, epsilon=0.1):
                         cols_del = cols_del + [var.name[4:]]
     else:
         sys.exit("Terminating program due to inexpected end. EXIT 2 ")
-    if  model.name == 'AB_E' or  model.name == 'AB_E_c_r' or model.name == 'AB_V': 
-        rows_next, cols_next, edges_1_next, nb_edges_0_next, density = update_data(rows_rem, cols_rem, edges_1_rem, rows_res, cols_res)
+    if  model.name == 'AB_E' or  model.name == 'AB_E_r' or model.name == 'AB_V'  or model.name == 'AB_E_h': 
+        rows_next, cols_next, edges_1_next, nb_edges_0_next, density = update_data(rows_rem, cols_rem, edges_1_rem, rows_res, cols_res, debug)
         size = len(rows_next) * len(cols_next)
         print('-' * 40)
         print()
@@ -1751,7 +1495,7 @@ def solve(path_to_data, model, epsilon=0.1):
   
     return rows_res, cols_res # should be    rows_next, cols_next, edges_1_next, nb_edges_0_next, density !!! if AB_E after KPc and KPr
 
-def update_data(rows_data, cols_data, edges_1, rows_res, cols_res):
+def update_data(rows_data, cols_data, edges_1, rows_res, cols_res, debug):
     #updates  rows_data, cols_data, edges_1 and returs them in rows_rem, cols_rem, edges_1_rem. To compute that we use rows_del, cols_del, rows_res, cols_res information
     # first step
     # Convert rows_del to a set for faster lookup
@@ -1764,12 +1508,6 @@ def update_data(rows_data, cols_data, edges_1, rows_res, cols_res):
 
     cols_res_set = set(map(int, cols_res))
     rows_res_set = set(map(int, rows_res))
-    # print("\n-- Update Debugging Step: input rows_col_del_sets --")
-    # print("rows_del_set =", rows_del_set)
-    # print("cols_del_set =", cols_del_set)
-    # print("\n-- Update Debugging Step: input rows_col_remaining_sets --")
-    # print("rows_res_set =", rows_res_set) 
-    # print("cols_res_set =", cols_res_set)
 
     # Step 1: Compute deleted edges (edges connected to rows or cols in rows_del_set and cols_del_set)
     #edges_0_del= [edge for edge in edges_0 if edge[0] in rows_del_set or edge[1] in cols_del_set]
@@ -1786,15 +1524,29 @@ def update_data(rows_data, cols_data, edges_1, rows_res, cols_res):
     #print("\n-- Debugging Step: Remaining Edges --")
     # print("Remainig Edges_0 =",  edges_0_rem)
     #print("Remainig edges_1_rem =",  len(edges_1_rem))
-
+    if debug >= 2:
+        print("\n-- Update Debugging Step 1 : input data  and first updates --")
+    # print("rows_del_set =", rows_del_set)
+    # print("cols_del_set =", cols_del_set)
+    # print("\n-- Update Debugging Step: input rows_col_remaining_sets --")
+        print("rows_data =", rows_data) 
+        print("cols_data =", cols_data) 
+        print("edges 1 =", edges_1)  
+        print("rows_res_set =", rows_res_set) 
+        print("cols_res_set =", cols_res_set)
+        print("  edges_1_del  =",  edges_1_del) 
+        print("  edges_1_rem  =",  edges_1_rem)
 
  # Step 3: Update column degrees in cols_data
     col_degree_map = {col: degree for col, degree in cols_data}
     row_degree_map = {row: degree for row, degree in rows_data}
     # print("input cols_data_degree_map =", col_degree_map)
     # print("input rows_data_degree_map =", row_degree_map)
-
-
+    if debug >= 2:
+        print("\n-- Update Debugging Step 2 : input data  and later  updates --")
+        print()
+        print("col_degree_map =", col_degree_map) 
+        print("row_degree_map =", row_degree_map) 
     # Reduce the count of rows/cols degrees based on removed edges 1 
     for row, col in edges_1_del :  # Loop only through removed edges
         row_degree_map[row] = max(0, row_degree_map[row] - 1)  # Reduce degree only if that row was involved
@@ -1818,10 +1570,22 @@ def update_data(rows_data, cols_data, edges_1, rows_res, cols_res):
     nb_edges_1_rem = sum(degree for _, degree in rows_rem)
     size = row_rem_length * col_rem_length
     nb_edges_0_rem = size - nb_edges_1_rem
-    if size == 0:
-        sys.exit("Terminating program due to matrix degeneration EXIT 2. row_rem_length=", row_rem_length,"col_rem_length =", col_rem_length)
     density = nb_edges_1_rem/size
-    print("Stats in updata_data : row_rem_length =",row_rem_length,"col_rem_length =",col_rem_length, "nb_edges_0_rem=", nb_edges_0_rem, "nb_edges_1_rem=", nb_edges_1_rem, " !!!!! density =", density)
+    if debug >= 2:
+        print("\n-- Update Debugging Step 3 : input data  and later  updates --")
+        print()
+        print("col_degree_map reduced =", col_degree_map) 
+        print("row_degree_map reduced =", row_degree_map) 
+        print("cols_rem   =", cols_rem ) 
+        print("rows_rem   =", rows_rem ) 
+        print(" nb_edges_1_rem   =", nb_edges_1_rem ) 
+        print(" nb_edges_0_rem   =", nb_edges_0_rem )
+        print("row_rem_length=", row_rem_length,"col_rem_length =", col_rem_length)
+        print("Stats in updata_data : row_rem_length =",row_rem_length,"col_rem_length =",col_rem_length, "nb_edges_0_rem=", nb_edges_0_rem, "nb_edges_1_rem=", nb_edges_1_rem, " !!!!! density =", density)
+        print()
+    if size == 0:
+        sys.exit("Terminating program due to matrix degeneration EXIT 2.")
+
 
     #rows_last = [tup for tup in rows_rem if tup[0] in rows_res_set] # ??? should be  rows_last = rows_res 
     #edges_0_row_last = [edge for edge in edges_0_row_rem if edge[0] in rows_rem]
@@ -1924,13 +1688,13 @@ def update_data_first(rows_data, cols_data, edges_0, edges_1, rows_del, cols_del
 
 
   
-def get_data(path:str, model):
+def get_data(path:str):
 
     rows_data = []
     cols_data = []
     edges_0 = []
     edges_1 = []
-    model_name = model
+    #model_name = model
     df = pd.read_csv(path, header=0 ,index_col=0 )
     df[df == -1] = 0
 
@@ -1952,7 +1716,7 @@ def get_data(path:str, model):
     edges_0 = list(df[df == 0].stack().index)
 
     '''
-    if model_name == 'AB_V'  or model_name == 'AB_V_h'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_r' or model_name == 'AB_E_c_r':
+    if model_name == 'AB_V'  or model_name == 'AB_V_h'  or model_name == 'max_Surface' or model_name == 'max_Vertices' or model_name == 'max_Ones_comp'  or model_name == 'max_Ones' or model_name == 'AB_E' or model_name == 'AB_E_h' or model_name == 'AB_E_r':
 
         edges = list(df[df == 1].stack().index)
     else:
@@ -2026,7 +1790,7 @@ def get_complement_edges(num_row, num_col, edges):
 
 import pandas as pd
 
-def get_data_txt_file(path, model):
+def get_data_txt_file(path):
     with open(path, 'r') as file:  # Use 'with' to properly handle file closing
         content = file.readlines()
     
@@ -2087,20 +1851,22 @@ def print_log_output(prob):
     * prob: an solved LP model (pulp.LpProblem)
     """
     print()
-    print('-' * 40)
+    print('-' * 70)
     print('Stats')
-    print('-' * 40)
+    print('-' * 70)
     print()
-    print(f'Number variables: {prob.numVariables()}')
-    print(f'Number constraints: {prob.numConstraints()}')
+    print(f'I am print_log_output after model :', prob.name, f' Number variables: {prob.numVariables()}',f' Number constraints: {prob.numConstraints()}') 
+    #print(f'Number variables: {prob.numVariables()}')
+    #print(f'Number constraints: {prob.numConstraints()}')
     print()
-    print('Time:')
-    print(f'- (real) {prob.solutionTime}')
-    print(f'- (CPU) {prob.solutionCpuTime}')
+    print('Time:', f'- (real) {prob.solutionTime}', f'- (CPU) {prob.solutionCpuTime}') 
+    #print(f'- (real) {prob.solutionTime}')
+    #print(f'- (CPU) {prob.solutionCpuTime}')
     print()
 
     print(f'Solve status: {LpStatus[prob.status]}')
     print(f'Objective value: {prob.objective.value()}')
+    print('-' * 70)
 
     # print()
     # print('-' * 40)
@@ -2123,35 +1889,47 @@ def parse_arguments():
         '--filepath', dest='filepath', required=True, default='',
         help='Select the data',
     )
-    # argparser.add_argument(
-    #     '--model', dest='model', required=False, default='AB_V',
-    #     help='Select the model to use',
-    # )
+
     argparser.add_argument(
-        '--model', dest='model', required=False, default='AB_V_h',
+        '--model', dest='model', required=False, default='AB_E_r',
         help='Select the model to use',
     )
 
     argparser.add_argument(
-        '--epsilon', dest='epsilon', required=False, default=0.1, type=float,
-        help='Select the error rate value',
+        '--epsilon', dest='epsilon', required=False, default=1.0, type=float,
+        help='Select the zero deletion rate value',
     )
+
+    argparser.add_argument(
+        '--gamma', dest='gamma', required=False, default=0.1, type=float,
+        help='Select the error rate value (tolerance) ',
+    )
+
+
+    argparser.add_argument(
+        '--debug', nargs='?', required=False, const=1, type=int, default=0, 
+        help='Select the debug value  ',
+    )
+
+    #parser.add_argument('--debug', nargs='?', const=1, type=int, default=0)  
+
 
     arg = argparser.parse_args()
 
-    if arg.model not in ['König_V', 'König_E', 'AB_E', 'AB_E_r', 'AB_E_c_r','AB_V','AB_V_h','max_Ones','max_Ones_comp','max_Surface','max_Vertices','minDel_RC', 'minDel_Ones', 'KP_QBr', 'KP_QBc']:
+    if arg.model not in ['König_V', 'König_E', 'AB_E', 'AB_E_h', 'AB_E_r','AB_V','AB_V_h','max_Ones','max_Ones_comp','max_Surface','max_Vertices','minDel_RC', 'minDel_Ones', 'KP_QBr', 'KP_QBc']:
         argparser.print_help()
         sys.exit(1)
 
-    return (arg.filepath, arg.model, arg.epsilon)
+    return (arg.filepath, arg.model, arg.epsilon, arg.gamma, arg.debug)
 
 
 if __name__ == '__main__':
 
     # Read the arguments
-    file_path, selected_model, epsilon = parse_arguments()
+    file_path, selected_model, epsilon, gamma, debug = parse_arguments()
 
-    solve(file_path,selected_model,epsilon)
+
+    solve(file_path,selected_model,epsilon,gamma, debug)
 
 
 
