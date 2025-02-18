@@ -1,0 +1,211 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2639
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww20940\viewh13040\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs28 \cf0 (base) randonov@MAC-PYYNJ76WC0:~/Mirror/research_2025/workspace_quasibiclique$ python3 quasi_clique_new.py --filepath data/data1.csv --model  max_e_r --rate 0.7  --delta 0.1 --debug \
+3 --threshold 0.001\
+\
+ ****** Fixed density_threashold =  0.001\
+ DEBUG  = !!!!!!!!!!!!!!!! 3\
+----------------------------------------\
+ Input Data in csv files :\
+Number Rows Data : 10\
+Number Cols Data : 10\
+Number Edges_1 : 36\
+Number Edges_0 : 64\
+ Rows Data : [(0, 3), (1, 5), (2, 0), (3, 1), (4, 6), (5, 5), (6, 6), (7, 6), (8, 1), (9, 3)]\
+ Cols Data : [(0, 0), (1, 5), (2, 6), (3, 7), (4, 4), (5, 1), (6, 6), (7, 1), (8, 1), (9, 5)]\
+ Edges_1 : [(0, 6), (0, 7), (0, 8), (1, 2), (1, 3), (1, 4), (1, 6), (1, 9), (3, 9), (4, 1), (4, 2), (4, 3), (4, 4), (4, 6), (4, 9), (5, 1), (5, 2), (5, 3), (5, 5), (5, 6), (6, 1), (6, 2), (6, 3), (6, 4), (6, 6), (6, 9), (7, 1), (7, 2), (7, 3), (7, 4), (7, 6), (7, 9), (8, 3), (9, 1), (9, 2), (9, 3)]\
+ Edges_0 : [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 9), (1, 0), (1, 1), (1, 5), (1, 7), (1, 8), (2, 0), (2, 1), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (2, 7), (2, 8), (2, 9), (3, 0), (3, 1), (3, 2), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (4, 0), (4, 5), (4, 7), (4, 8), (5, 0), (5, 4), (5, 7), (5, 8), (5, 9), (6, 0), (6, 5), (6, 7), (6, 8), (7, 0), (7, 5), (7, 7), (7, 8), (8, 0), (8, 1), (8, 2), (8, 4), (8, 5), (8, 6), (8, 7), (8, 8), (8, 9), (9, 0), (9, 4), (9, 5), (9, 6), (9, 7), (9, 8), (9, 9)]\
+Adjacency Matrix:\
+    0  1  2  3  4  5  6  7  8  9\
+0  0  0  0  0  0  0  1  1  1  0\
+1  0  0  1  1  1  0  1  0  0  1\
+2  0  0  0  0  0  0  0  0  0  0\
+3  0  0  0  0  0  0  0  0  0  1\
+4  0  1  1  1  1  0  1  0  0  1\
+5  0  1  1  1  0  1  1  0  0  0\
+6  0  1  1  1  1  0  1  0  0  1\
+7  0  1  1  1  1  0  1  0  0  1\
+8  0  0  0  1  0  0  0  0  0  0\
+9  0  1  1  1  0  0  0  0  0  0\
+----------------------------------------\
+Initial Stats\
+Input data = data/data1.csv\
+model.name =max_e_r\
+Size of current matrix :  10 * 10 = 100\
+number input zeros  =  64\
+number input ones =  36\
+rate =  0.7  delta= 0.1\
+Input sparsity =  0.64\
+Input density =  0.36  density_threshold: =  0.001\
+End Initial Stats\
+----------------------------------------\
+\
+----------------------------------------\
+\
+  End of greedy approaches. Exit while loop. I did 0  iterations. Density :  0.36  > 0.001\
+----------------------------------------\
+rows_in = [(0, 3), (1, 5), (2, 0), (3, 1), (4, 6), (5, 5), (6, 6), (7, 6), (8, 1), (9, 3)]\
+cols_in = [(0, 0), (1, 5), (2, 6), (3, 7), (4, 4), (5, 1), (6, 6), (7, 1), (8, 1), (9, 5)]\
+edges_1_in = [(0, 6), (0, 7), (0, 8), (1, 2), (1, 3), (1, 4), (1, 6), (1, 9), (3, 9), (4, 1), (4, 2), (4, 3), (4, 4), (4, 6), (4, 9), (5, 1), (5, 2), (5, 3), (5, 5), (5, 6), (6, 1), (6, 2), (6, 3), (6, 4), (6, 6), (6, 9), (7, 1), (7, 2), (7, 3), (7, 4), (7, 6), (7, 9), (8, 3), (9, 1), (9, 2), (9, 3)]\
+row_names_in, = Index(['r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7', 'r8', 'r9', 'r10'], dtype='object')\
+col_names_in, = Index(['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10'], dtype='object')\
+----------------------------------------\
+\
+ Calling exact approaches for QB clique discovery with delta = 0.1\
+----------------------------------------\
+\
+ Start exact approaches with :\
+rows_in = [(0, 3), (1, 5), (2, 0), (3, 1), (4, 6), (5, 5), (6, 6), (7, 6), (8, 1), (9, 3)]\
+cols_in = [(0, 0), (1, 5), (2, 6), (3, 7), (4, 4), (5, 1), (6, 6), (7, 1), (8, 1), (9, 5)]\
+edges_1_in = [(0, 6), (0, 7), (0, 8), (1, 2), (1, 3), (1, 4), (1, 6), (1, 9), (3, 9), (4, 1), (4, 2), (4, 3), (4, 4), (4, 6), (4, 9), (5, 1), (5, 2), (5, 3), (5, 5), (5, 6), (6, 1), (6, 2), (6, 3), (6, 4), (6, 6), (6, 9), (7, 1), (7, 2), (7, 3), (7, 4), (7, 6), (7, 9), (8, 3), (9, 1), (9, 2), (9, 3)]\
+row_names_in = Index(['r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7', 'r8', 'r9', 'r10'], dtype='object')\
+col_names_in = Index(['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10'], dtype='object')\
+\
+----------------------------------------\
+******** Solving model  ******** max_e_r  with delta =  0.1\
+ # rows_data = 10  # cols_data = 10  # edges = 36\
+row_threshold= 2\
+col_threshold= 2\
+\
+----------------------------------------\
+Set parameter Username\
+Set parameter TimeLimit to value 300\
+Set parameter LogFile to value "gurobi.log"\
+Using license file /Users/randonov/gurobi.lic\
+Academic license - for non-commercial use only - expires 2025-04-11\
+\
+Gurobi Optimizer version 11.0.1 build v11.0.1rc0 (mac64[arm] - Darwin 21.6.0 21H1320)\
+Copyright (c) 2024, Gurobi Optimization, LLC\
+\
+Read LP format model from file /var/folders/mg/by6f6n9d2j94g_lk3b9m7nfrjxgrsr/T/a7e1b63e4f9842a3a5326a321e769820-pulp.lp\
+Reading time = 0.00 seconds\
+maximize_sum: 94 rows, 56 columns, 384 nonzeros\
+\
+CPU model: Apple M2\
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads\
+\
+Optimize a model with 94 rows, 56 columns and 384 nonzeros\
+Model fingerprint: 0x1a36c0a8\
+Variable types: 36 continuous, 20 integer (20 binary)\
+Coefficient statistics:\
+  Matrix range     [3e-01, 2e+01]\
+  Objective range  [1e+00, 1e+00]\
+  Bounds range     [1e+00, 1e+00]\
+  RHS range        [2e+00, 2e+01]\
+Found heuristic solution: objective 3.0000000\
+Presolve removed 2 rows and 2 columns\
+Presolve time: 0.00s\
+Presolved: 92 rows, 54 columns, 342 nonzeros\
+Variable types: 0 continuous, 54 integer (54 binary)\
+Found heuristic solution: objective 17.0000000\
+\
+Root relaxation: objective 3.259893e+01, 36 iterations, 0.00 seconds (0.00 work units)\
+\
+    Nodes    |    Current Node    |     Objective Bounds      |     Work\
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time\
+\
+     0     0   32.59893    0   12   17.00000   32.59893  91.8%     -    0s\
+H    0     0                      30.0000000   32.59893  8.66%     -    0s\
+     0     0   32.59893    0   12   30.00000   32.59893  8.66%     -    0s\
+\
+Explored 1 nodes (36 simplex iterations) in 0.00 seconds (0.00 work units)\
+Thread count was 8 (of 8 available processors)\
+\
+Solution count 3: 30 17 3 \
+\
+Optimal solution found (tolerance 1.00e-04)\
+Best objective 3.000000000000e+01, best bound 3.000000000000e+01, gap 0.0000%\
+\
+Wrote result file '/var/folders/mg/by6f6n9d2j94g_lk3b9m7nfrjxgrsr/T/a7e1b63e4f9842a3a5326a321e769820-pulp.sol'\
+\
+Model is . Exporting LP file for debugging...\
+Model status: Optimal\
+\
+----------------------------------------------------------------------\
+Stats\
+\
+Print_log_output after model : max_e_r  Number variables: 56  Number constraints: 94\
+\
+Print_log_output after model : max_e_r  Time:  - (real) 0.012183904647827148 - (CPU) 0.012185958097688854\
+\
+Solve status: Optimal\
+Objective value: 30.0\
+----------------------------------------------------------------------\
+\
+\
+-- Debugging Step: checking extracted solution after solving model**** -- max_e_r\
+len_rows_res= 6\
+row_res= [1, 4, 5, 6, 7, 9]\
+len_rows_del= 0\
+rows_del= 0\
+len_cols_res= 6\
+cols_res= [1, 2, 3, 4, 6, 9]\
+len_cols_del= 0\
+cols_del= 0\
+nb row_names, = 10\
+row_names_res = ['r2', 'r5', 'r6', 'r7', 'r8', 'r10']\
+col_names_res = ['c2', 'c3', 'c4', 'c5', 'c7', 'c10']\
+ nb col_names, = 10\
+\
+----------------------------------------\
+\
+-- Update Debugging Step 1 : input data  and first updates --\
+rows_data = [(0, 3), (1, 5), (2, 0), (3, 1), (4, 6), (5, 5), (6, 6), (7, 6), (8, 1), (9, 3)]\
+cols_data = [(0, 0), (1, 5), (2, 6), (3, 7), (4, 4), (5, 1), (6, 6), (7, 1), (8, 1), (9, 5)]\
+edges 1 = [(0, 6), (0, 7), (0, 8), (1, 2), (1, 3), (1, 4), (1, 6), (1, 9), (3, 9), (4, 1), (4, 2), (4, 3), (4, 4), (4, 6), (4, 9), (5, 1), (5, 2), (5, 3), (5, 5), (5, 6), (6, 1), (6, 2), (6, 3), (6, 4), (6, 6), (6, 9), (7, 1), (7, 2), (7, 3), (7, 4), (7, 6), (7, 9), (8, 3), (9, 1), (9, 2), (9, 3)]\
+rows_res_set = \{1, 4, 5, 6, 7, 9\}\
+cols_res_set = \{1, 2, 3, 4, 6, 9\}\
+  edges_1_del  = [(0, 6), (0, 7), (0, 8), (3, 9), (5, 5), (8, 3)]\
+  edges_1_rem  = [(1, 2), (1, 3), (1, 4), (1, 6), (1, 9), (4, 1), (4, 2), (4, 3), (4, 4), (4, 6), (4, 9), (5, 1), (5, 2), (5, 3), (5, 6), (6, 1), (6, 2), (6, 3), (6, 4), (6, 6), (6, 9), (7, 1), (7, 2), (7, 3), (7, 4), (7, 6), (7, 9), (9, 1), (9, 2), (9, 3)]\
+\
+-- Update Debugging Step 2 : input data  and later  updates --\
+\
+col_degree_map = \{0: 0, 1: 5, 2: 6, 3: 7, 4: 4, 5: 1, 6: 6, 7: 1, 8: 1, 9: 5\}\
+row_degree_map = \{0: 3, 1: 5, 2: 0, 3: 1, 4: 6, 5: 5, 6: 6, 7: 6, 8: 1, 9: 3\}\
+\
+-- Update Debugging Step 3 : input data  and later  updates --\
+\
+col_degree_map reduced = \{0: 0, 1: 5, 2: 6, 3: 6, 4: 4, 5: 0, 6: 5, 7: 0, 8: 0, 9: 4\}\
+row_degree_map reduced = \{0: 0, 1: 5, 2: 0, 3: 0, 4: 6, 5: 4, 6: 6, 7: 6, 8: 0, 9: 3\}\
+cols_rem   = [(1, 5), (2, 6), (3, 6), (4, 4), (6, 5), (9, 4)]\
+rows_rem   = [(1, 5), (4, 6), (5, 4), (6, 6), (7, 6), (9, 3)]\
+ nb_edges_1_rem   = 30\
+ nb_edges_0_rem   = 6\
+row_rem_length= 6 col_rem_length = 6\
+Stats in updata_data : row_rem_length = 6 col_rem_length = 6 nb_edges_0_rem= 6 nb_edges_1_rem= 30  !!!!! density = 0.8333333333333334\
+\
+\
+----------------------------------------\
+ results from updating data after solving model = max_e_r  delta =   0.1\
+Number of Remaining  Rows  : 6\
+Number of Remaining number Columns : 6\
+Remaining  number Edges_0 P: 6 Remaining  number Edges_1 : 30 Density : 0.8333333333333334\
+----------------------------------------\
+\
+----------------------------------------\
+\
+Exit from the exact  approach  max_e_r  with delta= 0.1 Found matrix with rows_res of lenght = 6  and cols_res of lenght = 6 and density = 0.8333333333333334\
+ Density of the found matrix =  : 0.8333333333333334\
+ Remaining Rows  : [1, 4, 5, 6, 7, 9]\
+ Remaining  Cols  : [1, 2, 3, 4, 6, 9]\
+ Remaining Rows with degree : [(1, 5), (4, 6), (5, 4), (6, 6), (7, 6), (9, 3)]\
+ Remaining  Cols with degree : [(1, 5), (2, 6), (3, 6), (4, 4), (6, 5), (9, 4)]\
+----------------------------------------\
+\
+Exit from the exact approach  max_e_r  with delta= 0.1 Found matrix of size : ( 6 ,  6 ) and density = 0.8333333333333334 and # of ones = 30\
+ Remaining Rows  : [(1, 5), (4, 6), (5, 4), (6, 6), (7, 6), (9, 3)]\
+ Remaining  Cols  : [(1, 5), (2, 6), (3, 6), (4, 4), (6, 5), (9, 4)]\
+\
+----------------------------------------------------------------------\
+ End of computations for :    Input = data/data1.csv,   Model =max_e_r  Quasi-biclique error  =0.1\
+ Number of iterations in greedy approach :  0  with zero deletion rate :  0.7 and threshold :  0.001\
+ Computed density :  0.8333333333333334  Number computed ones: 30\
+ Size of Remaining matrix : ( 6 , 6 )\
+ Remaining Rows last : [1, 4, 5, 6, 7, 9]\
+ Remaining  Cols  last : [1, 2, 3, 4, 6, 9]\
+(base) randonov@MAC-PYYNJ76WC0:~/Mirror/research_2025/workspace_quasibiclique$ }
