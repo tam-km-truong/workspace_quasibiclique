@@ -34,14 +34,14 @@ from pulp import (
 )
 
 
-def max_v(rows_data, cols_data, edges, rate):
+def max_v(rows_data, cols_data, edges, delta):
     """
     Arguments:
     ----------
     rows_data: list of tuples (row, degree) of rows in the matrix.
     cols_data: list of tuples (col, degree) of columns in the matrix.
     edges: list of tuples (row, col) corresponding to the ones of the matrix.
-    rate: float, error tolerance for density constraints.
+    rho: float, error tolerance for density constraints.
 
     Returns:
     --------
@@ -49,9 +49,11 @@ def max_v(rows_data, cols_data, edges, rate):
         The ILP model.
     """
     # FORCING 
-    #rate = 0.0
+    #rho = 0.0
     # FORCING 
-
+    Big_R = len(rows_data) + 1
+    Big_C = len(cols_data) + 1
+    Big_M= Big_R+Big_C 
 
     model = LpProblem(name="max_v", sense=LpMaximize)
 
@@ -61,11 +63,10 @@ def max_v(rows_data, cols_data, edges, rate):
                     lowBound=0, upBound=1), degree) for row, degree in rows_data}
     lpCols = {col: (LpVariable(f'col_{col}', cat='Integer',
                                lowBound=0, upBound=1), degree) for col, degree in cols_data}
-    lpSum_row = {row: (LpVariable(f'sumRow_{row}', cat='Continuous')) for row, _ in rows_data}
-    lpSum_col= {col: (LpVariable(f'sumCol_{col}', cat='Continuous')) for col, _ in cols_data}
-    lpSlack_row = {row: (LpVariable(f'slackRow_{row}', cat='Continuous')) for row, _ in rows_data}
-    lpSlack_col= {col: (LpVariable(f'slackCol_{col}', cat='Continuous')) for col, _ in cols_data}
-
+    #lpSum_row = {row: (LpVariable(f'sumRow_{row}', cat='Integer',lowBound=0, upBound=Big_C)) for row, _ in rows_data}
+    #lpSum_col= {col: (LpVariable(f'sumCol_{col}', cat='Integer',lowBound=0, upBound=Big_R)) for col, _ in cols_data}
+    #lpSlack_row = {row: (LpVariable(f'slackRow_{row}', cat='Continuous')) for row, _ in rows_data}
+    #lpSlack_col= {col: (LpVariable(f'slackCol_{col}', cat='Continuous')) for col, _ in cols_data}
     #obj_rowsum =  LpVariable(f"obj_rowsum", cat=LpContinuous)
     #obj_colsum =  LpVariable(f"obj_colsum", cat=LpContinuous)
 
@@ -96,21 +97,23 @@ def max_v(rows_data, cols_data, edges, rate):
     #     model += (lpRows[row][0]+lpCols[col][0] -1 <= lpCells[(row, col)][0]), f'cell_{row}_{col}_4'
     #just for testing     
     # Add row density constraints
-    #__row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, rate)
-    #__col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, rate)
-    __row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_row, lpSlack_row, rate)
-    __col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_col, lpSlack_col, rate)
+    #__row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, rho)
+    #__col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, rho)
+    # __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_row, lpSlack_row, rho)
+    # __col_density(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_col, lpSlack_col, rho)
+    __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, delta)
+    __col_density(rows_data, cols_data, edges, model, lpRows, lpCols, delta)
 
     return model 
 
-def AB_V_h(rows_data, cols_data, edges, rate):
+def AB_V_h(rows_data, cols_data, edges, rho):
     """<
     Arguments:
     ----------
     rows_data: list of tuples (row, degree) of rows in the matrix.
     cols_data: list of tuples (col, degree) of columns in the matrix.
     edges: list of tuples (row, col) corresponding to the ones of the matrix.
-    rate: float, error tolerance for density constraints.
+    rho: float, error tolerance for density constraints.
 
     Returns:
     --------
@@ -146,10 +149,10 @@ def AB_V_h(rows_data, cols_data, edges, rate):
     model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
     model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
     # Add row density constraints
-    #__row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, rate)
-    #__col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, rate)
-    __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, rate)
-    __col_density(rows_data, cols_data, edges, model, lpRows, lpCols, rate)
+    #__row_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, rho)
+    #__col_density_iff(rows_data, cols_data, edges, model, lpRows, lpCols, rho)
+    __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, rho)
+    __col_density(rows_data, cols_data, edges, model, lpRows, lpCols, rho)
 
     return model 
 
@@ -253,6 +256,9 @@ def max_e_h(rows_data, cols_data, edges, delta):
     Goal : compute heuristically a good solution to be used as warm start 
     Particularities : no quadratic variables
     """
+    Big_R = len(rows_data) + 1
+    Big_C = len(cols_data) + 1
+    Big_M= Big_R+Big_C 
     model = LpProblem(name="max_e_h", sense=LpMaximize)
 
     # Variables for rows and columns
@@ -261,8 +267,8 @@ def max_e_h(rows_data, cols_data, edges, delta):
                     lowBound=0, upBound=1), degree) for row, degree in rows_data}
     lpCols = {col: (LpVariable(f'col_{col}', cat='Integer',
                                lowBound=0, upBound=1), degree) for col, degree in cols_data}
-    lpSum_row = {row: (LpVariable(f'sumRow_{row}', cat='Continuous',lowBound=0)) for row, _ in rows_data}
-    lpSum_col= {col: (LpVariable(f'sumCol_{col}', cat='Continuous',lowBound=0)) for col, _ in cols_data}
+    lpSum_row = {row: (LpVariable(f'sumRow_{row}', cat='Integer',lowBound=0, upBound=Big_C)) for row, _ in rows_data}
+    lpSum_col= {col: (LpVariable(f'sumCol_{col}', cat='Integer',lowBound=0, upBound=Big_R)) for col, _ in cols_data}
     #lpSlack_row = {row: (LpVariable(f'slackRow_{row}', cat='Continuous')) for row, _ in rows_data}
     #lpSlack_col= {col: (LpVariable(f'slackCol_{col}', cat='Continuous')) for col, _ in cols_data}
 
@@ -280,15 +286,15 @@ def max_e_h(rows_data, cols_data, edges, delta):
     #
     model += lpSum(lpSum_row) + lpSum(lpSum_col), "max_sum_rows_columns" 
     # Constraints for row and column thresholds
-    #row_threshold = 2
-    #col_threshold = 2
-    #model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
-    #model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
+    row_threshold = 2
+    col_threshold = 2
+    model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
+    model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
     #model += obj_rowsum == lpSum(lpSum_row), "obj_sum_row" # why ????
     #model += obj_colsum == lpSum(lpSum_col), "obj_sum_col" # why ???? 
     # Add row density constraints
-    #__row_density(rows_data, cols_data, edges, model, lpRows, lpCols, rate)
-    #_col_density(rows_data, cols_data, edges, model, lpRows, lpCols, rate)
+    #__row_density(rows_data, cols_data, edges, model, lpRows, lpCols, rho)
+    #_col_density(rows_data, cols_data, edges, model, lpRows, lpCols, rho)
 
     __row_density_h(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_row, delta)
     __col_density_h(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_col, delta)
@@ -348,8 +354,8 @@ def max_e_h_slack(rows_data, cols_data, edges, delta):
     model += obj_rowsum == lpSum(lpSum_row), "obj_sum_row" # why ????
     model += obj_colsum == lpSum(lpSum_col), "obj_sum_col" # why ???? 
     # Add row density constraints
-    #__row_density(rows_data, cols_data, edges, model, lpRows, lpCols, rate)
-    #_col_density(rows_data, cols_data, edges, model, lpRows, lpCols, rate)
+    #__row_density(rows_data, cols_data, edges, model, lpRows, lpCols, rho)
+    #_col_density(rows_data, cols_data, edges, model, lpRows, lpCols, rho)
 
     __row_density_slack(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_row, lpSlack_row, delta)
     __col_density_slack(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_col, lpSlack_col, delta)
@@ -448,14 +454,14 @@ def max_e_r(rows_data, cols_data, edges, delta):
 
     return model 
 
-def AB_E_r_table(rows_data, cols_data, edges, rate):
+def AB_E_r_table(rows_data, cols_data, edges, rho):
     """
     Arguments:
     ----------
     rows_data: list of tuples (row, degree) of rows in the matrix.
     cols_data: list of tuples (col, degree) of columns in the matrix.
     edges: list of tuples (row, col) corresponding to the ones of the matrix.
-    rate: float, error tolerance for density constraints.
+    rho: float, error tolerance for density constraints.
 
     Returns:
     --------
@@ -465,7 +471,7 @@ def AB_E_r_table(rows_data, cols_data, edges, rate):
     This is an improved model from Chnag et al. 
     """
     # TEMP FORCING - to be canceled 
-    #rate=0.1
+    #rho=0.1
     # FORCING - to be canceled 
 
     model = LpProblem(name="max_e_r", sense=LpMaximize)
@@ -534,8 +540,8 @@ def AB_E_r_table(rows_data, cols_data, edges, rate):
 
 
     # Add row density constraints
-    __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, rate)
-    __col_density(rows_data, cols_data, edges, model, lpRows, lpCols, rate)
+    __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, rho)
+    __col_density(rows_data, cols_data, edges, model, lpRows, lpCols, rho)
 
     return model 
 
@@ -553,7 +559,7 @@ def __col_density_h(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_co
     model: LpProblem to add constraints to.
     lpRows: dict of row variables and their degrees.
     lpCols: dict of column variables and their degrees.
-    rate: float, error tolerance for density constraints.
+    rho: float, error tolerance for density constraints.
     """
     mu = 0.0001
     Big_R = len(rows_data) + 1
@@ -583,12 +589,12 @@ def __col_density_h(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_co
         # #    >= (lpCols[col][0]-1) * Big_M, f"col_slack_{col}" 
         # )
         #model += (lpSlack_col[col] >= (lpCols[col][0]-1) * Big_M, f"col_err_rate_1_{col}"
-            # lpSum_col[col] - (1 - rate) * lpSum(lpRows[row][0] for row, _ in rows_data) 
+            # lpSum_col[col] - (1 - rho) * lpSum(lpRows[row][0] for row, _ in rows_data) 
             # >= (lpCols[col][0]-1) * Big_M, f"col_err_rate_1_{col}"
         #)
 
 
-def __col_density_slack(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_col, lpSlack_col, rate):
+def __col_density_slack(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_col, lpSlack_col, rho):
     """
     Adds col density constraints to the model.
 
@@ -600,7 +606,7 @@ def __col_density_slack(rows_data, cols_data, edges, model, lpRows, lpCols, lpSu
     model: LpProblem to add constraints to.
     lpRows: dict of row variables and their degrees.
     lpCols: dict of column variables and their degrees.
-    rate: float, error tolerance for density constraints.
+    rho: float, error tolerance for density constraints.
     """
     mu = 0.0001
     Big_R = len(rows_data) + 1
@@ -621,11 +627,11 @@ def __col_density_slack(rows_data, cols_data, edges, model, lpRows, lpCols, lpSu
         #print(f"Sum of edge variables: {lpSum(lpRows[row][0] for row in col_edges)}")
         #print(f"Sum of row variables: {lpSum(lpRows[row][0] for  row, _ in rows_data)}")
         model += (lpSlack_col[col] == 
-            lpSum_col[col] - (1 - rate) * lpSum(lpRows[row][0] for row, _ in rows_data), f"col_slack_{col}" 
+            lpSum_col[col] - (1 - rho) * lpSum(lpRows[row][0] for row, _ in rows_data), f"col_slack_{col}" 
         #    >= (lpCols[col][0]-1) * Big_M, f"col_slack_{col}"
         )
         model += (lpSlack_col[col] >= (lpCols[col][0]-1) * Big_M, f"col_err_rate_1_{col}"
-            # lpSum_col[col] - (1 - rate) * lpSum(lpRows[row][0] for row, _ in rows_data) 
+            # lpSum_col[col] - (1 - rho) * lpSum(lpRows[row][0] for row, _ in rows_data) 
             # >= (lpCols[col][0]-1) * Big_M, f"col_err_rate_1_{col}"
         )
 
@@ -672,7 +678,7 @@ def __row_density_h(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_ro
         #     lpSlack_row[row] >= (lpRows[row][0]-1) * Big_M, f"row_err_rate_1_{row}"
         # )
 
-def __row_density_slack(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_row, lpSlack_row, rate):
+def __row_density_slack(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_row, lpSlack_row, rho):
     """
     Adds row density constraints to the model.
 
@@ -684,7 +690,7 @@ def __row_density_slack(rows_data, cols_data, edges, model, lpRows, lpCols, lpSu
     model: LpProblem to add constraints to.
     lpRows: dict of row variables and their degrees.
     lpCols: dict of column variables and their degrees.
-    rate: float, error tolerance for density constraints.
+    rho: float, error tolerance for density constraints.
     """
     mu = 0.0001
     Big_R = len(rows_data) + 1
@@ -702,7 +708,7 @@ def __row_density_slack(rows_data, cols_data, edges, model, lpRows, lpCols, lpSu
         #print(f"Sum of edge variables: {lpSum(lpCols[col][0] for col in row_edges)}")
         #print(f"Sum of column variables: {lpSum(lpCols[col][0] for  col, _ in cols_data)}")
         model += (lpSlack_row[row]==
-            lpSum_row[row] - (1 - rate) * lpSum(lpCols[col][0] for col, _ in cols_data), f"row_slack_{row}" 
+            lpSum_row[row] - (1 - rho) * lpSum(lpCols[col][0] for col, _ in cols_data), f"row_slack_{row}" 
            # >= (lpRows[row][0]-1) * Big_M, f"row_err_rate_1_{row}"
         )
 
@@ -749,7 +755,7 @@ def __col_density(rows_data, cols_data, edges, model, lpRows, lpCols, delta):
         # Constraint for col density lower bound
         
         # model += (
-        #     lpSum(lpRows[row][0] for row in col_edges) - (1 - rate) * lpSum(lpRows[row][0] for row, _ in rows_data) <=
+        #     lpSum(lpRows[row][0] for row in col_edges) - (1 - rho) * lpSum(lpRows[row][0] for row, _ in rows_data) <=
         #     -mu + lpCols[col][0] * Big_M
         # ), f"col_err_rate_0_{col}"
 
@@ -791,7 +797,7 @@ def __row_density(rows_data, cols_data, edges, model, lpRows, lpCols,  delta):
         # Constraint for row density lower bound
         
         # model += (
-        #     lpSum(lpCols[col][0] for col in row_edges) - (1 - rate) * lpSum(lpCols[col][0] for col, _ in cols_data) <=
+        #     lpSum(lpCols[col][0] for col in row_edges) - (1 - rho) * lpSum(lpCols[col][0] for col, _ in cols_data) <=
         #     -mu + lpRows[row][0] * Big_M
         # ), f"row_err_rate_0_{row}"
 
@@ -800,14 +806,14 @@ def __row_density(rows_data, cols_data, edges, model, lpRows, lpCols,  delta):
 # ============================================================================ #
 
 
-def max_Ones(rows_data, cols_data, edges, rate):
+def max_Ones(rows_data, cols_data, edges, rho):
     """
     ARGUMENTS:
     ----------
     * rows_data: list of the tuples (row, degree) of rows the matrix.
     * cols_data: list of the tuples (col, degree) of columns the matrix.
     * edges: list of tuple (row,col) corresponding to the zeros  of the matrix.
-    * rate: percentage of accepted zeros 
+    * rho: percentage of accepted zeros 
     """
 
     # ------------------------------------------------------------------------ #
@@ -848,21 +854,21 @@ def max_Ones(rows_data, cols_data, edges, rate):
         #if (row, col) in edges:
         model += (lpRows[row][0]+lpCols[col][0] -1 <= lpCells[(row, col)][0]), f'cell_{row}_{col}_3'
 
-    model += (lpSum([(1-cellValue)*lpvar for lpvar, cellValue in lpCells.values()]) <= rate *
+    model += (lpSum([(1-cellValue)*lpvar for lpvar, cellValue in lpCells.values()]) <= rho *
               lpSum([lpvar for lpvar, _ in lpCells.values()])), f'err_rate'
 
     return model
 
 
 
-def max_Ones_comp(rows_data, cols_data, edges, rate):
+def max_Ones_comp(rows_data, cols_data, edges, rho):
     """
     ARGUMENTS:
     ----------
     * rows_data: list of the tuples (row, degree) of rows the matrix.
     * cols_data: list of the tuples (col, degree) of columns the matrix.
     * edges: list of tuple (row,col) corresponding to the zeros  of the matrix.
-    * rate: percentage of accepted zeros 
+    * rho: percentage of accepted zeros 
     """
 
     # ------------------------------------------------------------------------ #
@@ -926,13 +932,13 @@ def max_Ones_comp(rows_data, cols_data, edges, rate):
         ), f"row_degre_{row}"
     #      #########################################
 
-    model += (lpSum([(1-cellValue)*lpvar for lpvar, cellValue in lpCells.values()]) <= rate *
+    model += (lpSum([(1-cellValue)*lpvar for lpvar, cellValue in lpCells.values()]) <= rho *
               lpSum([lpvar for lpvar, _ in lpCells.values()])), f'err_rate'
 
     return model
 
 
-def KP_QBr(rows_data, col_length, nb_edges_0, debug, rate=0.1):
+def KP_QBr(rows_data, col_length, nb_edges_0, debug, rho=0.1):
     """
     In this model, we use knapsack model
     ARGUMENTS:
@@ -940,14 +946,14 @@ def KP_QBr(rows_data, col_length, nb_edges_0, debug, rate=0.1):
     * rows_data: list of the tuples (row, degree) of rows the matrix.
     * col_length: number of columns 
     * nb_edges_0: number of zeros in the matrix. Coresponds to the capacity of the knapsack
-    * rate: percentage of non deleted zeros 
+    * rho: percentage of non deleted zeros 
     """
     row_length = len(rows_data) #number of rows 
     if debug >=2:
         total_degree_0 = sum((col_length - degree) for _, degree in rows_data)
         print('I am currently solving row KP_QBr with Input data : ***************')
         print()
-        print('edges =',nb_edges_0, "rate=", rate, "number of columns =", col_length, "number of rows =", row_length,"total_degree_0=", total_degree_0, "RHS=" , (1-rate)* nb_edges_0)
+        print('edges =',nb_edges_0, "rho=", rho, "number of columns =", col_length, "number of rows =", row_length,"total_degree_0=", total_degree_0, "RHS=" , (1-rho)* nb_edges_0)
     #print('rows_data =', rows_data)
         print('-' * 40) 
     
@@ -975,18 +981,18 @@ def KP_QBr(rows_data, col_length, nb_edges_0, debug, rate=0.1):
     # ------------------------------------------------------------------------ #
 
     # # delete  at least (1-eps)*nb_edges  zeros
-    model += lpSum([(col_length - degree) * lpvar for lpvar, degree in lpRows]) >=  rate * nb_edges_0, 'sensitivity'
+    model += lpSum([(col_length - degree) * lpvar for lpvar, degree in lpRows]) >=  rho * nb_edges_0, 'sensitivity'
 
     return model
 
-def KP_QBc(cols_data, row_length, nb_edges_0, debug, rate=0.1):
+def KP_QBc(cols_data, row_length, nb_edges_0, debug, rho=0.1):
     """
     In this model, we use knapsack model
     ARGUMENTS:
     ----------
     * rows_data: list of the tuples (row, degree) of rows the matrix.
     * edges: list of tuples (row, col) corresponding to the zeros of the matrix.
-    * rate: percentage of accepted undesired cell over accepted desired cell
+    * rho: percentage of accepted undesired cell over accepted desired cell
     """
     col_length = len(cols_data) # # of columns 
     if debug >=2:
@@ -995,7 +1001,7 @@ def KP_QBc(cols_data, row_length, nb_edges_0, debug, rate=0.1):
         print('I will solve column KP_QBc with Input data : ***************')
         print()
         print(" input cols_data =", cols_data)
-        print('nb_edges_0 =',nb_edges_0, "rate=", rate,"# of rows =", row_length, "# of columns=", col_length, "total_degree_0=", total_degree_0, "RHS=" , (1-rate)* nb_edges_0)
+        print('nb_edges_0 =',nb_edges_0, "rho=", rho,"# of rows =", row_length, "# of columns=", col_length, "total_degree_0=", total_degree_0, "RHS=" , rho* nb_edges_0)
     #print('cols_data =', cols_data)
         print('-' * 40)
     
@@ -1025,7 +1031,7 @@ def KP_QBc(cols_data, row_length, nb_edges_0, debug, rate=0.1):
     # Constraints
     # ------------------------------------------------------------------------ #
 
-    model += lpSum([(row_length - degree) * lpvar for lpvar, degree in lpCols]) >= rate * nb_edges_0, 'sensitivity'
+    model += lpSum([(row_length - degree) * lpvar for lpvar, degree in lpCols]) >= rho * nb_edges_0, 'sensitivity'
 
 
     return model
@@ -1035,7 +1041,7 @@ def KP_QBc(cols_data, row_length, nb_edges_0, debug, rate=0.1):
 #============================================================================
 
 
-def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, rate, debug): 
+def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, rho, debug, KP_time): 
     # here we first call KP by rows, then KP by columns 
     rows_res = []
     cols_res = []
@@ -1046,24 +1052,24 @@ def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, ra
     cols_del = []
     cols_del_name = []
     col_length = len(cols)
-    model = KP_QBr(rows, col_length, nb_edges_0, debug, rate)
+    model = KP_QBr(rows, col_length, nb_edges_0, debug, rho)
     #model.solve(PULP_CBC_CMD(msg=True, timeLimit= 3600, gapRel = 0.5),)
-    model.solve(GUROBI_CMD(msg=False, timeLimit= 300)#, options=[("Heuristics", 0.0), ("NoRelHeurTime", 0)] )#,gapRel=0.3)
+    model.solve(GUROBI_CMD(msg=False, timeLimit= 100)#, options=[("Heuristics", 0.0), ("NoRelHeurTime", 0)] )#,gapRel=0.3)
     )
     #model.solve(GUROBI_CMD(msg=True, timeLimit= 60, MIPGap = 0.03),)
     # Check status
     if model.status == 9:  # GRB.TIME_LIMIT:
         print("Gurobi stopped due to time limit!")
-    print("Model is . Exporting LP file for debugging...")
+        print("Model is . Exporting LP file for debugging...")
     model.writeLP("debug_model_row.lp")
     print(f"Model status: {LpStatus[model.status]}")
     if model.status == -1:
          print("Model is infeasible. Exporting LP file for debugging...")
          model.writeLP("debug_model.lp")
          sys.exit("Terminating program due to infeasibility. EXIT 1")
-    print_log_output(model)
+    KP_time =  print_log_output(model, KP_time)
     if debug >=1:
-        print('I solved model name =', model.name, "for iteration i = ", iter)
+        print('I solved model name =', model.name, "for iteration i = ", iter, "KP time =", KP_time, 'debug :',  debug)
     if model.name == "row_knapsack_problem":
             for var in model.variables():
                 #print('row_knapsack var name =', var.name,'var value =', var.varValue)
@@ -1080,47 +1086,38 @@ def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, ra
                         print('Something wrong. var name =', var.name,'var value =', var.varValue)
                         sys.exit("Terminating program. EXIT 7 ")
     if model.name == "column_knapsack_problem":
-            for var in model.variables():
-                #print('column_knapsack var name =', var.name,'var value =', var.varValue)
-                if var.varValue == 0:
-                    if var.name[:3] == "col":
-                        cols_res = cols_res + [var.name[4:]]
-                    elif var.name[:3] == "row":
-                #    cols_res = cols_res + [var.name[4:]]
-                        print('Something wrong. var name =', var.name,'var value =', var.varValue)
-                        return model 
-                else: # i.e. var.varValue == 1:
-                    if var.name[:3] == "col":
-                        cols_del = cols_del + [var.name[4:]]
-                    elif var.name[:3] == "row":
-                        #cols_del = cols_del + [var.name[4:]]
-                        print('Something wrong. var name =', var.name,'var value =', var.varValue)
-                        return model 
+            sys.exit("Terminating program. Non expected case column_knapsack_problem instead of row_knapsack_problem. Exit 10")  
     if model.name == "row_knapsack_problem":
          cols_res = [str(c) for c, _ in cols]
          cols_res = [int(c) for c in cols_res]
          cols_res_name = [col_names[c] for c in cols_res]
     if model.name == "column_knapsack_problem":
-         rows_res = [str(c) for c, _ in rows]
-         rows_res = [int(r) for r in rows_res]
-         rows_res_name = [row_names[r] for r in rows_res]
-
+         sys.exit("Terminating program. Non expected case column_knapsack_problem instead of row_knapsack_problem. Exit 10")  
+        #  rows_res = [str(c) for c, _ in rows]
+        #  rows_res = [int(r) for r in rows_res]
+        #  rows_res_name = [row_names[r] for r in rows_res]
     #rows_res = [str(c) for c, _ in rows_res]
     rows_res = [int(r) for r in rows_res]
     if len(rows_res) == 0: 
-         sys.exit("Terminating program due to matrix degeneration. All rows deleted. Increase the value of rate.")    
+         sys.exit("Terminating program due to matrix degeneration. All rows deleted. Increase the value of rho.")    
     rows_res_name = [row_names[r] for r in rows_res]
     #cols_res = [str(c) for c, _ in cols]
     #cols_res = [int(c) for c in cols_res]
     #cols_res_name = [col_names[c] for c in cols_res]
-    rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density  = update_data(rows, cols, edges_1, rows_res, cols_res, debug) 
+    rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density  = update_data(rows, cols, edges_1, rows_res, cols_res, debug)
+    nb_edges_1_rem = len(edges_1_rem)
     if debug >=0:
-        print()
         print('-' * 40)
-        print(f"Updated data after solving model = {model.name}", " Density :", density , " delta =  ", delta, "iteration =", iter)
-        nb_edges_1 = len(edges_1_rem)
-        print("Number of Remaining  Rows  :", len(rows_rem), "Number of Remaining Columns :", len(cols_rem))
-        print("Number of Remaining Edges_0 : ", nb_edges_0_rem, "Number of Remaining Edges_1 : ", nb_edges_1)
+        print(f"""
+        Updated data after iteration: {iter} . We solved KP model :  {model.name} with delta =  {delta} 
+        Found matrix of size : ({len(rows_rem)}, {len(cols_rem)}) and density : {density} and number of remaining ones : {nb_edges_1_rem}
+        """)
+    if debug >=1:
+        # print('-' * 40)
+        # print(f"Updated data after solving model = {model.name}", " Density :", density , " delta =  ", delta, "iteration =", iter, "debug =",  debug)
+        # nb_edges_1 = len(edges_1_rem)
+        # print("Number of Remaining  Rows  :", len(rows_rem), "Number of Remaining Columns :", len(cols_rem))
+        # print("Number of Remaining Edges_0 : ", nb_edges_0_rem, "Number of Remaining Edges_1 : ", nb_edges_1)
         if debug >= 2:
             print("Remaining  Rows before colling KP col :", rows_rem)
             print("Remaining Columns  before colling KP col :", cols_rem)
@@ -1128,14 +1125,13 @@ def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, ra
         print()
     nb_rows_rem = len(rows_rem)
        
-    model = KP_QBc(cols_rem, nb_rows_rem, nb_edges_0_rem, debug, rate) 
+    model = KP_QBc(cols_rem, nb_rows_rem, nb_edges_0_rem, debug, rho) 
 
-    model.solve(GUROBI_CMD(msg=False, timeLimit= 300))
+    model.solve(GUROBI_CMD(msg=False, timeLimit= 100))
     # Check status
     if model.status == 9 : #GRB.TIME_LIMIT:
         print("Gurobi stopped due to time limit!")
-    print("Gurobi Model Status:", model.status, "-", gp.GRB.Status.__dict__.get(model.status, "Unknown"))
-    print("Model.status is ", model.status, "Exporting LP file for debugging...")
+    #print("Gurobi Model Status:", model.status, "-", gp.GRB.Status.__dict__.get(model.status, "Unknown"))
     model.writeLP("debug_model_col.lp")
     print(f"Model status: {LpStatus[model.status]}")
     if model.status == -1:
@@ -1147,6 +1143,8 @@ def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, ra
         print('I solved model name =', model.name, "for iteration i = ", iter)
     cols_res=[]
     cols_del=[]
+    if model.name == "row_knapsack_problem":
+            sys.exit("Terminating program. Non expected case row_knapsack_problem instead of column_knapsack_problem Exit 11")  
     if model.name == "column_knapsack_problem":
             for var in model.variables():
                 if var.varValue == 0:
@@ -1165,52 +1163,31 @@ def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, ra
                         print('Something wrong. var name =', var.name,'var value =', var.varValue)
                         return model 
     # update  edges      
-    print_log_output(model) 
-    #if debug >= 2:
-        # print()
-        # print('-' * 40)           
-        # print('after col kp solution !!!!!!!!!!!! ')
-        # print(' number of cols_res =', len(cols_res))
-        # print(' number of  cols_del =', len(cols_del)) 
-        # print(' number of  rows_res =', len(rows_res))
-        # print('  rows_res =', rows_res) 
-        # print(' number of rows_del =', len(rows_del))
-        # print(' number of edges_1_rem =', len(edges_1_rem))
-        # print(' edges_1_rem =',edges_1_rem) 
-    #sys.exit("Terminating program due to inexpected end. EXIT after col KP ")
+    KP_time = print_log_output(model, KP_time) 
     if len(cols_res) == 0: 
          sys.exit("Terminating program due to matrix degeneration. All columns deleted.")    
     rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density = update_data(rows_rem, cols_rem, edges_1_rem, rows_res, cols_res, debug)
     if debug >=0:
+        print('-' * 40)
+        print(f"""
+        Updated data after iteration: {iter} . We solved KP model :  {model.name} with delta =  {delta} 
+        Found matrix of size : ({len(rows_rem)}, {len(cols_rem)}) and density : {density} and number of remaining ones : {nb_edges_1_rem}
+        """)
+    if debug >=2:
         print()
         print('-' * 40)
-        print(f"Updated data after solving model = {model.name}", " Density :", density , " delta =  ", delta, "iteration:", iter)
-        nb_edges_1_rem = len(edges_1_rem)
-        print("Number of Remaining  Rows  :", len(rows_rem), "Number of Remaining Columns :", len(cols_rem))
-        print("Number of Remaining Edges_0 : ", nb_edges_0_rem, "Number of Remaining Edges_1 : ", nb_edges_1_rem)
+        # print(f"Updated data after solving model = {model.name}", " Density :", density , " delta =  ", delta, "iteration:", iter)
+        # nb_edges_1_rem = len(edges_1_rem)
+        # print("Number of Remaining  Rows  :", len(rows_rem), "Number of Remaining Columns :", len(cols_rem))
+        # print("Number of Remaining Edges_0 : ", nb_edges_0_rem, "Number of Remaining Edges_1 : ", nb_edges_1_rem)
         if debug >= 2:
             print("Remaining  Rows before colling KP col :", rows_rem)
             print("Remaining Columns  before colling KP col :", cols_rem)
         print('-' * 40)
         print()
-    # nb_0 = 0
-    # nb_1 = 0
-    # for _, degree in rows_rem: #number of ones counting 
-    #     nb_1 = nb_1 + degree
-    # surface = len(rows_rem)*len(cols_rem)
-    # nb_0 = surface - nb_1 #number of zeros counting 
-    # if debug >= 2:
-    #     print('-' * 40)
-    #     print("nb_remaining_row:", len(rows_rem) )
-    #     print("number current zeros  = ", nb_0,"number current ones = ",nb_1, "current surface  = ", surface, "rate = ", rate)
-    #     print("current sparsity = ", nb_0/surface, "current density = ", nb_1/surface )
-    #     print('End current Stats (I will call AB_AB_E_c_r with rows_rem, cols_rem and edges_1_rem ')
-    #     print('-' * 40)
-    #     print()
-           
     #sys.exit("Terminating program after KP col") 
     # end of zero_cleaner  
-    return rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density 
+    return rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density, KP_time 
 
 
 # ============================================================================ #
@@ -1218,7 +1195,7 @@ def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, ra
 # ============================================================================ #
 
 
-def solve(path_to_data, model, rate=1.0, delta=0.1, density_threshold=0.87, debug=0):
+def solve(path_to_data, model, rho=1.0, delta=0.1, density_threshold=0.87, debug=0):
     """
     Function to solve the maximum biclique problem, this function reads the data,
     create a LP model using the data and return a list of rows and a list of 
@@ -1227,13 +1204,15 @@ def solve(path_to_data, model, rate=1.0, delta=0.1, density_threshold=0.87, debu
     ----------
     * path_to_data: the path to the csv file.
     * model: the model to be use.
-    * rate: rate of zero deletion used in all greedy approaches 
+    * rho: rho of zero deletion used in all greedy approaches 
     * delta: error tolerance (percentage of accepted zeros) in the final result submatrix
     """
     #density_threshold =  0.8
     print()
-    print(" ****** Fixed density_threashold = ", density_threshold )
+    print(" ****** Density_threashold = ", density_threshold )
     print(" DEBUG  = !!!!!!!!!!!!!!!!", debug)
+    KP_time = 0.0
+    QBC_time = 0.0  
     obj_total =  0.0 
     slack_total =  0.0 
     total_error = 0.0 
@@ -1282,10 +1261,10 @@ def solve(path_to_data, model, rate=1.0, delta=0.1, density_threshold=0.87, debu
     print('Initial Stats')
     print(f"Input data = {path_to_data}")
     print(f"model.name ={model}")
-    print("Size of current matrix : ", len(rows), "*", len(cols), "=", len(rows) * len(cols))
+    print("Size of initial matrix : ", len(rows), "*", len(cols), "=", len(rows) * len(cols))
     print("number input zeros  = ",nbi_0)     
     print("number input ones = ",nbi_1)            
-    print("rate = ",rate, " delta=", delta)
+    print("rho = ",rho, " delta=", delta)
     print("Input sparsity = ", nbi_0/(len(rows) * len(cols)))
     print("Input density = ", density, " density_threshold: = ", density_threshold)
     print('End Initial Stats')
@@ -1301,8 +1280,9 @@ def solve(path_to_data, model, rate=1.0, delta=0.1, density_threshold=0.87, debu
     nb_edges_0_in =  nb_edges_0 
     row_names_in = row_names
     col_names_in = col_names 
+    matrix_limit = 2 
     iter = 0
-    while density < density_threshold:
+    while density < density_threshold and len(rows_in) > matrix_limit and len(cols_in) > matrix_limit:
         iter+=1
         if debug >= 1:
             print()
@@ -1313,7 +1293,7 @@ def solve(path_to_data, model, rate=1.0, delta=0.1, density_threshold=0.87, debu
             print()
             print("I am in the while loop with i=", iter , "density=", density, "and fixed_threshold=", density_threshold)
             print()
-        rows_res, cols_res, edges_1_res, nb_edges_0_res, density = zero_cleaner(rows_in, cols_in, row_names, col_names, edges_1_in, nb_edges_0_in, iter, rate, debug)
+        rows_res, cols_res, edges_1_res, nb_edges_0_res, density, KP_time  = zero_cleaner(rows_in, cols_in, row_names, col_names, edges_1_in, nb_edges_0_in, iter, rho, debug, KP_time)
         rows_in = rows_res
         cols_in = cols_res
         edges_1_in = edges_1_res
@@ -1325,15 +1305,16 @@ def solve(path_to_data, model, rate=1.0, delta=0.1, density_threshold=0.87, debu
         cols_res_in = [int(r) for r in cols_res_in]
         col_names_in = [col_names[r] for r in cols_res_in]
     else:
-        if debug >= 0:
+        if debug >= 0 and iter > 0:
             print('-' * 40)
-            print()
-            print("  End of greedy approaches. Exit while loop. I did", iter, " iterations. Density : ", density, " >", density_threshold)
-            #cols_in_set = set(map(int, cols_in))
-            #rows_in_set = set(map(int, rows_in))
-            #row_names_in = [row_names[r] for r in rows_in]
-            #col_names_in = [col_names[c] for c in cols_in]
-        if debug >= 2: 
+            #print()
+            print(f"""
+            End of greedy approaches. Exit while loop. I did: {iter} iterations
+            Density : {density} > {density_threshold}
+            It took me : {KP_time:.5f} time
+            Found matrix of size : ({len(rows_res)}, {len(cols_res)}) and density : {density}
+            """)
+        if debug >= 2 and iter > 0: 
             print('-' * 40)
             print("rows_in =", rows_in)
             print("cols_in =", cols_in)
@@ -1356,20 +1337,26 @@ def solve(path_to_data, model, rate=1.0, delta=0.1, density_threshold=0.87, debu
             print("row_names_in =", row_names_in)
             print("col_names_in =", col_names_in)
     #sys.exit("Terminating program before calling exact exit 10 !!!!")  
-    rows_res, cols_res, density, nb_edges_1 = exact(model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug)
+    rows_res, cols_res, density, nb_edges_1, QBC_time = exact(model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
     if debug >=0:
         print('-' * 40)
-        print()
-        print('Exit from the exact approach ',  model_name,' with delta=', delta, 'Found matrix of size : (' ,len(rows_res),", ", len(cols_res), ') and density =', density, 'and # of ones =', nb_edges_1)
+        print(f"""
+        Exit from the exact approach: {model_name}
+        with delta =  {delta}
+        Found matrix of size : ({len(rows_res)}, {len(cols_res)})
+        and density : {density}
+        and # of ones : {nb_edges_1}
+        and QBC time  : {QBC_time:.5f}
+        """)
     if debug >=2:
         print(" Remaining Rows  :", rows_res )
         print(" Remaining  Cols  :", cols_res )
         #sys.exit("Terminating program because not done EXIT -1 ")
-    return  rows_res, cols_res, density, nb_edges_1, iter 
+    return  rows_res, cols_res, density, nb_edges_1, iter, KP_time, QBC_time 
 #######################################################################
     #END OF SOLVE
 ##################################################################
-def exact(model_name, rows, cols, row_names, col_names, edges_1, delta, debug):     
+def exact(model_name, rows, cols, row_names, col_names, edges_1, delta, debug, QBC_time):     
     if model_name == 'max_e':
         model = max_e(rows, cols, edges_1, delta)
     elif model_name == 'max_e_h':
@@ -1384,12 +1371,8 @@ def exact(model_name, rows, cols, row_names, col_names, edges_1, delta, debug):
         model = max_Ones(rows, cols, edges_1, delta)
     elif model_name == 'max_Ones_comp':
         model = max_Ones_comp(rows, cols, edges_1, delta)
-    #create the model using one of the previously implemented models
-
-    #solve the model using GUROBI_CMD. The solver will be automatically stoped after 
-    #the time limit is set to 1 hour. 
     #model.solve(PULP_CBC_CMD(msg=True, timeLimit= 3600, gapRel = 0.5),)
-    model.solve(GUROBI_CMD(msg=True, timeLimit= 300)#, options=[("Heuristics", 0.0), ("NoRelHeurTime", 0)] )#,gapRel=0.3)
+    model.solve(GUROBI_CMD(msg=True, timeLimit= 600)#, options=[("Heuristics", 0.0), ("NoRelHeurTime", 0)] )#,gapRel=0.3)
     )
     #model.solve(GUROBI_CMD(msg=False, timeLimit= 60, MIPGap = 0.03),)
     # Check status
@@ -1402,9 +1385,8 @@ def exact(model_name, rows, cols, row_names, col_names, edges_1, delta, debug):
          print("Model is infeasible. Exporting LP file for debugging...")
          model.writeLP("debug_model.lp")
          sys.exit("Terminating program due to infeasibility. EXIT 1")
-    print_log_output(model)
-   #if debug >= 1:
-       # print('I solved model name =', model.name, "Reading and analyse of the obtained results")
+    QBC_time = print_log_output(model, QBC_time)
+   #Reading and analyse of the obtained results")
     #read the results from the solver
     rows_res = []
     cols_res = []
@@ -1447,14 +1429,6 @@ def exact(model_name, rows, cols, row_names, col_names, edges_1, delta, debug):
     #rows_res = [str(r) for r, _ in rows]
     # if len(rows_res) == 0:
     #     row_res = [str(r) for r, _ in rows]
-
-    # print()
-    # print('-after KP ****')
-    # print('cols_res')
-    # print(cols_res)
-    # print()
-    # print('-' * 40)
-    
     # #
     #rows_res = [int(r) for r in rows_res]
 
@@ -1529,7 +1503,7 @@ def exact(model_name, rows, cols, row_names, col_names, edges_1, delta, debug):
                     print(" Remaining  Cols  :", cols_res )
                     print(" Remaining Rows with degree :", rows_rem )
                     print(" Remaining  Cols with degree :", cols_rem )
-    return rows_rem, cols_rem, density, len(edges_1_rem) 
+    return rows_rem, cols_rem, density, len(edges_1_rem), QBC_time 
 ###############################################################################
 # END OF EXACT 
 # ########################################################################  
@@ -1885,7 +1859,7 @@ def get_data_txt_file(path):
 
 #     return rows_data, cols_data, edges, range(num_row), range(num_col), df
 
-def print_log_output(prob):
+def print_log_output(prob, run_time):
     """Print the log output and problem solutions.
     ARGUMENTS:
     ----------
@@ -1894,21 +1868,19 @@ def print_log_output(prob):
     print()
     print('-' * 70)
     print('Stats')
-    #print('-' * 70)
-    print()
-    print(f'Print_log_output after model :', prob.name, f' Number variables: {prob.numVariables()}',f' Number constraints: {prob.numConstraints()}') 
+    #print('-' * 70) 
     #print(f'Number variables: {prob.numVariables()}')
     #print(f'Number constraints: {prob.numConstraints()}')
+    run_time = run_time + prob.solutionCpuTime
     print()
-    print(f'Print_log_output after model :', prob.name, f' Time:  - (real) {prob.solutionTime}', f'- (CPU) {prob.solutionCpuTime}')
+    #print(f' I solved model :', prob.name, f' with  number variables: {prob.numVariables()}',f' and  number constraints: {prob.numConstraints()}') 
+    print(f' I solved model :', prob.name, f' Local Time:  - (real) {prob.solutionTime:.5f}', f'- (Local CPU) {prob.solutionCpuTime:.5f}', f'- (Global CPU) {run_time:.5f}')
     #print(f'Number variables: {prob.numVariables()}')) 
     #print(f'- (real) {prob.solutionTime}')
     #print(f'- (CPU) {prob.solutionCpuTime}')
     print()
-
-    print(f'Solve status: {LpStatus[prob.status]}')
-    print(f'Objective value: {prob.objective.value()}')
-    print('-' * 70)
+    print(f'Solve status: {LpStatus[prob.status]}', f'Objective value: {prob.objective.value()}')
+    print('-' * 40)
 
     # print()
     # print('-' * 40)
@@ -1920,7 +1892,7 @@ def print_log_output(prob):
     #         print(v.name, v.varValue)
     # #breakpoint()
     # print('-' * 40)
-
+    return run_time 
 
 def parse_arguments():
     """Parse the input arguments and retrieve the choosen resolution method and
@@ -1938,13 +1910,13 @@ def parse_arguments():
     )
 
     argparser.add_argument(
-        '--rate', dest='rate', required=False, default=1.0, type=float,
-        help='Select the zero deletion rate value',
+        '--rho', dest='rho', required=False, default=1.0, type=float,
+        help='Select the zero deletion rho value',
     )
 
     argparser.add_argument(
         '--delta', dest='delta', required=False, default=0.1, type=float,
-        help='Select the error rate value (tolerance) ',
+        help='Select the error rho value (tolerance) ',
     )
 
     argparser.add_argument(
@@ -1967,20 +1939,44 @@ def parse_arguments():
         argparser.print_help()
         sys.exit(1)
 
-    return (arg.filepath, arg.model, arg.rate, arg.delta,  arg.threshold, arg.debug)
+    return (arg.filepath, arg.model, arg.rho, arg.delta,  arg.threshold, arg.debug)
 
 
 if __name__ == '__main__':
 
     # Read the arguments
-    file_path, selected_model, rate, delta,  threshold, debug, = parse_arguments()
+    file_path, selected_model, rho, delta,  threshold, debug, = parse_arguments()
 
 
-    rows_res, cols_res, density, nb_edges_1, iter =  solve(file_path,selected_model,rate,delta, threshold, debug)    
+    rows_res, cols_res, density, nb_edges_1, iter, KP_time, QBC_time  =  solve(file_path,selected_model,rho,delta, threshold, debug) 
+    global_time = KP_time + QBC_time 
     print()
-    print('-' * 70)
+    print('-' * 70) 
     print(" End of computations for :  ", f" Input = {file_path}, ", f" Model ={selected_model}" , f" Quasi-biclique error  ={delta}"    )
-    print(" Number of iterations in greedy approach : ",iter, " with zero deletion rate : ", rate, "and threshold : ",threshold)
+    #print("Size of initial matrix : ", len(rows), "*", len(cols), "=", len(rows) * len(cols))
+    if global_time != 0:
+        percentage = (KP_time / global_time) * 100
+    else:
+        print("Percentage: Undefined (division by zero)")
+        sys.exit("Terminating program due to division by zero")
+    print(f"""
+    Number of iterations in greedy approach: {iter}
+    Time in greedy approach: {KP_time:.5f}
+    Time in QBC approach: {QBC_time:.5f}
+    Global Time: {global_time:.5f}
+    Percentage of greedy run time verus QBC run time : {percentage:.2f}% 
+    With zero deletion rho: {rho}
+    Threshold: {threshold}
+    """)
+    # print(
+    # f" Number of iterations in greedy approach: {iter} "
+    # f"Time in greedy approach: {KP_time:.5f} "
+    # f"Time in exact approach: {QBC_time:.5f} "
+    # f"Global Time: {global_time:.5f} "
+    # f"with zero deletion rho: {rho} and threshold: {threshold}"
+    # )
+    # print(" Number of iterations in greedy approach : ",iter, 
+    #       " Time in greedy approach : ", {KP_time:.5f}, " Time in exact approach : ",{QBC_time:.5}, " Global Time : ",{global_time:.5} , " with zero deletion rho : ", rho, "and threshold : ",threshold)
     print(" Computed density : ", density, " Number computed ones:",nb_edges_1 )
     print(" Size of Remaining matrix : (", len(rows_res), ",", len(cols_res), ")") 
     #print(" Number Remaining  Cols  :", len(cols_res) )
