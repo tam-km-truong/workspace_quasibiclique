@@ -1209,7 +1209,7 @@ def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, rh
 # ============================================================================ #
 
 
-def solve(matrix_name, rows, cols, edges_1, model, KP_time, QBC_time, rho=1.0, delta=0.1, density_threshold=0.87):
+def solve(DC, matrix_name, rows, cols, edges_1, model, KP_time, QBC_time, rho=1.0, delta=0.1, density_threshold=0.87):
     """
     Function to solve the maximum biclique problem, this function reads the data,
     create a LP model using the data and return a list of rows and a list of 
@@ -1225,7 +1225,7 @@ def solve(matrix_name, rows, cols, edges_1, model, KP_time, QBC_time, rho=1.0, d
     if debug >= 1: 
         print()
         print('-' * 70)
-        print(f"***Stats Current Input for matrix {matrix_name} in  {file_path} and model:  {model}***")
+        print(f"***Stats Current Input for matrix {matrix_name} in  {file_path} at level {DC} and with model:  {model}***")
         print("Size of current matrix : ", len(rows), "*", len(cols), "=", len(rows) * len(cols), "; complementary:", complementary )
         print("number input zeros : ",nbi_0, "; number input ones : ",nbi_1)            
         print("rho = ",rho, "; delta : ", delta)
@@ -1314,10 +1314,10 @@ def solve(matrix_name, rows, cols, edges_1, model, KP_time, QBC_time, rho=1.0, d
             print("edges_1_in =", edges_1_in)
     #sys.exit("Terminating program before calling exact exit 10 !!!!")
     if model == "max_e_c": 
-        rows_res, cols_res, density, nb_edges_1, QBC_time_h, QBC_time_g = warm_exact(matrix_name,model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
+        rows_res, cols_res, density, nb_edges_1, QBC_time_h, QBC_time_g = warm_exact(DC, matrix_name,model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
         #sys.exit("Terminating program before calling exact exit 10 !!!!")  
     else:
-        rows_res, cols_res, density, nb_edges_1, QBC_time_g = exact(matrix_name, model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
+        rows_res, cols_res, density, nb_edges_1, QBC_time_g = exact(DC, matrix_name, model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
         QBC_time_h = 0.0 
     if debug >=1:
         print('-' * 40)
@@ -1344,7 +1344,7 @@ def solve(matrix_name, rows, cols, edges_1, model, KP_time, QBC_time, rho=1.0, d
     #END OF SOLVE
 ##################################################################
 
-def exact(matrix_name, model_name, rows, cols, row_names, col_names, edges_1, delta, debug, QBC_time):  
+def exact(DC, matrix_name, model_name, rows, cols, row_names, col_names, edges_1, delta, debug, QBC_time):  
     obj_value = None  # ✅ Initialize to None
     rows_res = []
     cols_res = []
@@ -1391,30 +1391,14 @@ def exact(matrix_name, model_name, rows, cols, row_names, col_names, edges_1, de
         obj_value = 0  # ✅ Fallback value if model failed
 
     # ✅ Only proceed with saving the solution if the model found a feasible solution
-    if model.status in [1, 2, 9]:
-        # if debug >= 1:
-        #     print('-' * 70)
-        #     print(f"Computed Objective Value: {obj_value}")
-        # # Extract solution values (only nonzero rows and columns)
-        # solution = {
-        #     var.name: var.varValue
-        #     for var in model.variables()
-        #     if var.varValue != 0
-        # }
-
-        # # Read results and classify into rows and columns
-        # rows_res = [var_name[4:] for var_name in solution if var_name.startswith("row")]
-        # cols_res = [var_name[4:] for var_name in solution if var_name.startswith("col")]
-
-        #solution_file = f"Experiments/solution_1BC_{matrix_name}.csv"
-
-        # Save the solution to a CSV file
-        if matrix_name == 'M11' or matrix_name == 'M12' or matrix_name == 'M21' or matrix_name == 'M22':
-            solution_file = f"Experiments/solution_1BC_{matrix_name}.csv"
-        elif matrix_name == 'M0' or matrix_name == 'M1' or matrix_name == 'M2':
-            solution_file = f"Experiments/solution_0BC_{matrix_name}.csv"
-        else:
-            solution_file = "Experiments/solution_M???.csv"
+    if model.status in [1, 2, 9]:  # 1 = Optimal, 2 = Feasible, 9 = Time limit reached
+        # Save the solution to a CSV file 
+        # if matrix_name == 'M11' or matrix_name == 'M12' or matrix_name == 'M21' or matrix_name == 'M22':
+        solution_file = f"Experiments/solution_{DC}_{matrix_name}.csv"
+        # elif matrix_name == 'M0' or matrix_name == 'M1' or matrix_name == 'M2':
+        #     solution_file = f"Experiments/solution_0BC_{matrix_name}.csv"
+        # else:
+        #     solution_file = "Experiments/solution_M???.csv"
         with open(solution_file, mode="w", newline="") as file:
             writer = csv.writer(file)
             # Write the objective value
@@ -1484,7 +1468,7 @@ def exact(matrix_name, model_name, rows, cols, row_names, col_names, edges_1, de
 ###############################################################################
 # END OF EXACT 
 # ########################################################################  
-def warm_exact(matrix_name,model_name, rows, cols, row_names, col_names, edges_1, delta, debug, QBC_time):     
+def warm_exact(DC, matrix_name,model_name, rows, cols, row_names, col_names, edges_1, delta, debug, QBC_time):     
     # elif model_name == 'max_e_h':
     rows_res = []
     cols_res = []
@@ -1537,12 +1521,12 @@ def warm_exact(matrix_name,model_name, rows, cols, row_names, col_names, edges_1
     # ✅ Only proceed with saving the solution if the model found a feasible solution
     if model.status in [1, 2, 9]:
         # Save the solution to a CSV file
-        if matrix_name == 'M11' or matrix_name == 'M12' or matrix_name == 'M21' or matrix_name == 'M22':
-            solution_file = f"Experiments/solution_1BC_{matrix_name}.csv"
-        elif matrix_name == 'M0' or matrix_name == 'M1' or matrix_name == 'M2':
-            solution_file = f"Experiments/solution_0BC_{matrix_name}.csv"
-        else:
-            solution_file = "Experiments/solution_M???.csv"
+        # if matrix_name == 'M11' or matrix_name == 'M12' or matrix_name == 'M21' or matrix_name == 'M22':
+        solution_file = f"Experiments/solution_h_{DC}_{matrix_name}.csv"
+        # elif matrix_name == 'M0' or matrix_name == 'M1' or matrix_name == 'M2':
+        #     solution_file = f"Experiments/solution_0BC_{matrix_name}.csv"
+        # else:
+        #     solution_file = "Experiments/solution_M???.csv"
         with open(solution_file, mode="w", newline="") as file:
             writer = csv.writer(file)
             # Write the objective value
@@ -1673,13 +1657,12 @@ def warm_exact(matrix_name,model_name, rows, cols, row_names, col_names, edges_1
     print("*****Model in warm start is feasible. Improving the solution!!!*** ")
     if model.status in [1, 2, 9]:  # 1 = Optimal, 2 = Feasible, 9 = Time limit reached
     # Save the solution to a file
-        if matrix_name == 'M11' or matrix_name == 'M12' or matrix_name == 'M21' or matrix_name == 'M22':
-            solution_file = f"Experiments/solution_1BC_{matrix_name}.csv"
-        elif matrix_name == 'M0' or matrix_name == 'M1' or matrix_name == 'M2':
-            solution_file = f"Experiments/solution_0BC_{matrix_name}.csv"
-            #solution_file = f"Experiments/solution_warm_start_0BC_{matrix_name}.csv"
-        else:
-            solution_file = "Experiments/solution_M???.csv"
+        solution_file = f"Experiments/solution_warm_st_{DC}_{matrix_name}.csv"
+        # elif matrix_name == 'M0' or matrix_name == 'M1' or matrix_name == 'M2':
+        #     solution_file = f"Experiments/solution_0BC_{matrix_name}.csv"
+        #     #solution_file = f"Experiments/solution_warm_start_0BC_{matrix_name}.csv"
+        # else:
+        #     solution_file = "Experiments/solution_M???.csv"
         with open(solution_file, mode="w", newline="") as file:
             writer = csv.writer(file)
             # Write the objective value
@@ -2227,7 +2210,7 @@ def density_calcul(rows, cols):
 #     density = nbi_1/(len(rows) * len(cols)) # definition of density
 #     return nbi_0, nbi_1, sparsity, density 
 
-def affichage(matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g):
+def affichage(DC,matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g):
     # pretty print the results
     global_time = KP_time + QBC_time_g  #+ QBC_time_h 
     global_time_c = QBC_time_g #+ QBC_time_h 
@@ -2250,7 +2233,7 @@ def affichage(matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time, 
     print()
     print('-' * 70)
     print(f""" 
-    End of computations for matrix {matrix_name} in  {file_path} and complementary: {complementary} and debug  {debug}
+    End of computations for matrix {matrix_name} in  {file_path} at level {DC} and complementary: {complementary} and debug  {debug}
     With  model: {selected_model} and quasi-biclique error: {delta} 
     Size of Remaining matrix : ({ len(rows_res)},{len(cols_res)}), with  density : {density} and number of ones: {nb_ones}
     Global Time (in sec): {global_time:.3f}
@@ -2276,8 +2259,8 @@ def affichage(matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time, 
         if debug >= 3:
                 print(" Remaining Rows with degree :", rows_res )
                 print(" Remaining Cols with degree :", cols_res )
-    if complementary == 0:
-        sys.exit(" Terminating program because of complementary == 0. End of computations!  EXIT 0")
+    #if complementary == 0:
+        #sys.exit(" Terminating program because of complementary == 0. End of computations!  EXIT 0")
 
 def get_complement_edges(rows, cols, edges):
     # Ensure rows are in (index, degree) format
@@ -2295,9 +2278,76 @@ def get_complement_edges(rows, cols, edges):
     # Compute complement edges
     edges_compl = [(r, c) for r in row_indices for c in col_indices if (r, c) not in edges]
     
-    return edges_compl
+    return edges_compl 
 
-def divide_and_conquer(matrix_name, rows, cols, edges_1, KP_time, QBC_time):
+def divide_and_conquer(DC, matrix_name, rows, cols, edges_1, KP_time, QBC_time):
+    """
+    Implements a divide-and-conquer approach to solve the problem.
+
+    Args:
+        matrix_name (str): Name of the matrix.
+        DC : level of the divide and conquer approach. If DC = 0, the divide and conquer approach is not used and the original matrix is used. When DC >= 1, the divide and conquer approach is used and the matrix is divided into two submatrices.
+        rows (list of tuples): List of (row_index, degree) for rows.
+        cols (list of tuples): List of (col_index, degree) for columns.
+        edges_1 (list of tuples): List of existing edges (row_index, col_index).
+        KP_time (float): Time taken for the greedy approach.
+        QBC_time (float): Time taken for the quasi-biclique approach.
+
+    Returns:
+        M1, M2: Two submatrices.
+        KP_time: Updated KP_time.
+        QBC_time_g: Updated QBC_time_g.
+    """
+    # Compute complementary row and column indices
+    if DC == 0: # No divide-and-conquer
+        # Solve the problem
+        results = solve(DC, matrix_name, rows, cols, edges_1, selected_model, KP_time, QBC_time, rho, delta, threshold)
+        # Unpack results
+        (rows_res, cols_res, density, nb_ones, iter, KP_time, 
+        kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 
+        QBC_time_h, QBC_time_g) = results
+        # Display results
+        affichage(DC,matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
+        return KP_time, QBC_time_g
+        #sys.exit(" Terminating program because DC == 0. End of computations!  EXIT 0")
+    if DC >= 1:
+        # Compute complementary row and column indices
+        rows_compl, cols_compl, edges_compl = get_complement_rowcols(rows, cols, edges_1)
+        # Solve the problem
+        results = solve(DC,matrix_name, rows_compl, cols_compl, edges_compl, selected_model, KP_time, QBC_time, rho, delta, threshold)
+        # Unpack results
+        (rows_res, cols_res, density, nb_ones, iter, KP_time, 
+        kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 
+        QBC_time_h, QBC_time_g) = results
+        # Display results
+        affichage(DC,matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
+        # Compute submatrices M1 and M2
+        ML, MR = get_submatrices(rows, cols, edges_1, rows_res, cols_res)
+    else:
+        print("DC=", DC)
+        sys.exit("Terminating program due to invalid value for DC. EXIT 1.")
+    # Debugging output
+    if debug >= 1:
+        print(f"{DC} - ML:")
+        print("Size Rows:", len(ML[0]))
+        print("Size Cols:", len(ML[1]))
+        print(f"\n{DC} - MR:")
+        print("Size Rows:", len(MR[0]))
+        print("Size Cols:", len(MR[1]))
+    if debug >= 2:
+        print(f"\n{DC} - ML Rows:", ML[0])
+        print(f"{DC} - ML Cols:", ML[1])
+        print(f"\n{DC} - MR Rows:", MR[0])
+        print(f"{DC} - MR Cols:", MR[1])
+    KP_time_left, QBC_time_left = divide_and_conquer(DC-1,"ML",  ML[0], ML[1], ML[2], KP_time, QBC_time)
+    print("KP_time_left", KP_time_left)
+    KP_time_right, QBC_time_right = divide_and_conquer(DC-1,"MR",  MR[0], MR[1], MR[2], KP_time, QBC_time)
+    print("KP_time_right", KP_time_right)
+    KP_time_g = KP_time_left + KP_time_right
+    QBC_time_g = QBC_time_left + QBC_time_right
+    return  KP_time_g, QBC_time_g
+
+def divide_and_conquer_OLD(matrix_name, rows, cols, edges_1, KP_time, QBC_time):
     """
     Implements a divide-and-conquer approach to solve the problem.
 
@@ -2318,13 +2368,13 @@ def divide_and_conquer(matrix_name, rows, cols, edges_1, KP_time, QBC_time):
     rows_compl, cols_compl, edges_compl = get_complement_rowcols(rows, cols, edges_1)
 
     # Solve the problem
-    results = solve(matrix_name, rows_compl, cols_compl, edges_compl, selected_model, KP_time, QBC_time, rho, delta, threshold)
+    results = solve(DC,matrix_name, rows_compl, cols_compl, edges_compl, selected_model, KP_time, QBC_time, rho, delta, threshold)
     # Unpack results
     (rows_res, cols_res, density, nb_ones, iter, KP_time, 
      kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 
      QBC_time_h, QBC_time_g) = results
     # Display results
-    affichage(matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
+    affichage(DC,matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
 
     # Compute submatrices M1 and M2
     M1, M2 = get_submatrices(rows, cols, edges_1, rows_res, cols_res)
@@ -2398,30 +2448,33 @@ if __name__ == '__main__':
     # start computations
     KP_time = 0.0
     QBC_time = 0.0 
-    if complementary == 0:
-        rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g  =  solve("M0", rows, cols, edges_1, selected_model, KP_time, QBC_time, rho,delta, threshold) 
-        affichage("M0", rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
-        #   sys.exit(" Terminating program because of complementary == 0. End of computations!  EXIT 0")
-    else:
-        M1, M2, KP_time, QBC_time_g = divide_and_conquer("M0", rows, cols, edges_1, KP_time, QBC_time)
-        # M11, M12, KP_time, QBC_time_g = divide_and_conquer("M1", M1[0], M1[1], M1[2], KP_time, QBC_time)
-        # M21, M22, KP_time, QBC_time_g = divide_and_conquer("M2", M2[0], M2[1], M2[2], KP_time, QBC_time)     
-    sys.exit("Terminating program at M0 EXIT 00")
-    rows_compl, cols_compl, edges_compl = get_complement_rowcols(M1[0], M1[1], M1[2])
-    ############################################################
-    rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g  =  solve("M11", M11[0], M11[1], M11[2], selected_model, KP_time, QBC_time,rho,delta, threshold)
-    affichage("M11", rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
-    ######################################################
-    rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g  =  solve("M12", M12[0], M12[1], M12[2], selected_model, KP_time, QBC_time,rho,delta, threshold)
-    affichage("M12", rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
-    #########################################################
-     ############################################################
-    rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g  =  solve("M21", M21[0], M21[1], M21[2], selected_model, KP_time, QBC_time,rho,delta, threshold)
-    affichage("M21", rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
-    ######################################################
-    rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g  =  solve("M22", M22[0], M22[1], M22[2], selected_model, KP_time, QBC_time,rho,delta, threshold)
-    affichage("M22", rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
+    DC = 1
+    KP_time_g, QBC_time_g = divide_and_conquer(DC, "MC", rows, cols, edges_1, KP_time, QBC_time)
     sys.exit("***Computation done EXIT 108 !!!")
+    # ################################################
+    # rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g  =  solve(DC,"M0", rows, cols, edges_1, selected_model, KP_time, QBC_time, rho,delta, threshold) 
+    # affichage(DC,"M0", rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
+    #     #   sys.exit(" Terminating program because of complementary == 0. End of computations!  EXIT 0")
+    # #else:
+    # M1, M2, KP_time, QBC_time_g = divide_and_conquer("M0", rows, cols, edges_1, KP_time, QBC_time)
+    # # M11, M12, KP_time, QBC_time_g = divide_and_conquer("M1", M1[0], M1[1], M1[2], KP_time, QBC_time)
+    #  # M21, M22, KP_time, QBC_time_g = divide_and_conquer("M2", M2[0], M2[1], M2[2], KP_time, QBC_time)     
+    # sys.exit("Terminating program at M0 EXIT 00")
+    # rows_compl, cols_compl, edges_compl = get_complement_rowcols(M1[0], M1[1], M1[2])
+    # ############################################################
+    # rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g  =  solve(DC,"M11", M11[0], M11[1], M11[2], selected_model, KP_time, QBC_time,rho,delta, threshold)
+    # affichage(DC,"M11", rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
+    # ######################################################
+    # rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g  =  solve(DC,"M12", M12[0], M12[1], M12[2], selected_model, KP_time, QBC_time,rho,delta, threshold)
+    # affichage(DC,"M12", rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
+    # #########################################################
+    #  ############################################################
+    # rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g  =  solve(DC,"M21", M21[0], M21[1], M21[2], selected_model, KP_time, QBC_time,rho,delta, threshold)
+    # affichage(DC,"M21", rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
+    # ######################################################
+    # rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g  =  solve(DC,"M22", M22[0], M22[1], M22[2], selected_model, KP_time, QBC_time,rho,delta, threshold)
+    # affichage(DC,"M22", rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
+    # sys.exit("***Computation done EXIT 108 !!!")
     # ###############################################################
     # # ####################################################
     # sys.exit("Terminating program because not done EXIT 0")
