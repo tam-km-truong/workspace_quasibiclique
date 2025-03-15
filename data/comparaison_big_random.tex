@@ -1,0 +1,537 @@
+import gurobipy as gp
+from gurobipy import GRB
+
+def max_e_wr(rows_data, cols_data, edges, rows_res, cols_res, delta):
+    """
+    Converts the PuLP model to a Gurobi model with warm start capability.
+    """
+    model = gp.Model("max_e_warm_r")
+    model.ModelSense = GRB.MAXIMIZE
+
+    # Create variables for rows and columns with binary constraints
+    lpRows = {row: (model.addVar(vtype=GRB.BINARY, name=f"row_{row}"), degree) for row, degree in rows_data}
+    lpCols = {col: (model.addVar(vtype=GRB.BINARY, name=f"col_{col}"), degree) for col, degree in cols_data}
+
+    # Create variables for cells with continuous constraints between 0 and 1
+    lpCells = {(row, col): model.addVar(vtype=GRB.CONTINUOUS, lb=0, ub=1, name=f"cell_{row}_{col}") 
+               for row, col in edges}
+
+    model.update()  # Integrate new variables into the model
+
+    # Warm start: set initial solution values
+    for row, (var, _) in lpRows.items():
+        var.Start = 1 if row in rows_res else 0
+
+    for col, (var, _) in lpCols.items():
+        var.Start = 1 if col in cols_res else 0
+
+    for (row, col), var in lpCells.items():
+        var.Start = 1 if (row in rows_res and col in cols_res) else 0
+
+    # Objective: maximize sum of cell variables
+    model.setObjective(gp.quicksum(lpCells.values()))
+
+    # Threshold constraints
+    row_threshold = 2
+    col_threshold = 2
+    model.addConstr(gp.quicksum(var for var, _ in lpRows.values()) >= row_threshold, name="row_threshold")
+    model.addConstr(gp.quicksum(var for var, _ in lpCols.values()) >= col_threshold, name="col_threshold")
+
+    # Cell activation constraints
+    for row, col in edges:
+        model.addConstr(lpRows[row][0] >= lpCells[(row, col)], name=f"cell_row_{row}_{col}")
+        model.addConstr(lpCols[col][0] >= lpCells[(row, col)], name=f"cell_col_{row}_{col}")
+
+    # Density constraints
+    __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, delta)
+    __col_density(rows_data, cols_data, edges, model, lpRows, lpCols, delta)
+
+    model.optimize()
+
+    return model
+
+def __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, delta):
+    Big_M = len(rows_data) + len(cols_data) + 2
+    for row, _ in rows_data:
+        row_edges = [col for u, col in edges if u == row]
+        lhs = gp.quicksum(lpCols[col][0] for col in row_edges)
+        rhs = (1 - delta) * gp.quicksum(lpCols[col][0] for col, _ in cols_data)
+        model.addConstr(lhs - rhs >= (lpRows[row][0] - 1) * Big_M, name=f"row_density_{row}")
+
+def __col_density(rows_data, cols_data, edges, model, lpRows, lpCols, delta):
+    Big_M = len(rows_data) + len(cols_data) + 2
+    for col, _ in cols_data:
+        col_edges = [row for row, v in edges if v == col]
+        lhs = gp.quicksum(lpRows[row][0] for row in col_edges)
+        rhs = (1 - delta) * gp.quicksum(lpRows[row][0] for row, _ in rows_data)
+        model.addConstr(lhs - rhs >= (lpCols[col][0] - 1) * Big_M, name=f"col_density_{col}")
+        
+        
+         python3 quasi_clique_comb.py --filepath data/data4.csv   --model  max_e_h  --rho 0.1  --delta 0.1 --debug 0  --threshold 0.83
+         
+ below is my code for reading  files containing binary   matrix A.  Can you modify them to return (in addition to M  the complement matrix comp(M)  of M.  comp(M) contains 1 where M contains 0  and 0 where M contains 1. Is the task clear?
+         
+         
+         
+def get_complement_edges(num_row, num_col, edges):
+    # Create a set of all possible edges using Cartesian product
+    all_edges = set(itertools.product(range(num_row), range(num_col)))
+
+    # Convert the original edges list to a set for efficient subtraction
+    original_edges = set(edges)
+
+    # Complement edges = all_edges - original_edges
+    complement_edges = list(all_edges - original_edges)
+
+    return complement_edges
+
+import pandas as pd
+
+def get_data_txt_file(path):
+    with open(path, 'r') as file:  # Use 'with' to properly handle file closing
+        content = file.readlines()
+    
+    name = content[0][2:-1].strip()  # Strip removes unwanted whitespace
+    num_row = int(content[1].split(":")[1].strip())  # Extract numbers correctly
+    num_col = int(content[2].split(":")[1].strip())
+    num_edge = int(content[3].split(":")[1].strip())
+
+    deg_row = [0] * num_row
+    deg_col = [0] * num_col
+    edges = []
+    df = pd.DataFrame(0, index=range(num_row), columns=range(num_col))  # Corrected dataframe initialization
+
+    for line in content[4:]:
+        splitted_line = line.strip().split()  # Automatically splits on any whitespace
+        u, v = int(splitted_line[0]), int(splitted_line[1])
+        
+        edges.append((u, v))
+        deg_row[u] += 1
+        deg_col[v] += 1
+        df.iloc[u, v] = 1 
+
+    rows_data = list(zip(range(num_row), deg_row))
+    cols_data = list(zip(range(num_col), deg_col))
+
+    return rows_data, cols_data, edges, range(num_row), range(num_col), df
+    
+    proposal ChatGPT
+    
+    
+        Exit from the exact approach: max_e_r
+        with delta =  0.0
+        Found matrix of size : (3, 6)
+        and density : 1.0
+        and # of ones : 18
+        and QBC time heuristic  : 0.00000
+        and QBC time  : 0.07794
+        
+ Remaining Rows  : [(18, 6), (52, 6), (58, 6)]
+ Remaining  Cols  : [(20, 3), (25, 3), (31, 3), (53, 3), (88, 3), (96, 3)]
+
+----------------------------------------------------------------------
+ 
+    End of computations for = data/random_bench/random.m_100_n_100_r_0.2_p_0.8_many_hours_run.txt 
+    With  model: max_e_r and quasi-biclique error: 0.0
+    Size of Remaining matrix : (3,6), with  density : 1.0 and number of ones: 18
+    Global Time (in sec): 0.729
+    Total Time in QBC approaches: 0.078
+    Time in greedy approach: 0.651,  size of matrix found by greedy : (16,16) 
+    With density : 0.480 and # ones : 123 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 53
+    Percentage of greedy approach run time in global run time : 89.31% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.025 and threshold: 0.47
+    
+ Remaining Rows last : [18, 52, 58]
+ Remaining  Cols  last : [20, 25, 31, 53, 88, 96]
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+        Exit from the exact approach: max_e_r
+        with delta =  0.0
+        Found matrix of size : (6, 3)
+        and density : 1.0
+        and # of ones : 18
+        and QBC time heuristic  : 0.00000
+        and QBC time  : 0.20081
+        
+ Remaining Rows  : [(8, 3), (27, 3), (57, 3), (79, 3), (87, 3), (95, 3)]
+ Remaining  Cols  : [(45, 6), (56, 6), (73, 6)]
+
+----------------------------------------------------------------------
+ 
+    End of computations for = data/random_bench/random.m_100_n_100_r_0.2_p_0.8_many_hours_run.txt 
+    With  model: max_e_r and quasi-biclique error: 0.0
+    Size of Remaining matrix : (6,3), with  density : 1.0 and number of ones: 18
+    Global Time (in sec): 0.814
+    Total Time in QBC approaches: 0.201
+    Time in greedy approach: 0.613,  size of matrix found by greedy : (23,23) 
+    With density : 0.403 and # ones : 213 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 46
+    Percentage of greedy approach run time in global run time : 75.32% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.025 and threshold: 0.4
+    
+ Remaining Rows last : [8, 27, 57, 79, 87, 95]
+ Remaining  Cols  last : [45, 56, 73]
+    
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    ----------------------------------------------------------------------
+ 
+    End of computations for = data/random_bench/random.m_100_n_100_r_0.2_p_0.8_many_hours_run.txt 
+    With  model: max_e_r and quasi-biclique error: 0.0
+    Size of Remaining matrix : (9,2), with  density : 1.0 and number of ones: 18
+    Global Time (in sec): 1.019
+    Total Time in QBC approaches: 0.485
+    Time in greedy approach: 0.534,  size of matrix found by greedy : (27,27) 
+    With density : 0.372 and # ones : 271 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 42
+    Percentage of greedy approach run time in global run time : 52.43% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.025 and threshold: 0.37
+    
+ Remaining Rows last : [8, 27, 57, 76, 77, 79, 83, 87, 95]
+ Remaining  Cols  last : [45, 73]
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+     
+    End of computations for = data/random_bench/random.m_100_n_100_r_0.2_p_0.8_many_hours_run.txt 
+    With  model: max_e_r and quasi-biclique error: 0.0
+    Size of Remaining matrix : (11,2), with  density : 1.0 and number of ones: 22
+    Global Time (in sec): 1.762
+    Total Time in QBC approaches: 1.402
+    Time in greedy approach: 0.360,  size of matrix found by greedy : (41,41) 
+    With density : 0.303 and # ones : 510 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 28
+    Percentage of greedy approach run time in global run time : 20.42% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.025 and threshold: 0.3
+    
+ Remaining Rows last : [7, 8, 27, 57, 76, 77, 79, 83, 86, 87, 95]
+ Remaining  Cols  last : [45, 73]
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  
+    End of computations for = data/random_bench/random.m_100_n_100_r_0.2_p_0.8_many_hours_run.txt 
+    With  model: max_e_r and quasi-biclique error: 0.0
+    Size of Remaining matrix : (12,2), with  density : 1.0 and number of ones: 24
+    Global Time (in sec): 44.051
+    Total Time in QBC approaches: 44.037
+    Time in greedy approach: 0.014,  size of matrix found by greedy : (76,76) 
+    With density : 0.224 and # ones : 1294 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 1
+    Percentage of greedy approach run time in global run time : 0.03% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.25 and threshold: 0.2
+    
+ Remaining Rows last : [2, 4, 16, 23, 27, 39, 70, 76, 79, 87, 92, 99]
+ Remaining  Cols  last : [36, 73]
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+    End of computations for = data/random_bench/random.m_100_n_100_r_0.2_p_0.8_many_hours_run.txt 
+    With  model: max_e_h and quasi-biclique error: 0.0
+    Size of Remaining matrix : (12,2), with  density : 1.0 and number of ones: 24
+    Global Time (in sec): 3.864
+    Total Time in QBC approaches: 3.850
+    Time in greedy approach: 0.015,  size of matrix found by greedy : (76,76) 
+    With density : 0.224 and # ones : 1294 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 1
+    Percentage of greedy approach run time in global run time : 0.38% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.25 and threshold: 0.2
+    
+ Remaining Rows last : [2, 4, 16, 23, 27, 39, 70, 76, 79, 87, 92, 99]
+ Remaining  Cols  last : [36, 73]
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  
+    End of computations for = data/random_bench/random.m_100_n_100_r_0.2_p_0.8_many_hours_run.txt 
+    With  model: max_e_h and quasi-biclique error: 0.0
+    Size of Remaining matrix : (12,2), with  density : 1.0 and number of ones: 24
+    Global Time (in sec): 3.052
+    Total Time in QBC approaches: 3.037
+    Time in greedy approach: 0.015,  size of matrix found by greedy : (90,90) 
+    With density : 0.205 and # ones : 1662 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 1
+    Percentage of greedy approach run time in global run time : 0.49% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.2
+    
+ Remaining Rows last : [7, 8, 27, 41, 57, 76, 77, 79, 83, 86, 87, 95]
+ Remaining  Cols  last : [45, 73]
+(base) randonov@MAC-PYYNJ76WC0:~/Mirror
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+    End of computations for = data/random_bench/random.m_100_n_100_r_0.2_p_0.8_many_hours_run.txt 
+    With  model: max_e_h and quasi-biclique error: 0.0
+    Size of Remaining matrix : (13,2), with  density : 1.0 and number of ones: 26
+    Global Time (in sec): 3.799
+    Total Time in QBC approaches: 3.799
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.01
+    
+ Remaining Rows last : [15, 25, 28, 37, 44, 52, 63, 65, 73, 75, 79, 83, 94]
+ Remaining  Cols  last : [20, 91]
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  
+    End of computations for = data/random_bench/random.m_100_n_100_r_0.2_p_0.8_many_hours_run.txt 
+    With  model: max_e_h and quasi-biclique error: 0.0
+    Size of Remaining matrix : (13,2), with  density : 1.0 and number of ones: 26
+    Global Time (in sec): 3.920
+    Total Time in QBC approaches: 3.920
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.0001
+    
+ Remaining Rows last : [15, 25, 28, 37, 44, 52, 63, 65, 73, 75, 79, 83, 94]
+ Remaining  Cols  last : [20, 91]
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ ----------------------------------------------------------------------
+ 
+    End of computations for = data/random_bench/random.m_100_n_100_r_0.2_p_0.8_many_hours_run.txt 
+    With  model: max_e_r and quasi-biclique error: 0.0
+    Size of Remaining matrix : (4,5), with  density : 1.0 and number of ones: 20
+    Global Time (in sec): 135.166
+    Total Time in QBC approaches: 135.166
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.0001
+    
+ Remaining Rows last : [4, 58, 60, 84]
+ Remaining  Cols  last : [7, 36, 51, 53, 83]
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  Remaining Rows  : [(4, 5), (58, 5), (60, 5), (84, 5)]
+ Remaining  Cols  : [(7, 4), (36, 4), (51, 4), (53, 4), (83, 4)]
+
+----------------------------------------------------------------------
+ 
+    End of computations for = data/random_bench/random.m_100_n_100_r_0.2_p_0.8_many_hours_run.txt 
+    With  model: max_e_h and quasi-biclique error: 0.0
+    Size of Remaining matrix : (4,5), with  density : 1.0 and number of ones: 20
+    Global Time (in sec): 6.909
+    Total Time in QBC approaches: 6.909
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.0001
+    
+ Remaining Rows last : [4, 58, 60, 84]
+ Remaining  Cols  last : [7, 36, 51, 53, 83]
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+ Stats
+ Model solved : max_e_h  Local Time:  - (real) 0.00542 - (Local CPU) 0.00542 - (Global CPU) 0.00542
+
+ Solve status: Not Solved Objective value: None nb_rows 4 nb_cols 4
+----------------------------------------
+
+----------------------------------------
+ results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining  Rows  : 4
+Number of Remaining number Columns : 4
+Remaining  number Edges_0 P: 1 Remaining  number Edges_1 : 15 Density : 0.9375
+----------------------------------------
+
+----------------------------------------
+
+Exit from the exact  approach  max_e_h  with delta= 0.0 Found matrix with rows_res of lenght = 4  and cols_res of lenght = 4 and density = 0.9375
+ Density of the found matrix =  : 0.9375
+ Remaining Rows  : [29, 58, 75, 96]
+ Remaining  Cols  : [24, 25, 55, 83]
+ Remaining Rows with degree : [(29, 3), (58, 4), (75, 4), (96, 4)]
+ Remaining  Cols with degree : [(24, 4), (25, 4), (55, 3), (83, 4)]
+----------------------------------------
+
+        Exit from the exact approach: max_e_h
+        with delta =  0.0
+        Found matrix of size : (4, 4)
+        and density : 0.9375
+        and # of ones : 15
+        and QBC time heuristic  : 0.00000
+        and QBC time  : 0.00542
+        
+ Remaining Rows  : [(29, 3), (58, 4), (75, 4), (96, 4)]
+ Remaining  Cols  : [(24, 4), (25, 4), (55, 3), (83, 4)]
+
+----------------------------------------------------------------------
+ 
+    End of computations for = data/random_bench/random.m_100_n_100_r_0.2_p_0.8_many_hours_run.txt 
+    With  model: max_e_h and quasi-biclique error: 0.0
+    Size of Remaining matrix : (4,4), with  density : 0.9375 and number of ones: 15
+    Global Time (in sec): 0.296
+    Total Time in QBC approaches: 0.005
+    Time in greedy approach: 0.291,  size of matrix found by greedy : (4,4) 
+    With density : 0.938 and # ones : 15 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 27
+    Percentage of greedy approach run time in global run time : 98.17% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.87
+    
+ Remaining Rows last : [29, 58, 75, 96]
+ Remaining  Cols  last : [24, 25, 55, 83]
+ 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+ ----------------------------------------------------------------------
+Stats
+ Model solved : max_e_h  Local Time:  - (real) 3.69313 - (Local CPU) 3.69311 - (Global CPU) 3.69311
+
+ Solve status: Optimal Objective value: 318.0 nb_rows 13 nb_cols 2
+----------------------------------------
+
+----------------------------------------
+ results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining  Rows  : 13
+Number of Remaining number Columns : 2
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 26 Density : 1.0
+----------------------------------------
+
+----------------------------------------
+
+Exit from the exact  approach  max_e_h  with delta= 0.0 Found matrix with rows_res of lenght = 13  and cols_res of lenght = 2 and density = 1.0
+ Density of the found matrix =  : 1.0
+ Remaining Rows  : [15, 25, 28, 37, 44, 52, 63, 65, 73, 75, 79, 83, 94]
+ Remaining  Cols  : [20, 91]
+ Remaining Rows with degree : [(15, 2), (25, 2), (28, 2), (37, 2), (44, 2), (52, 2), (63, 2), (65, 2), (73, 2), (75, 2), (79, 2), (83, 2), (94, 2)]
+ Remaining  Cols with degree : [(20, 13), (91, 13)]
+----------------------------------------
+
+        Exit from the exact approach: max_e_h
+        with delta =  0.0
+        Found matrix of size : (13, 2)
+        and density : 1.0
+        and # of ones : 26
+        and QBC time heuristic  : 0.00000
+        and QBC time  : 3.69311
+        
+ Remaining Rows  : [(15, 2), (25, 2), (28, 2), (37, 2), (44, 2), (52, 2), (63, 2), (65, 2), (73, 2), (75, 2), (79, 2), (83, 2), (94, 2)]
+ Remaining  Cols  : [(20, 13), (91, 13)]
+
+----------------------------------------------------------------------
+ 
+    End of computations for = data/random_bench/random.m_100_n_100_r_0.2_p_0.8_many_hours_run.txt 
+    With  model: max_e_h and quasi-biclique error: 0.0
+    Size of Remaining matrix : (13,2), with  density : 1.0 and number of ones: 26
+    Global Time (in sec): 3.693
+    Total Time in QBC approaches: 3.693
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.001
+    
+ Remaining Rows last : [15, 25, 28, 37, 44, 52, 63, 65, 73, 75, 79, 83, 94]
+ Remaining  Cols  last : [20, 91]
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+ ----------------------------------------------------------------------
+Stats
+ Model solved : max_e_r  Local Time:  - (real) 151.97568 - (Local CPU) 151.97423 - (Global CPU) 151.97423
+
+ Solve status: Optimal Objective value: 26.0 nb_rows 13 nb_cols 2
+----------------------------------------
+
+----------------------------------------
+ results from updating data after solving model = max_e_r  delta =   0.0
+Number of Remaining  Rows  : 13
+Number of Remaining number Columns : 2
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 26 Density : 1.0
+----------------------------------------
+
+----------------------------------------
+
+Exit from the exact  approach  max_e_r  with delta= 0.0 Found matrix with rows_res of lenght = 13  and cols_res of lenght = 2 and density = 1.0
+ Density of the found matrix =  : 1.0
+ Remaining Rows  : [15, 25, 28, 37, 44, 52, 63, 65, 73, 75, 79, 83, 94]
+ Remaining  Cols  : [20, 91]
+ Remaining Rows with degree : [(15, 2), (25, 2), (28, 2), (37, 2), (44, 2), (52, 2), (63, 2), (65, 2), (73, 2), (75, 2), (79, 2), (83, 2), (94, 2)]
+ Remaining  Cols with degree : [(20, 13), (91, 13)]
+----------------------------------------
+
+        Exit from the exact approach: max_e_r
+        with delta =  0.0
+        Found matrix of size : (13, 2)
+        and density : 1.0
+        and # of ones : 26
+        and QBC time heuristic  : 0.00000
+        and QBC time  : 151.97423
+        
+ Remaining Rows  : [(15, 2), (25, 2), (28, 2), (37, 2), (44, 2), (52, 2), (63, 2), (65, 2), (73, 2), (75, 2), (79, 2), (83, 2), (94, 2)]
+ Remaining  Cols  : [(20, 13), (91, 13)]
+
+----------------------------------------------------------------------
+ 
+    End of computations for = data/random_bench/random.m_100_n_100_r_0.2_p_0.8_many_hours_run.txt 
+    With  model: max_e_r and quasi-biclique error: 0.0
+    Size of Remaining matrix : (13,2), with  density : 1.0 and number of ones: 26
+    Global Time (in sec): 151.974
+    Total Time in QBC approaches: 151.974
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.001
+    
+ Remaining Rows last : [15, 25, 28, 37, 44, 52, 63, 65, 73, 75, 79, 83, 94]
+ 
+  Remaining  Cols  last : [20, 91]
+  
+  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  Below is how my matrix is declared. 
+  
+      ----------
+    rows_data: list of tuples (row, degree) of rows in the matrix.
+    cols_data: list of tuples (col, degree) of columns in the matrix.
+    edges: list of tuples (row, col) corresponding to the ones of the matrix.
+    
+    I know a matrix M with rows_data, cols_data and edges
+    and a submatrix of M called sub_M with rows_res, cols_res; edges_res. 
+    
+   can you write me a python code that returns two submatrices M1 and M2 such that 
+   M1 with rows_new =rows_data minus rows_res and  cols_new = cols_data and edges_new respectively computed to take in account the modifications
+   and 
+   M2 with rows_new= rows_data and cols_new =   cols_data - cols_res and edges_new respectively computed  to take in account the modifications 
+   
+ 

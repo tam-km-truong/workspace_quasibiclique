@@ -1,0 +1,37 @@
+from pulp import LpProblem, LpMaximize, LpVariable, lpSum, value
+
+# Initialize the model
+model = LpProblem(name="max_e_wr", sense=LpMaximize)
+
+# Variables for rows and columns
+lpRows = {row: (LpVariable(f'row_{row}', cat='Integer', lowBound=0, upBound=1), degree) for row, degree in rows_data}
+lpCols = {col: (LpVariable(f'col_{col}', cat='Integer', lowBound=0, upBound=1), degree) for col, degree in cols_data}
+lpCells = {(row, col): LpVariable(f'cell_{row}_{col}', cat='Continuous', lowBound=0, upBound=1) for (row, col) in edges}
+
+# Warm start (PuLP way: use setInitialValue if needed)
+for row, (var, _) in lpRows.items():
+    var.setInitialValue(1 if row in rows_res_set else 0)
+
+for col, (var, _) in lpCols.items():
+    var.setInitialValue(1 if col in cols_res_set else 0)
+
+for (row, col), var in lpCells.items():
+    var.setInitialValue(1 if (row, col) in itertools.product(rows_res, cols_res) else 0)
+
+# Create and link 'current' variable to the sum of lpCells
+lpCurrent = LpVariable('current', cat='Integer', lowBound=0)
+
+# Objective: maximize lpCurrent
+model += lpCurrent, "maximize_current"
+
+# Constraint: lpCurrent equals the sum of lpCells
+model += lpCurrent == lpSum(lpCells.values()), "current_value"
+
+# Solve the model
+status = model.solve()
+
+# Print results
+if status == 1:  # Optimal solution
+    print(f"Value of 'current': {value(lpCurrent)}")
+else:
+    print("No optimal solution found.")

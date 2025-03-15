@@ -1,0 +1,62 @@
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix M0 in  data/data3.csv and model:  max_e_c***
+Size of current matrix :  50 * 50 = 2500 ; complementary: 0
+number input zeros :  1608 ; number input ones :  892
+rho =  0.1 ; delta :  0.0
+Input density : 0.357 ; density_threshold: 0.17000
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+Model status: Optimal
+Solution saved to Experiments/solution_0BC_M0.csv
+
+----------------------------------------
+ results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining  Rows  : 20
+Number of Remaining number Columns : 21
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 420 Density : 1.0 current obj value 1200.0
+----------------------------------------
+
+ !!!!!!!!!!!!!!!!!! I got a lower bound  420
+*****Model in warm start is infeasible.!!!*** 
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix M0
+        with delta =  0.0
+        Found matrix of size : (20, 21)
+        and density : 1.0
+        and # of ones : 420
+        and QBC time heuristic  : 0.03842
+        and QBC time  : 0.11954
+        
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix M0 in  data/data3.csv and complementary: 0 and debug  1
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (20,21), with  density : 1.0 and number of ones: 420
+    Global Time (in sec): 0.120
+    Total Time in QBC approaches: 0.120
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.038 
+    Time in warm start only : 0.081
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 32.14%
+    With zero deletion rate (rho): 0.1 and threshold: 0.17
+    
+----------------------------------------------------------------------
+
+ ***Solution Rows indices : [3, 6, 12, 14, 16, 17, 18, 22, 25, 29, 30, 32, 34, 35, 37, 39, 41, 42, 44, 47]
+ ***Solution Cols indices : [3, 4, 8, 10, 11, 14, 15, 17, 18, 19, 20, 22, 24, 30, 35, 41, 43, 46, 47, 48, 49]

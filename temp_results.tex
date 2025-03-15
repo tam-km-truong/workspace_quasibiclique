@@ -1,0 +1,246 @@
+Optimize a model with 660 rows, 658 columns and 53700 nonzeros
+Model fingerprint: 0x343b0aac
+Variable types: 0 continuous, 658 integer (329 binary)
+Coefficient statistics:
+  Matrix range     [9e-01, 3e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 3e+02]
+  RHS range        [2e+00, 3e+02]
+Presolve removed 324 rows and 324 columns
+Presolve time: 0.03s
+Presolved: 336 rows, 334 columns, 27058 nonzeros
+Variable types: 0 continuous, 334 integer (329 binary)
+Found heuristic solution: objective 15374.000000
+
+Root relaxation: objective 1.976014e+04, 171 iterations, 0.00 seconds (0.01 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 19760.1365    0  125 15374.0000 19760.1365  28.5%     -    0s
+H    0     0                    15833.000000 19760.1365  24.8%     -    0s
+H    0     0                    17345.000000 19690.4024  13.5%     -    0s
+     0     0 17901.3797    0  179 17345.0000 17901.3797  3.21%     -    0s
+     0     0 17863.8499    0  180 17345.0000 17863.8499  2.99%     -    0s
+     0     0 17851.1792    0  181 17345.0000 17851.1792  2.92%     -    0s
+     0     0 17850.8028    0  184 17345.0000 17850.8028  2.92%     -    0s
+     0     0 17628.4205    0  203 17345.0000 17628.4205  1.63%     -    0s
+     0     0 17580.7654    0  198 17345.0000 17580.7654  1.36%     -    0s
+     0     0 17574.3392    0  196 17345.0000 17574.3392  1.32%     -    0s
+     0     0 17569.6774    0  197 17345.0000 17569.6774  1.30%     -    0s
+     0     0 17567.5604    0  203 17345.0000 17567.5604  1.28%     -    0s
+     0     0 17566.0970    0  203 17345.0000 17566.0970  1.27%     -    0s
+     0     0 17565.8376    0  205 17345.0000 17565.8376  1.27%     -    0s
+     0     0 17477.7753    0  207 17345.0000 17477.7753  0.77%     -    0s
+     0     0 17445.3990    0  202 17345.0000 17445.3990  0.58%     -    0s
+     0     0 17432.5169    0  207 17345.0000 17432.5169  0.50%     -    0s
+     0     0 17428.9422    0  209 17345.0000 17428.9422  0.48%     -    0s
+     0     0 17427.1303    0  209 17345.0000 17427.1303  0.47%     -    0s
+     0     0 17425.8104    0  212 17345.0000 17425.8104  0.47%     -    0s
+     0     0 infeasible    0      17345.0000 17345.0000  0.00%     -    0s
+
+Cutting planes:
+  Cover: 74
+  MIR: 171
+  StrongCG: 9
+  RLT: 125
+
+Explored 1 nodes (2200 simplex iterations) in 0.57 seconds (1.09 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 3: 17345 15833 15374 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.734500000000e+04, best bound 1.734500000000e+04, gap 0.0000%
+
+Wrote result file '/var/folders/mg/by6f6n9d2j94g_lk3b9m7nfrjxgrsr/T/3077b6c8b5424de783086639fcb3abbf-pulp.sol'
+
+Model is . Exporting LP file for debugging...
+Model status: Optimal
+
+----------------------------------------------------------------------
+Stats
+
+ I solved model : max_e_h  Local Time:  - (real) 0.66765 - (Local CPU) 0.66766 - (Global CPU) 0.66766
+
+Solve status: Optimal Objective value: 17345.0
+----------------------------------------
+
+checking solution after model max_e_h density: 1.355524861878453 size= 7240 !!!!!!!!!!!!!!!!!!!!!!!!!
+
+----------------------------------------
+Set parameter Username
+Set parameter TimeLimit to value 600
+Set parameter LogFile to value "gurobi.log"
+Using license file /Users/randonov/gurobi.lic
+Academic license - for non-commercial use only - expires 2025-04-11
+
+Gurobi Optimizer version 11.0.1 build v11.0.1rc0 (mac64[arm] - Darwin 21.6.0 21H1320)
+Copyright (c) 2024, Gurobi Optimization, LLC
+
+Read LP format model from file /var/folders/mg/by6f6n9d2j94g_lk3b9m7nfrjxgrsr/T/9292a652d3d54d688c5e75e5ad03a034-pulp.lp
+Reading time = 0.03 seconds
+maximize_sum: 22575 rows, 11451 columns, 75286 nonzeros
+
+CPU model: Apple M2
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 22575 rows, 11451 columns and 75286 nonzeros
+Model fingerprint: 0x77768d6a
+Variable types: 11122 continuous, 329 integer (329 binary)
+Coefficient statistics:
+  Matrix range     [1e-01, 3e+02]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 3e+02]
+Found heuristic solution: objective 4.0000000
+Presolve added 4 rows and 4 columns
+Presolve time: 0.11s
+Presolved: 22579 rows, 11455 columns, 72455 nonzeros
+Variable types: 11122 continuous, 333 integer (329 binary)
+
+Root relaxation: objective 8.862878e+03, 12265 iterations, 1.11 seconds (3.66 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 8862.87783    0  125    4.00000 8862.87783      -     -    1s
+H    0     0                    3466.0000000 8862.87783   156%     -    1s
+H    0     0                    6961.0000000 8862.87783  27.3%     -    1s
+     0     0 7488.19578    0  331 6961.00000 7488.19578  7.57%     -    9s
+     0     0 7451.83594    0  332 6961.00000 7451.83594  7.05%     -   10s
+     0     0 7451.83594    0  332 6961.00000 7451.83594  7.05%     -   10s
+     0     0 7451.83594    0  332 6961.00000 7451.83594  7.05%     -   10s
+     0     0 7247.55355    0  332 6961.00000 7247.55355  4.12%     -   14s
+     0     0 7245.07301    0  332 6961.00000 7245.07301  4.08%     -   14s
+     0     0 7244.26363    0  332 6961.00000 7244.26363  4.07%     -   14s
+     0     0 7244.06895    0  332 6961.00000 7244.06895  4.07%     -   14s
+     0     0 7223.03527    0  332 6961.00000 7223.03527  3.76%     -   15s
+     0     0 7222.08207    0  332 6961.00000 7222.08207  3.75%     -   16s
+     0     0 7222.08207    0  332 6961.00000 7222.08207  3.75%     -   16s
+     0     0 7216.52943    0  332 6961.00000 7216.52943  3.67%     -   16s
+     0     0 7214.24250    0  332 6961.00000 7214.24250  3.64%     -   17s
+     0     0 7214.24250    0  332 6961.00000 7214.24250  3.64%     -   17s
+     0     0 7214.24250    0  332 6961.00000 7214.24250  3.64%     -   17s
+     0     0 7213.64308    0  332 6961.00000 7213.64308  3.63%     -   18s
+     0     0 7213.64308    0  332 6961.00000 7213.64308  3.63%     -   18s
+     0     0 7212.64168    0  332 6961.00000 7212.64168  3.62%     -   18s
+     0     0 7212.32496    0  332 6961.00000 7212.32496  3.61%     -   19s
+     0     2 7211.25990    0  332 6961.00000 7211.25990  3.60%     -   23s
+     5     8 7119.50432    3  328 6961.00000 7184.54289  3.21%  2032   26s
+    25    16 7068.98542    6  325 6961.00000 7098.65593  1.98%  2129   30s
+    62    20 7024.70556    9  321 6961.00000 7098.44808  1.97%  1420   36s
+    92    22 6993.88502   12  318 6961.00000 7098.44808  1.97%  1244   42s
+   130    32     cutoff   15      6961.00000 7092.70839  1.89%  1122   45s
+   234     2     cutoff   17      6961.00000 7005.14347  0.63%   843   50s
+
+Cutting planes:
+  Gomory: 7
+  Cover: 63
+  MIR: 210
+  StrongCG: 20
+  RLT: 31
+
+Explored 246 nodes (266834 simplex iterations) in 51.46 seconds (171.42 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 3: 6961 3466 4 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 6.961000000000e+03, best bound 6.961000000000e+03, gap 0.0000%
+
+Wrote result file '/var/folders/mg/by6f6n9d2j94g_lk3b9m7nfrjxgrsr/T/9292a652d3d54d688c5e75e5ad03a034-pulp.sol'
+
+Model is . Exporting LP file for debugging...
+Model status: Optimal
+
+----------------------------------------------------------------------
+Stats
+
+ I solved model : max_e_warm_r  Local Time:  - (real) 51.68591 - (Local CPU) 51.68594 - (Global CPU) 52.35360
+
+Solve status: Optimal Objective value: 6961.0
+----------------------------------------
+
+----------------------------------------
+
+        Exit from the exact approach: max_e_c
+        with delta =  0.1
+        Found matrix of size : (40, 181)
+        and density : 1.355524861878453
+        and # of ones : 9814
+        and QBC time  : 0.00000
+        
+
+----------------------------------------------------------------------
+ End of computations for :    Input = data/data4.csv,   Model =max_e_c  Quasi-biclique error  =0.1
+
+    Number of iterations in greedy approach: 0
+    Time in greedy approach: 0.00000
+    Total Time in QBC approaches: 53.02126
+    Time in max_e_h only : 52.35360
+    Time in max_e_r only : 0.66766
+    Global Time: 53.02126
+    Percentage of knapsack run time versus global run time : 0.00% 
+    Percentage of heuristic run time versus total QBC run time : 98.74%
+    With zero deletion rho: 0.1
+    Threshold: 0.001
+    
+ Computed density :  1.355524861878453  Number computed ones: 9814
+ 
+ 
+ 24/02 
+ 
+ malaria 
+ 
+Explored 1 nodes (16998 simplex iterations) in 34.23 seconds (72.55 work units)
+Thread count was 8 (of 8 available processors)
+
+Solution count 5: 72 54 10 ... 4
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 7.200000000000e+01, best bound 7.200000000000e+01, gap 0.0000%
+
+Wrote result file '/var/folders/mg/by6f6n9d2j94g_lk3b9m7nfrjxgrsr/T/22dcf9d094a44111b2baa532f1e3c690-pulp.sol'
+
+
+----------------------------------------
+Solver Status after solving model with status and computed objective : max_e_wr, 1 72.0
+Model is . Exporting LP file for debugging...
+
+
+----------------------------------------------------------------------
+Stats
+ Model solved : max_e_wr  Local Time:  - (real) 35.02055 - (Local CPU) 35.02066 - (Global CPU) 118.61034
+
+ Solve status: Optimal Objective value: 72.0 nb_rows 4 nb_cols 18
+----------------------------------------
+----------------------------------------
+
+        Exit from the exact approach: max_e_c
+        with delta =  0.1
+        Found matrix of size : (4, 18)
+        and density : 1.0
+        and # of ones : 72
+        and QBC time heuristic  : 83.58969
+        and QBC time  : 118.61034
+        
+
+----------------------------------------------------------------------
+global_time_combined only   118.61034158291295 global_time  118.61034158291295
+ End of computations for :    Input = data/malaria.csv,   Model =max_e_c  Quasi-biclique error  =0.1
+
+    Number of iterations in greedy approach: 0
+    Time in greedy approach: 0.00000
+    Total Time in QBC approaches: 118.61034
+    Time in max_e_h only : 83.58969
+    Time in max_e_wr only : 35.02066
+    Global Time: 118.61034
+    Percentage of knapsack run time versus global run time : 0.00% 
+    Percentage of heuristic run time versus total QBC run time : 70.47%
+    With zero deletion rho: 0.1
+    Threshold: 0.001
+    
+ Computed density :  1.0  Number computed ones: 72
+ Size of Remaining matrix : ( 4 , 18 )
+ 

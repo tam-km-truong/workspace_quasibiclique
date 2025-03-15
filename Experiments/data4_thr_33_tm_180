@@ -1,0 +1,194 @@
+
+----------------------------------------
+Computed Objective Value: 3798.0
+Solution saved to solution_max_e_h.csv
+
+ !!!!!!!!!!!!!!!!!! I got a lower bound  1106
+Computed Objective Value: 1188.0
+Solution saved to solution.csv
+
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix M0 in  data/data4.csv and complementary: 1 and debug  0
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (11,108), with  density : 1.0 and number of ones: 1188
+    Global Time (in sec): 0.498
+    Total Time in QBC approaches: 0.459
+    Time in greedy approach: 0.039,  size of matrix found by greedy : (44,210) 
+    With density : 0.354 and # ones : 3268 
+    Time in heuristic only : 0.131 
+    Time in warm start only : 0.328
+    Number of iterations in greedy approach: 3
+    Percentage of greedy approach run time in global run time : 7.88% 
+    Percentage of heuristic run time in QBC run time : 28.54%
+    With zero deletion rate (rho): 0.1 and threshold: 0.33
+    
+----------------------------------------------------------------------
+
+
+----------------------------------------
+Computed Objective Value: 738.0
+Solution saved to solution_max_e_h.csv
+
+ !!!!!!!!!!!!!!!!!! I got a lower bound  222
+Model in warm start is infeasible. 
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix M1 in  data/data4.csv and complementary: 1 and debug  0
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (3,74), with  density : 1.0 and number of ones: 222
+    Global Time (in sec): 0.242
+    Total Time in QBC approaches: 0.114
+    Time in greedy approach: 0.128,  size of matrix found by greedy : (19,129) 
+    With density : 0.332 and # ones : 814 
+    Time in heuristic only : 0.079 
+    Time in warm start only : 0.036
+    Number of iterations in greedy approach: 8
+    Percentage of greedy approach run time in global run time : 52.77% 
+    Percentage of heuristic run time in QBC run time : 68.77%
+    With zero deletion rate (rho): 0.1 and threshold: 0.33
+    
+----------------------------------------------------------------------
+
+
+----------------------------------------
+Computed Objective Value: 1170.0
+Solution saved to solution_max_e_h.csv
+
+ !!!!!!!!!!!!!!!!!! I got a lower bound  142
+Computed Objective Value: 252.0
+Solution saved to solution.csv
+
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix M2 in  data/data4.csv and complementary: 1 and debug  0
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (7,36), with  density : 1.0 and number of ones: 252
+    Global Time (in sec): 8.911
+    Total Time in QBC approaches: 8.740
+    Time in greedy approach: 0.171,  size of matrix found by greedy : (39,116) 
+    With density : 0.353 and # ones : 1595 
+    Time in heuristic only : 0.484 
+    Time in warm start only : 8.256
+    Number of iterations in greedy approach: 4
+    Percentage of greedy approach run time in global run time : 1.91% 
+    Percentage of heuristic run time in QBC run time : 5.54%
+    With zero deletion rate (rho): 0.1 and threshold: 0.33
+    
+----------------------------------------------------------------------
+
+
+----------------------------------------
+Computed Objective Value: 11692.0
+Solution saved to solution_max_e_h.csv
+
+ !!!!!!!!!!!!!!!!!! I got a lower bound  2204
+Computed Objective Value: 2646.0
+Solution saved to solution.csv
+
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix M11 in  data/data4.csv and complementary: 1 and debug  0
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (27,98), with  density : 1.0 and number of ones: 2646
+    Global Time (in sec): 180.752
+    Total Time in QBC approaches: 180.581
+    Time in greedy approach: 0.171,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.284 
+    Time in warm start only : 180.298
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.09% 
+    Percentage of heuristic run time in QBC run time : 0.16%
+    With zero deletion rate (rho): 0.1 and threshold: 0.33
+    
+----------------------------------------------------------------------
+
+
+----------------------------------------
+Computed Objective Value: 9174.0
+Solution saved to solution_max_e_h.csv
+
+ !!!!!!!!!!!!!!!!!! I got a lower bound  2166
+Computed Objective Value: 2340.0
+Solution saved to solution.csv
+
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix M12 in  data/data4.csv and complementary: 1 and debug  0
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (30,78), with  density : 1.0 and number of ones: 2340
+    Global Time (in sec): 62.298
+    Total Time in QBC approaches: 62.128
+    Time in greedy approach: 0.171,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.155 
+    Time in warm start only : 61.973
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.27% 
+    Percentage of heuristic run time in QBC run time : 0.25%
+    With zero deletion rate (rho): 0.1 and threshold: 0.33
+    
+----------------------------------------------------------------------
+
+
+----------------------------------------
+Computed Objective Value: 6693.0
+Solution saved to solution_max_e_h.csv
+
+ !!!!!!!!!!!!!!!!!! I got a lower bound  975
+Computed Objective Value: 1430.0
+Solution saved to solution.csv
+
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix M21 in  data/data4.csv and complementary: 1 and debug  0
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (22,65), with  density : 1.0 and number of ones: 1430
+    Global Time (in sec): 180.577
+    Total Time in QBC approaches: 180.406
+    Time in greedy approach: 0.171,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.254 
+    Time in warm start only : 180.153
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.09% 
+    Percentage of heuristic run time in QBC run time : 0.14%
+    With zero deletion rate (rho): 0.1 and threshold: 0.33
+    
+----------------------------------------------------------------------
+
+
+----------------------------------------
+Computed Objective Value: 5457.0
+Solution saved to solution_max_e_h.csv
+
+ !!!!!!!!!!!!!!!!!! I got a lower bound  106
+Computed Objective Value: 1025.0
+Solution saved to solution.csv
+
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix M22 in  data/data4.csv and complementary: 1 and debug  0
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (25,41), with  density : 1.0 and number of ones: 1025
+    Global Time (in sec): 180.720
+    Total Time in QBC approaches: 180.549
+    Time in greedy approach: 0.171,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.414 
+    Time in warm start only : 180.135
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.09% 
+    Percentage of heuristic run time in QBC run time : 0.23%
+    With zero deletion rate (rho): 0.1 and threshold: 0.33
+    
+----------------------------------------------------------------------
+

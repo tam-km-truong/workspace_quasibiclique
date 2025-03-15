@@ -1,0 +1,20 @@
+Solution saved to Experiments/solution_0BC_M0.csv
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix M0 in  data/data3.csv and complementary: 0 and debug  0
+    With  model: max_e_r and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (20,21), with  density : 1.0 and number of ones: 420
+    Global Time (in sec): 0.143
+    Total Time in QBC approaches: 0.070
+    Time in greedy approach: 0.072,  size of matrix found by greedy : (34,32) 
+    With density : 0.737 and # ones : 802 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 6
+    Percentage of greedy approach run time in global run time : 50.79% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.7
+    
+----------------------------------------------------------------------
+
