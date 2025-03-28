@@ -1,0 +1,282 @@
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 1 in  data/data1.csv at level 1 and with model:  max_e_c***
+Size of current matrix :  10 * 10 = 100 ; dec_conq: 1
+number input zeros :  36 ; number input ones :  64
+rho =  0.1 ; delta :  0.0
+Input density : 0.640 ; density_threshold: 0.00300
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+row data= [(0, 7), (1, 5), (2, 10), (3, 9), (4, 4), (5, 5), (6, 4), (7, 4), (8, 9), (9, 7)]
+col data= [(0, 10), (1, 5), (2, 4), (3, 3), (4, 6), (5, 9), (6, 4), (7, 9), (8, 9), (9, 5)]
+row_edges for row 0: [0, 1, 2, 3, 4, 5, 9]
+Keys in lpCols: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+row_edges for row 1: [0, 1, 5, 7, 8]
+Keys in lpCols: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+row_edges for row 2: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Keys in lpCols: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+row_edges for row 3: [0, 1, 2, 3, 4, 5, 6, 7, 8]
+Keys in lpCols: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+row_edges for row 4: [0, 5, 7, 8]
+Keys in lpCols: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+row_edges for row 5: [0, 4, 7, 8, 9]
+Keys in lpCols: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+row_edges for row 6: [0, 5, 7, 8]
+Keys in lpCols: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+row_edges for row 7: [0, 5, 7, 8]
+Keys in lpCols: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+row_edges for row 8: [0, 1, 2, 4, 5, 6, 7, 8, 9]
+Keys in lpCols: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+row_edges for row 9: [0, 4, 5, 6, 7, 8, 9]
+Keys in lpCols: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Model status: Optimal
+Solution saved to Experiments/data1/results_h_1_M_1.csv
+
+----------------------------------------
+ results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining number  Rows  : 8
+Number of Remaining number Columns : 4
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 32 Density : 1.0 current obj value 89.0
+----------------------------------------
+
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 1
+        with delta =  0.0
+        Found matrix of size : (8, 4)
+        and density : 1.0
+        and # of ones : 32
+        and Heuristic QBC time   : 0.01019
+        and Global QBC  time  : 0.01019
+        
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 1 in  data/data1.csv at level 1 and debug  1
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (8,4), with  density : 1.0 and number of ones: 32
+    Global Time (in sec): 0.010
+    Total Time in QBC approaches: 0.010
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.010 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 100.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.003
+    
+----------------------------------------------------------------------
+
+rows = [(0, 3), (1, 5), (2, 0), (3, 1), (4, 6), (5, 5), (6, 6), (7, 6), (8, 1), (9, 3)]
+cols = [(0, 0), (1, 5), (2, 6), (3, 7), (4, 4), (5, 1), (6, 6), (7, 1), (8, 1), (9, 5)]
+edges_1 = [(0, 6), (0, 7), (0, 8), (1, 2), (1, 3), (1, 4), (1, 6), (1, 9), (3, 9), (4, 1), (4, 2), (4, 3), (4, 4), (4, 6), (4, 9), (5, 1), (5, 2), (5, 3), (5, 5), (5, 6), (6, 1), (6, 2), (6, 3), (6, 4), (6, 6), (6, 9), (7, 1), (7, 2), (7, 3), (7, 4), (7, 6), (7, 9), (8, 3), (9, 1), (9, 2), (9, 3)]
+rows_res = [1, 2, 3, 4, 6, 7, 8, 9]
+cols_res = [0, 5, 7, 8]
+dec_conq= 1
+
+ Level 0, Matrix 2:
+Size Rows: 2
+Size Cols: 10
+
+ Level 0 Matrix  3:
+Size Rows: 10
+Size Cols: 6
+ Node 2 has been fathomed because of min number rows = 3 or min number columns = 3 
+calling decrease_and_conquer 3
+Task with matrix 3 with size (10,6) and density 0.55 has been added to the queue.
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 3 in  data/data1.csv at level 0 and with model:  max_e_c***
+Size of current matrix :  10 * 6 = 60 ; dec_conq: 0
+number input zeros :  27 ; number input ones :  33
+rho =  0.1 ; delta :  0.0
+Input density : 0.550 ; density_threshold: 0.00300
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+row data= [(0, 1), (1, 5), (2, 0), (3, 1), (4, 6), (5, 4), (6, 6), (7, 6), (8, 1), (9, 3)]
+col data= [(1, 5), (2, 6), (3, 7), (4, 4), (6, 6), (9, 5)]
+row_edges for row 0: [6]
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+row_edges for row 1: [2, 3, 4, 6, 9]
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+row_edges for row 2: []
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+row_edges for row 3: [9]
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+row_edges for row 4: [1, 2, 3, 4, 6, 9]
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+row_edges for row 5: [1, 2, 3, 6]
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+row_edges for row 6: [1, 2, 3, 4, 6, 9]
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+row_edges for row 7: [1, 2, 3, 4, 6, 9]
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+row_edges for row 8: [3]
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+row_edges for row 9: [1, 2, 3]
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+Model status: Optimal
+Solution saved to Experiments/data1/results_h_0_M_3.csv
+
+----------------------------------------
+ results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining number  Rows  : 4
+Number of Remaining number Columns : 5
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 20 Density : 1.0 current obj value 51.0
+----------------------------------------
+
+ !!!!!!!!!!!!!!!!!! I got a lower bound  20
+*****Model in warm start is infeasible.!!!*** 
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 3
+        with delta =  0.0
+        Found matrix of size : (4, 5)
+        and density : 1.0
+        and # of ones : 20
+        and Heuristic QBC time   : 0.00630
+        and Global QBC  time  : 0.01262
+        
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 3 in  data/data1.csv at level 0 and debug  1
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (4,5), with  density : 1.0 and number of ones: 20
+    Global Time (in sec): 0.013
+    Total Time in QBC approaches: 0.013
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.006 
+    Time in warm start only : 0.006
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 49.89%
+    With zero deletion rate (rho): 0.1 and threshold: 0.003
+    
+----------------------------------------------------------------------
+
+return from 3 with winning node = 3
+return from 1 with winning node = 3
+
+----------------------------------------------------------------------
+
+End of tasks generation stage. Last generated task from matrix 1 with winning node 3 and global time 0.0126223,
+rows = [(1, 5), (4, 5), (6, 5), (7, 5)], 
+cols = [(2, 4), (3, 4), (4, 4), (6, 4), (9, 4)], 
+density = 1.0, nb_ones = 20
+ Matrix: 3, Size: 60, Rows: [(0, 1), (1, 5), (2, 0), (3, 1), (4, 6), (5, 4), (6, 6), (7, 6), (8, 1), (9, 3)], Cols: [(1, 5), (2, 6), (3, 7), (4, 4), (6, 6), (9, 5)], Edges: [(0, 6), (1, 2), (1, 3), (1, 4), (1, 6), (1, 9), (3, 9), (4, 1), (4, 2), (4, 3), (4, 4), (4, 6), (4, 9), (5, 1), (5, 2), (5, 3), (5, 6), (6, 1), (6, 2), (6, 3), (6, 4), (6, 6), (6, 9), (7, 1), (7, 2), (7, 3), (7, 4), (7, 6), (7, 9), (8, 3), (9, 1), (9, 2), (9, 3)]
+----------------------------------------------------------------------
+
+
+***QUEUE Processing of task number 3 with (size 60) selected_model max_e_c dec_conq 0 delta 0.0 threshold 0.003 rho 0.1 QBC_time 0.012622292037121952 ***
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 3 in  data/data1.csv at level 0 and with model:  max_e_c***
+Size of current matrix :  10 * 6 = 60 ; dec_conq: 0
+number input zeros :  27 ; number input ones :  33
+rho =  0.1 ; delta :  0.0
+Input density : 0.550 ; density_threshold: 0.00300
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+row data= [(0, 1), (1, 5), (2, 0), (3, 1), (4, 6), (5, 4), (6, 6), (7, 6), (8, 1), (9, 3)]
+col data= [(1, 5), (2, 6), (3, 7), (4, 4), (6, 6), (9, 5)]
+row_edges for row 0: [6]
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+row_edges for row 1: [2, 3, 4, 6, 9]
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+row_edges for row 2: []
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+row_edges for row 3: [9]
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+row_edges for row 4: [1, 2, 3, 4, 6, 9]
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+row_edges for row 5: [1, 2, 3, 6]
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+row_edges for row 6: [1, 2, 3, 4, 6, 9]
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+row_edges for row 7: [1, 2, 3, 4, 6, 9]
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+row_edges for row 8: [3]
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+row_edges for row 9: [1, 2, 3]
+Keys in lpCols: [1, 2, 3, 4, 6, 9]
+Model status: Optimal
+Solution saved to Experiments/data1/results_h_0_M_3.csv
+
+----------------------------------------
+ results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining number  Rows  : 4
+Number of Remaining number Columns : 5
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 20 Density : 1.0 current obj value 51.0
+----------------------------------------
+
+ !!!!!!!!!!!!!!!!!! I got a lower bound  20
+*****Model in warm start is infeasible.!!!*** 
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 3
+        with delta =  0.0
+        Found matrix of size : (4, 5)
+        and density : 1.0
+        and # of ones : 20
+        and Heuristic QBC time   : 0.01857
+        and Global QBC  time  : 0.02491
+        
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 3 in  data/data1.csv at level 0 and debug  1
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (4,5), with  density : 1.0 and number of ones: 20
+    Global Time (in sec): 0.025
+    Total Time in QBC approaches: 0.025
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.019 
+    Time in warm start only : 0.006
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 74.56%
+    With zero deletion rate (rho): 0.1 and threshold: 0.003
+    
+----------------------------------------------------------------------
+
+Processed 3 (size 60) -> obj = 20
+
+***End of computations !!!
+

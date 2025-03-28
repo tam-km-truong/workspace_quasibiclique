@@ -1,10 +1,8 @@
-Objective Value,198
-# of rows,18
-# of columns,11
+Objective Value,171
+# of rows,19
+# of columns,9
 Variable,Value
-col_11,1.0
 col_13,1.0
-col_15,1.0
 col_18,1.0
 col_19,1.0
 col_21,1.0
@@ -29,5 +27,6 @@ row_34,1.0
 row_35,1.0
 row_37,1.0
 row_39,1.0
+row_40,1.0
 row_41,1.0
 row_44,1.0

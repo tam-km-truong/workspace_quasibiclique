@@ -1,0 +1,131 @@
+
+----------------------------------------------------------------------
+
+End of tasks generation stage. Last generated task from matrix 1 with winning node 1 and global time 0.0000000
+
+----------------------------------------------------------------------
+ Size of the queue: 1
+ Matrix: 1, Size: 8092, Number Rows: 100,  Number Cols: 100,  Number Edges: 8092, obj None
+
+----------------------------------------------------------------------
+
+
+***QUEUE Processing of task number 1 with (edges 8092) selected_model max_e_c dec_conq 0 delta 0.0 threshold 0.19 rho 0.1 QBC_time 0.0 ***
+
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 1 in  data/random_bench/random_very_long.txt at level 0 and with model:  max_e_c***
+Size of current matrix :  100 * 100 = 10000 ; dec_conq: 0
+number input zeros :  1908 ; number input ones :  8092
+rho =  0.1 ; delta :  0.0
+Input density : 0.809 ; density_threshold: 0.19000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+Model status: Optimal
+ A lower_bound = 164 has been found by max_e_h 
+Solution saved to Experiments/random_bench/random_very_long.txt/results_h_0_M_1.csv
+
+----------------------------------------
+ results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining number  Rows  : 2
+Number of Remaining number Columns : 82
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 164 Density : 1.0 current obj value 6854.0
+----------------------------------------
+
+ !!!!!!!!!!!!!!!!!! I got a lower bound  164
+*****Model in warm start is feasible. Improving the solution!!!*** 
+Solution saved to Experiments/random_bench/random_very_long.txt/results_wstart_0_M_1.csv
+
+
+----------------------------------------
+ results from updating data after solving model = max_e_wr  delta =   0.0
+Number of Remaining  Rows  : 14
+Number of Remaining number Columns : 32
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 448 Density : 1.0
+----------------------------------------
+
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 1
+        with delta =  0.0
+        Found matrix of size : (14, 32)
+        and density : 1.0
+        and # of ones : 448
+        and Heuristic QBC time   : 38.47516
+        and Global QBC  time  : 2541.51919
+        
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 1 in  data/random_bench/random_very_long.txt at level 0 and debug  1
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (14,32), with  density : 1.0 and number of ones: 448
+    Global Time (in sec): 2541.519
+    Total Time in QBC approaches: 2541.519
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 38.475 
+    Time in warm start only : 2503.044
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 1.51%
+    With zero deletion rate (rho): 0.1 and threshold: 0.19
+    
+----------------------------------------------------------------------
+
+PROCESSED TASK NUMBER 1 with (edges 8092) -> obj = 448  with solving TIME : 4526.4728 sec
+
+Best task: 1, Best objective: 448 with # rows 14 and # cols 32
+ Number of fathomed tasks : 0
+
+----------------------------------------------------------------------
+
+Evaluated Queue:
+----------------------------------------------------------------------
+ Size of the evaluated  queue: 1
+ Matrix: 1, # Rows: 100,  # Cols: 100,  # Edges: 8092, size max clique  448, # rows: 14 # columns: 32
+
+----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+Size of the COPY_QUEUE: 1
+Matrix: 1, Size: 8092, Number Rows: 100, Number Cols: 100, Number Edges: 8092
+
+----------------------------------------------------------------------
+***End of computations !!!
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+ 
+    End of computations for matrix  data/random_bench/random_very_long.txt with rows: 100 and columns 100
+    with  input density : 0.809 and number of ones: 8092
+    using  model: max_e_c  with quasi-biclique error: 0.0 and density_threshold: 0.190 
+    and zero deletion rate (rho): 0.1 and debug: 1
+    Decrease and conquer levels:  0, # ext task: 1, int task : 0 
+    The solution has been found in matrix : 1  with 
+    size max clique  448, # rows: 14 # columns: 32,
+    # solved  tasks : 1, # skipped  tasks : 0  # fathomed tasks : 0
+    
+----------------------------------------------------------------------
+
+Best task: 1, Best objective: 448 with # rows 14 and # cols 32
+
+----------------------------------------------------------------------
+ Model building and solving global time: 4526.9060 sec
+ Tasks_generation time: 0.0000 sec
+ Tasks_pure_solving time: 4526.4728 sec
+
+size egdes_1: 8092
+
+Number of ones in the best submatrix : 448

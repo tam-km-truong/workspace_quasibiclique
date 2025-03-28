@@ -1,7 +1,7 @@
 # -*- coding=utf-8 -*-
 
 """
-Skeleton for the project: Searching Maximum Quasi-Bicliques
+             Searching Maximum Quasi-Bicliques
 
 Install Gurobi Solver with free academic licence using your University account at: https://www.gurobi.com/features/academic-named-user-license/
 
@@ -25,6 +25,8 @@ import itertools
 import gurobipy as gp
 import gurobipy as GRB 
 import numpy as np 
+import heapq 
+#from tabulate import tabulate
 from pulp import (
     GUROBI_CMD,
     PULP_CBC_CMD,
@@ -234,34 +236,36 @@ def max_e_r(rows_data, cols_data, edges, delta):
         print('-' * 40) 
         print(f"******** Solving model  ********", model.name, " with delta = ", delta)
         print(' # rows_data =', len(rows_data),' # cols_data =', len(cols_data), ' # edges =', len(edges)) 
+        print(' # rows_data =', rows_data, '\n, # cols_data =', cols_data, '\n, # edges =', edges)
         print('row_threshold=', row_threshold )
         print('col_threshold=', col_threshold )
         print()
         print('-' * 40)
     model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
     model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
+    # for row, col in edges:
+    # #for row, col in lpCells:
+    #     model += (lpRows[row][0] >= lpCells[(row, col)]), f'cell_{row}_{col}_1'
+    #     model += (lpCols[col][0] >= lpCells[(row, col)]), f'ce ll_{row}_{col}_2'
+    # Constraints for matrix structure
+    # Check for missing columns in cols_data
+    missing_cols = {col for _, col in edges} - {col for col, _ in cols_data}
+    if missing_cols:
+        print(f"Warning: These columns are missing from cols_data but appear in edges: {missing_cols}")
+
     for row, col in edges:
-    #for row, col in lpCells:
-        model += (lpRows[row][0] >= lpCells[(row, col)]), f'cell_{row}_{col}_1'
-        model += (lpCols[col][0] >= lpCells[(row, col)]), f'ce ll_{row}_{col}_2'
+        if row in lpRows and col in lpCols and (row, col) in lpCells:
+            model += (lpRows[row][0] >= lpCells[(row, col)]), f'cell_{row}_{col}_1'
+            model += (lpCols[col][0] >= lpCells[(row, col)]), f'cell_{row}_{col}_2'
+        else:
+            print(f"Warning: row={row}, col={col} not found in lpRows/lpCols!")
 
-        #########################################
-        #compacting  with degree 
-        #########################################
-      
-    # for col, _ in cols_data:
-    #     col_edges = [u for u, v in edges if v == col]           
-    #     model += (
-    #         lpSum(lpCells[(row, col)][0] for row in col_edges) <= lpCols[col][1]*lpCols[col][0]
-    #     ), f"col_degre_{col}"
-    # for row, _ in rows_data:
-    #     row_edges = [v for u, v in edges if u == row]           
-    #     model += (
-    #         lpSum(lpCells[(row, col)][0] for col in row_edges) <= lpRows[row][1]*lpRows[row][0]
-    #     ), f"row_degre_{row}"
-        
-         #########################################
-
+    # for row, col in edges:
+    #     if (row, col) in lpCells:
+    #         model += (lpRows[row][0] >= lpCells[(row, col)]), f'cell_{row}_{col}_1'
+    #         model += (lpCols[col][0] >= lpCells[(row, col)]), f'cell_{row}_{col}_2'
+    #     else:
+    #         print(f"Warning: ({row}, {col}) not found in lpCells!")
 
     # Add row density constraints
     __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, delta)
@@ -300,7 +304,7 @@ def max_e_wr(rows_data, cols_data, edges, rows_res, cols_res, prev_obj, delta):
                     for (row, col) in edges
     }
 
-    cols_res_set = set(map(int, cols_res))
+    cols_res_set = set(map(int, cols_res)) 
     rows_res_set = set(map(int, rows_res))
     # print("I am in warm start!!!!!!!!!!!!!!!!")
     #print("rows_res_set: bis", rows_res_set)
@@ -352,7 +356,11 @@ def max_e_wr(rows_data, cols_data, edges, rows_res, cols_res, prev_obj, delta):
         print("\n Initial point before solving:")
         print("ROWS:", row_initial_values)
         print("COLS:", col_initial_values)
+        #print("CELLS:", cell_initial_values)
+    if debug >=4:
+        print("\n Initial point (cells) before solving:")
         print("CELLS:", cell_initial_values)
+
 
 
     # Objective 
@@ -387,26 +395,56 @@ def max_e_wr(rows_data, cols_data, edges, rows_res, cols_res, prev_obj, delta):
 
     # Constraints for row and column thresholds
     #sys.exit("Terminating program to check warm start value ")
+    # row_threshold = 2
+    # col_threshold = 2
+    # if debug >= 3:
+    #     print()
+    #     print('-' * 40) 
+    #     print(f"******** Solving model  ********", model.name, " with delta = ", delta)
+    #     print(' # rows_data =', len(rows_data),' # cols_data =', len(cols_data), ' # edges =', len(edges)) 
+    #     print('row_threshold=', row_threshold )
+    #     print('col_threshold=', col_threshold )
+    #     print()
+    #     print('-' * 40)
+    # model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
+    # model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
+    # #constraint for obj improvement
+    # model += lpSum(lpCells) >= prev_obj + 1, "impovement????"
+    # #end constraint for obj improvement
+    # for row, col in edges:
+    # #for row, col in lpCells:
+    #     model += (lpRows[row][0] >= lpCells[(row, col)]), f'cell_{row}_{col}_1'
+    #     model += (lpCols[col][0] >= lpCells[(row, col)]), f'ce ll_{row}_{col}_2'
+
     row_threshold = 2
     col_threshold = 2
+
     if debug >= 3:
         print()
         print('-' * 40) 
-        print(f"******** Solving model  ********", model.name, " with delta = ", delta)
-        print(' # rows_data =', len(rows_data),' # cols_data =', len(cols_data), ' # edges =', len(edges)) 
-        print('row_threshold=', row_threshold )
-        print('col_threshold=', col_threshold )
+        print(f"******** Solving model ******** {model.name} with delta = {delta}")
+        print(f"# rows_data = {len(rows_data)}, # cols_data = {len(cols_data)}, # edges = {len(edges)}") 
+        print(f"row_threshold = {row_threshold}")
+        print(f"col_threshold = {col_threshold}")
         print()
         print('-' * 40)
+
+    # Add constraints for row and column thresholds
     model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
     model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
-    #constraint for obj improvement
-    model += lpSum(lpCells) >= prev_obj + 1, "impovement????"
-    #end constraint for obj improvement
+
+    # Constraint for objective improvement
+    model += lpSum(lpCells.values()) >= prev_obj + 1, "improvement"
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    # Constraints for matrix structure
     for row, col in edges:
-    #for row, col in lpCells:
-        model += (lpRows[row][0] >= lpCells[(row, col)]), f'cell_{row}_{col}_1'
-        model += (lpCols[col][0] >= lpCells[(row, col)]), f'ce ll_{row}_{col}_2'
+        if (row, col) in lpCells:
+            model += (lpRows[row][0] >= lpCells[(row, col)]), f'cell_{row}_{col}_1'
+            model += (lpCols[col][0] >= lpCells[(row, col)]), f'cell_{row}_{col}_2'
+        else:
+            print(f"Warning: ({row}, {col}) not found in lpCells!")
+
 
 
     __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, delta)
@@ -439,10 +477,11 @@ def max_e_h(rows_data, cols_data, edges, delta):
 
     # Variables for rows and columns
 
-    lpRows = {row: (LpVariable(f'row_{row}', cat='Integer',
-                    lowBound=0, upBound=1), degree) for row, degree in rows_data}
-    lpCols = {col: (LpVariable(f'col_{col}', cat='Integer',
-                               lowBound=0, upBound=1), degree) for col, degree in cols_data}
+    lpRows = {row: (LpVariable(f'row_{row}', cat='Binary'), degree) for row, degree in rows_data}
+    lpCols = {col: (LpVariable(f'col_{col}', cat='Binary'), degree) for col, degree in cols_data}
+    
+    #lpRows = {row: (LpVariable(f'row_{row}', cat='Integer', lowBound=0, upBound=1), degree) for row, degree in rows_data}
+    #lpCols = {col: (LpVariable(f'col_{col}', cat='Integer', lowBound=0, upBound=1), degree) for col, degree in cols_data}
     lpSum_row = {row: (LpVariable(f'sumRow_{row}', cat='Integer',lowBound=0, upBound=Big_C)) for row, _ in rows_data}
     lpSum_col= {col: (LpVariable(f'sumCol_{col}', cat='Integer',lowBound=0, upBound=Big_R)) for col, _ in cols_data}
 
@@ -707,20 +746,33 @@ def __row_density_h(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_ro
     lpCols: dict of column variables and their degrees.
     delta: float, error tolerance for density constraints.
     """
+
     mu = 0.0001
     Big_R = len(rows_data) + 1
     Big_C = len(cols_data) + 1
-    Big_M= Big_R+Big_C 
+    Big_M = Big_R + Big_C 
+    if debug >= 3:
+        print()
+        print('-' * 40)
+        print(f"row data in row_density_h = {rows_data}")
+        print(f"col data in row_density_h = {cols_data}")
+
     for row, _ in rows_data:
-        #print(f"Adding row density constraints for row {row}:")
         row_edges = [v for u, v in edges if u == row]
-        model += (lpSum_row[row] == 
-                  lpSum(lpCols[col][0] for col in row_edges), f"row_sum_{row}"
-        )
+
+        # Debugging output
+        if debug >= 4:
+            print(f"Row_edges for row in row_density_h {row}: {row_edges}")
+            print(f"Keys in lpCols in row_density_h: {list(lpCols.keys())}")
+
+        # Avoid KeyError by filtering missing keys
+        model += (lpSum_row[row] == lpSum(lpCols[col][0] for col in row_edges if col in lpCols), f"row_sum_{row}")
+
         model += (
-            lpSum_row[row] - (1 - delta) * lpSum(lpCols[col][0] for col, _ in cols_data) >= (lpRows[row][0]-1) * Big_M, f"row_slack_{row}" 
-           # >= (lpRows[row][0]-1) * Big_M, f"row_err_rate_1_{row}"
+            lpSum_row[row] - (1 - delta) * lpSum(lpCols[col][0] for col, _ in cols_data) >= (lpRows[row][0] - 1) * Big_M,
+            f"row_slack_{row}"
         )
+
 
 def __row_density_slack(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_row, lpSlack_row, rho):
     """
@@ -969,8 +1021,8 @@ def KP_QBr(rows_data, col_length, nb_edges_0, debug, rho=0.1):
         print('I am currently solving row KP_QBr with Input data : ***************')
         print()
         print('edges =',nb_edges_0, "rho=", rho, "number of columns =", col_length, "number of rows =", row_length,"total_degree_0=", total_degree_0, "RHS=" , rho* nb_edges_0)
-    #print('rows_data =', rows_data)
-        print('-' * 40) 
+        print(' rows_data =', rows_data)
+        print('-' * 70) 
     
     # ------------------------------------------------------------------------ #
     # Model with minimization
@@ -1069,7 +1121,7 @@ def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, rh
     col_length = len(cols)
     model = KP_QBr(rows, col_length, nb_edges_0, debug, rho)
     #model.solve(PULP_CBC_CMD(msg=True, timeLimit= 3600, gapRel = 0.5),)
-    model.solve(GUROBI_CMD(msg=False, timeLimit= 100)#, options=[("Heuristics", 0.0), ("NoRelHeurTime", 0)] )#,gapRel=0.3)
+    model.solve(GUROBI_CMD(msg=False, timeLimit= 600)#, options=[("Heuristics", 0.0), ("NoRelHeurTime", 0)] )#,gapRel=0.3)
     )
     #model.solve(GUROBI_CMD(msg=True, timeLimit= 60, MIPGap = 0.03),)
     # Check status
@@ -1087,10 +1139,11 @@ def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, rh
          model.writeLP("debug_model.lp")
          sys.exit("Terminating program due to infeasibility. EXIT 1")
     if debug >=2:
-        print('I solved model name =', model.name, "for iteration i = ", iter, "KP time =", KP_time, 'debug :',  debug)
+        print('I solved model name =', model.name, "for iteration i = ", iter, "with obj value:", obj_value, "KP time =", KP_time, 'debug :',  debug)
     if model.name == "row_knapsack_problem":
             for var in model.variables():
-                #print('row_knapsack var name =', var.name,'var value =', var.varValue)
+                if debug >= 3:
+                    print('row_knapsack var name =', var.name,'var value =', var.varValue)
                 if var.varValue == 0:
                     if var.name[:3] == "row":
                         rows_res = rows_res + [var.name[4:]]
@@ -1117,7 +1170,7 @@ def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, rh
     #rows_res = [str(c) for c, _ in rows_res]
     rows_res = [int(r) for r in rows_res]
     if len(rows_res) == 0: 
-         sys.exit("Terminating program due to matrix degeneration. All rows deleted. Increase the value of rho.")    
+         sys.exit("Terminating program due to matrix degeneration. All rows deleted. Decrease the value of rho.")    
     rows_res_name = [row_names[r] for r in rows_res]
     #cols_res = [str(c) for c, _ in cols]
     #cols_res = [int(c) for c in cols_res]
@@ -1140,7 +1193,7 @@ def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, rh
        
     model = KP_QBc(cols_rem, nb_rows_rem, nb_edges_0_rem, debug, rho) 
 
-    model.solve(GUROBI_CMD(msg=False, timeLimit= 100))
+    model.solve(GUROBI_CMD(msg=False, timeLimit= 600))
     # Check status
     if model.status == 9 : #GRB.TIME_LIMIT:
         print("Gurobi stopped due to time limit!")
@@ -1154,15 +1207,16 @@ def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, rh
          sys.exit("Terminating program due to infeasibility. EXIT 7")
     #read the result from the solver
     if debug >=2:
-        print('I solved model name =', model.name, "for iteration i = ", iter)
+        print('I solved model name =', model.name, "for iteration i = ", iter, "with obj value:", obj_value, "KP time =", KP_time, 'debug :',  debug)
     cols_res=[]
     cols_del=[]
     if model.name == "row_knapsack_problem":
             sys.exit("Terminating program. Non expected case row_knapsack_problem instead of column_knapsack_problem Exit 11")  
     if model.name == "column_knapsack_problem":
             for var in model.variables():
+                if debug >= 3:
+                    print('column_knapsack var name =', var.name,'var value =', var.varValue)
                 if var.varValue == 0:
-                    #print('column_knapsack var name =', var.name,'var value =', var.varValue)
                     if var.name[:3] == "col":
                         cols_res = cols_res + [var.name[4:]]
                     elif var.name[:3] == "row":
@@ -1194,9 +1248,9 @@ def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, rh
         # nb_edges_1_rem = len(edges_1_rem)
         # print("Number of Remaining  Rows  :", len(rows_rem), "Number of Remaining Columns :", len(cols_rem))
         # print("Number of Remaining Edges_0 : ", nb_edges_0_rem, "Number of Remaining Edges_1 : ", nb_edges_1_rem)
-        if debug >= 2:
-            print("Remaining  Rows before colling KP col :", rows_rem)
-            print("Remaining Columns  before colling KP col :", cols_rem)
+        if debug >= 3:
+            print("Remaining  Rows after solving KP col :", rows_rem)
+            print("Remaining Columns after solving KP col :", cols_rem)
         print('-' * 40)
         print()
     #sys.exit("Terminating program after KP col") 
@@ -1216,6 +1270,11 @@ def solve(dec_conq, matrix_name, rows, cols, edges_1, model, KP_time, QBC_time, 
     columns as a result. 
     ARGUMENTS:
     ----------
+    * dec_conq: the level of decomposition and conquering.
+    * matrix_name: the name of the matrix.
+    * rows (list of tuples): List of (row_index, degree) for rows.
+    * cols (list of tuples): List of (col_index, degree) for columns.
+    * edges_1 (list of tuples): List of existing edges (row_index, col_index).
     * path_to_data: the path to the csv file.
     * model: the model to be used.
     * rho: zero deletion value used in all greedy approaches 
@@ -1232,9 +1291,17 @@ def solve(dec_conq, matrix_name, rows, cols, edges_1, model, KP_time, QBC_time, 
         # Safe printing: Convert None to "N/A" or provide a default value
         print(f"Input density : {density:.3f}" if density is not None else "Input density: N/A",  f"; density_threshold: {density_threshold:.5f}")
         #print(f"Input density : {density:.3f}, ; density_threshold: {density_threshold}")
+        if debug >= 3 : 
+            print("rows =", rows)
+            print("cols =", cols)
+            print("row_names =", row_names)
+            print("col_names =", col_names)
+            print("edges_1 =", edges_1)
+        print('-' * 70)
         print('End Current  Stats')
         print('-' * 70)
         print()
+
     # end fetching input data
     # start solving the problem  
     nb_edges_0 = len(edges_compl)
@@ -1310,10 +1377,11 @@ def solve(dec_conq, matrix_name, rows, cols, edges_1, model, KP_time, QBC_time, 
             print("cols_in =", cols_in)
             print("row_names_in =", row_names_in)
             print("col_names_in =", col_names_in)
+            print("edges_1_in =", edges_1_in)
     if debug == 4: 
             print("edges_1_in =", edges_1_in)
     #sys.exit("Terminating program before calling exact exit 10 !!!!")
-    if model == "max_e_c": 
+    if model == "max_e_c" or dec_conq >= 1: 
         rows_res, cols_res, density, nb_edges_1, QBC_time_h, QBC_time_g = warm_exact(dec_conq, matrix_name,model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
         #sys.exit("Terminating program before calling exact exit 10 !!!!")  
     else:
@@ -1327,8 +1395,8 @@ def solve(dec_conq, matrix_name, rows, cols, edges_1, model, KP_time, QBC_time, 
         Found matrix of size : ({len(rows_res)}, {len(cols_res)})
         and density : {density}
         and # of ones : {nb_edges_1}
-        and QBC time heuristic  : {QBC_time_h:.5f}
-        and QBC time  : {QBC_time_g:.5f}
+        and Heuristic QBC time   : {QBC_time_h:.5f}
+        and Global QBC  time  : {QBC_time_g:.5f}
         """)
     if debug >=2:
         print(" Remaining Rows  :", rows_res )
@@ -1344,10 +1412,31 @@ def solve(dec_conq, matrix_name, rows, cols, edges_1, model, KP_time, QBC_time, 
     #END OF SOLVE
 ##################################################################
 
-def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, edges_1, delta, debug, QBC_time):  
+def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, edges_1, delta, debug, QBC_time):
+    """
+    Arguments:
+    ----------
+    rows: list of tuples (row, degree) of rows in the matrix.
+    cols: list of tuples (col, degree) of columns in the matrix.
+    edges_1: list of tuples (row, col) corresponding to the ones of the matrix.
+    delta: float, error tolerance for density constraints.
+
+    Returns:
+    --------
+    rows_res: list of tuples (row, degree) of rows in the submatrix.
+    cols_res: list of tuples (col, degree) of columns in the submatrix.
+    density: float, density of the submatrix.
+    nb_edges_1: number of ones in the submatrix.
+    QBC_time: float, time taken to solve the model.
+    """  
     obj_value = None  # ✅ Initialize to None
     rows_res = []
     cols_res = []
+
+    # # Convert rows and cols into dictionaries for fast lookup
+    # row_degree_map = {row: degree for row, degree in rows}
+    # col_degree_map = {col: degree for col, degree in cols}
+
     # Select the appropriate model
     if model_name == 'max_e':
         model = max_e(rows, cols, edges_1, delta)
@@ -1357,27 +1446,35 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
         model = max_e_r(rows, cols, edges_1, delta)
     elif model_name == 'max_v':
         model = max_v(rows, cols, edges_1, delta)
+    
     try:
         # Solve the model with Gurobi
-        model.solve(GUROBI_CMD(msg=False, timeLimit=timelimit))#, options=[("MIPGap", 0.003)]))
+        model.solve(GUROBI_CMD(msg=False, timeLimit=timelimit))
+
         if debug >= 2:
             print('-' * 70)
-            print(f"Model status: {LpStatus[model.status]}")
+            print(f"Model status: {LpStatus[model.status]}")    
         # Check if the model has an optimal/feasible solution
         if model.status in [1, 2, 9]:  # 1 = Optimal, 2 = Feasible, 9 = Time limit reached
-            obj_value = value(model.objective)  # ✅ Extract objective value
+            obj_value = value(model.objective)  # ✅ Extract objective value           
             if debug >= 2:
                 print('-' * 70)
-                print(f"Computed Objective Value: {obj_value}")
+                print(f"Computed Objective Value: {obj_value}")          
             # Extract solution values (only nonzero rows and columns)
             solution = {
                 var.name: var.varValue
                 for var in model.variables()
-                if var.varValue != 0 #and var_name.startswith("row") or var_name.startswith("col")
+                if var.varValue == 1
             }
-            # Read results and classify into rows and columns
+
+            # Convert extracted indices back to tuples (index, degree)
+            row_indices = [int(var_name[4:]) for var_name in solution if var_name.startswith("row")]
+            col_indices = [int(var_name[4:]) for var_name in solution if var_name.startswith("col")]
+
             rows_res = [var_name[4:] for var_name in solution if var_name.startswith("row")]
             cols_res = [var_name[4:] for var_name in solution if var_name.startswith("col")]
+            # rows_res = [(index, row_degree_map[index]) for index in row_indices]
+            # cols_res = [(index, col_degree_map[index]) for index in col_indices]
 
     except Exception as e:
         print(f"Error during solving: {e}")
@@ -1385,27 +1482,36 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
     # Print model status
     if debug >= 1:
         print(f"Model status: {LpStatus.get(model.status, 'Unknown Status')}")
+    
     # ✅ Ensure obj_value is valid before using it
     if obj_value is None:
         print("Warning: obj_value is None. Assigning default value 0.")
         obj_value = 0  # ✅ Fallback value if model failed
 
     # ✅ Only proceed with saving the solution if the model found a feasible solution
-    if model.status in [1, 2, 9]:  # 1 = Optimal, 2 = Feasible, 9 = Time limit reached
+    if model.status in [1, 2, 9]:  
         # Save the solution to a CSV file 
-        file_path_no_ext = file_path.replace(".csv", "").replace("data/", "")
+        if p.lower().endswith('.csv'):
+            file_path_no_ext = file_path.replace(".csv", "").replace("data/", "")
+        if p.lower().endswith('.txt'):
+         file_path_no_ext = file_path.replace(".txt", "").replace("data/", "")
         solution_file = f"Experiments/{file_path_no_ext}/results_{dec_conq}_M_{matrix_name}.csv"
+
         with open(solution_file, mode="w", newline="") as file:
             writer = csv.writer(file)
+
             # Write the objective value
             if model_name == 'max_e_h':
-                writer.writerow(["Objective Value", len(rows_res)*len(cols_res)])
+                lower_bound = len(rows_res)*len(cols_res)
+                writer.writerow(["Objective Value", lower_bound])
             else:
                 writer.writerow(["Objective Value", obj_value])
+
             # Write number of rows
             writer.writerow(["# of rows", len(rows_res)])
             # Write number of columns
             writer.writerow(["# of columns", len(cols_res)])
+
             # Write variable values
             writer.writerow(["Variable", "Value"])
             for var_name, var_value in solution.items():
@@ -1413,6 +1519,8 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                     writer.writerow([var_name, var_value])
 
         print(f"Solution saved to {solution_file}")
+    
+    #return rows_res, cols_res, obj_value
 
     else:
         print("No feasible solution found.")
@@ -1429,6 +1537,8 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
     cols_res = [int(c) for c in cols_res]
 
     # Convert from 0-based to the original row/column names
+    # row_names_res = [row_names[r] for r in row_indices if 0 <= r < len(row_names)]
+    # col_names_res = [col_names[c] for c in row_indices if 0 <= c < len(col_names)]
     row_names_res = [row_names[r] for r in rows_res if 0 <= r < len(row_names)]
     col_names_res = [col_names[c] for c in cols_res if 0 <= c < len(col_names)]
     row_names_res = [int(r) if isinstance(r, (np.int64, np.int32)) else r for r in row_names_res]
@@ -1448,36 +1558,55 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
         print(" nb col_names, =", len(col_names)) 
         print()
         print('-' * 40)
-    cols_res_set = set(map(int, cols_res))
-    rows_res_set = set(map(int, rows_res))
+    # cols_res_set = set(map(int, cols_res))
+    # rows_res_set = set(map(int, rows_res))
     QBC_time = print_log_output(model, QBC_time, obj_value, len(rows_res), len(cols_res))
-    rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density  = update_data(rows, cols, edges_1, rows_res, cols_res, debug) 
+    rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density  = update_data(rows, cols, edges_1, rows_res, cols_res, debug)
+    # rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density  = update_data(rows, cols, edges_1, row_indices, col_indices, debug) 
     nb_edges_1 = len(edges_1_rem)
     if debug >=1:
         print()
         print('-' * 40)
-        print(f"Results from updating data after solving model = {model.name}", " with delta =  ", delta, "and dec_conq= ", dec_conq)
+        print(f"Results from update_data after solving model = {model.name}", " with delta =  ", delta, "and dec_conq= ", dec_conq)
         print("Number of Remaining  Rows  :", len(rows_rem))
-        print("Number of Remaining number Columns :", len(cols_rem))
-        print("Remaining  number Edges_0 P:", nb_edges_0_rem, "Remaining  number Edges_1 :", nb_edges_1, "Density :", density )
+        print("Number of Remaining Columns :", len(cols_rem))
+        print("Remaining  number Edges_0 P:", nb_edges_0_rem, "Remaining  number Edges_1 :", nb_edges_1, "Density :", density, "current obj value", obj_value )
         print('-' * 40)
         print()
+    if debug >=2:
+          print('-' * 40)
+          print()
+          print('Exit from the heuristic (or exact  approach) ',  model_name,' with delta=', delta, 'Found matrix with rows_res of lenght =',len(rows_res), ' and cols_res of lenght =',len(cols_res)) #, 'and density = ', density)
+          if debug >= 3:
+                    #print(" Density of the found matrix =  :", density )
+                    print(" Original Rows  :", rows )
+                    print(" Original Cold  :", cols )
+                    print(" Remaining Rows  :", rows_res )
+                    print(" Remaining  Cols  :", cols_res )
+                    print(" Remaining Rows with degree :", rows_rem )
+                    print(" Remaining  Cols with degree :", cols_rem )
     
     return rows_rem, cols_rem, density,  nb_edges_1, QBC_time 
 ###############################################################################
 # END OF EXACT 
 # ########################################################################  
-def warm_exact(dec_conq, matrix_name,model_name, rows, cols, row_names, col_names, edges_1, delta, debug, QBC_time):     
+def warm_exact(dec_conq, matrix_name,model_name, rows, cols, row_names, col_names, edges_1, delta, debug, QBC_time):
+    """
+    Arguments:
+    ----------
+    rows: list of tuples (row, degree) of rows in the matrix.
+    cols: list of tuples (col, degree) of columns in the matrix.
+    edges_1: list of tuples (row, col) corresponding to the ones of the matrix.
+
+    Returns:
+    --------
+    rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density 
+        
+    """     
     # elif model_name == 'max_e_h':
     obj_value = None  # ✅ Initialize to None
     rows_res = []
     cols_res = []
-    # rows_res_name = []
-    # cols_res_name = []
-    # rows_del = []
-    # rows_del_name = []
-    # cols_del = []
-    # cols_del_name = []
     # obj_total =  0.0
     #############################
     if debug >= 1:
@@ -1487,7 +1616,7 @@ def warm_exact(dec_conq, matrix_name,model_name, rows, cols, row_names, col_name
         print()
     model = max_e_h(rows, cols, edges_1, delta)
     try:
-        # Solve the model with Gurobi
+        # Solve the model  max_e_h  with Gurobi
         model.solve(GUROBI_CMD(msg=False, timeLimit= timelimit))#, options=[("MIPGap", 0.03)]))
         # Print model status
         if debug >= 2:
@@ -1503,9 +1632,12 @@ def warm_exact(dec_conq, matrix_name,model_name, rows, cols, row_names, col_name
             solution = {
                 var.name: var.varValue
                 for var in model.variables()
-                if var.varValue != 0 #and var_name.startswith("row") or var_name.startswith("col")
+                if var.varValue == 1#and var_name.startswith("row") or var_name.startswith("col")
             }
             # Read results and classify into rows and columns
+            # row_indices = [int(var_name[4:]) for var_name in solution if var_name.startswith("row")]
+            # col_indices = [int(var_name[4:]) for var_name in solution if var_name.startswith("col")]
+
             rows_res = [var_name[4:] for var_name in solution if var_name.startswith("row")]
             cols_res = [var_name[4:] for var_name in solution if var_name.startswith("col")]
     except Exception as e:
@@ -1527,7 +1659,10 @@ def warm_exact(dec_conq, matrix_name,model_name, rows, cols, row_names, col_name
             writer = csv.writer(file)
             # Write the objective value
             #if model_name == 'max_e_h':
-            writer.writerow(["Objective Value", len(rows_res)*len(cols_res)])
+            lower_bound = len(rows_res)*len(cols_res)
+            writer.writerow(["Objective Value",lower_bound ])
+            if debug >= 1:
+                print(f" A lower_bound = {lower_bound} has been found by max_e_h ")
             # else:
             #     writer.writerow(["Objective Value", obj_value])
             # Write number of rows
@@ -1563,12 +1698,8 @@ def warm_exact(dec_conq, matrix_name,model_name, rows, cols, row_names, col_name
         print("\n-- Debugging Step: checking extracted solution after solving model**** --", model.name )
         print('len_rows_res=', len(rows_res))
         print('row_res=', rows_res)
-        #print('len_rows_del=', len(rows_del))
-        #print('rows_del=',len(rows_del))
         print('len_cols_res=', len(cols_res))
         print('cols_res=', cols_res)
-        #print('len_cols_del=', len(cols_del))
-        #print('cols_del=', len(cols_del))
         print("nb row_names_res, =", len(row_names_res))
         print("row_names_res =", row_names_res)
         print("col_names_res =", col_names_res)
@@ -1582,12 +1713,15 @@ def warm_exact(dec_conq, matrix_name,model_name, rows, cols, row_names, col_name
  
     QBC_time_h = print_log_output(model, QBC_time, obj_value, len(rows_res), len(cols_res))
     rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density  = update_data(rows, cols, edges_1, rows_res, cols_res, debug) 
-    nb_edges_1 = len(edges_1_rem)
+    if delta == 0:
+        nb_edges_1 = len(rows_res)*len(cols_res)
+    else:
+        nb_edges_1 = len(edges_1_rem)
     if debug >=1:
         print()
         print('-' * 40)
         print(f" results from updating data after solving model = {model.name}", " delta =  ", delta)
-        print("Number of Remaining  Rows  :", len(rows_rem))
+        print("Number of Remaining number  Rows  :", len(rows_res))
         print("Number of Remaining number Columns :", len(cols_rem))
         print("Remaining  number Edges_0 P:", nb_edges_0_rem, "Remaining  number Edges_1 :", nb_edges_1, "Density :", density , "current obj value", obj_value)
         print('-' * 40)
@@ -1596,9 +1730,9 @@ def warm_exact(dec_conq, matrix_name,model_name, rows, cols, row_names, col_name
     if debug >=2:
           print('-' * 40)
           print()
-          print('Exit from the exact  approach ',  model_name,' with delta=', delta, 'Found matrix with rows_res of lenght =',len(rows_rem), ' and cols_res of lenght =',len(cols_rem), 'and density =', density)
+          print('Exit from the heuristic (or exact  approach) ',  model_name,' with delta=', delta, 'Found matrix with rows_res of lenght =',len(rows_res), ' and cols_res of lenght =',len(cols_res)) #, 'and density = ', density)
           if debug >= 3:
-                    print(" Density of the found matrix =  :", density )
+                    #print(" Density of the found matrix =  :", density )
                     print(" Original Rows  :", rows )
                     print(" Original Cold  :", cols )
                     print(" Remaining Rows  :", rows_res )
@@ -1607,14 +1741,24 @@ def warm_exact(dec_conq, matrix_name,model_name, rows, cols, row_names, col_name
                     print(" Remaining  Cols with degree :", cols_rem )
 
     #sys.exit("Terminating program before callong  max_e_wr EXIT 11")
-    if dec_conq >= 1:
-        return rows_rem, cols_rem, density, nb_edges_1, QBC_time_h, QBC_time_h 
+    if dec_conq >= 1: # the task is not going to be solved but to saved in a file for further solving
+        #density= 1
+        #nb_edges_1 = len(rows_res)*len(cols_res)
+        #return rows_res, cols_res, density, nb_edges_1, QBC_time_h, QBC_time_h 
+        #return rows_res, cols_res, density, nb_edges_1, QBC_time_h, QBC_time_h
+        return rows_res, cols_res, density, nb_edges_1, QBC_time_h, QBC_time_h  
+    #the task is going to be solved 
+    #model.Params.Cutoff = lower_bound
     model = max_e_wr(rows, cols, edges_1, rows_res, cols_res, nb_edges_1, delta)
     try:
         # Solve the model with Gurobi
         model.solve(GUROBI_CMD(msg=False, timeLimit= timelimit))#, options=[("MIPGap", 0.03)]))
         #, options=[("MIPStart", 1), ("Heuristics", 0.0), ("NoRelHeurTime", 0)] )#,gapRel=0.3))
         # Print model status
+        # if model.status == GRB.CUTOFF:
+        #     print('-' * 70)
+        #     print("No solution found above the found by max_e_h lower bound!!! This lower_bound is considered as the solution")
+        #     print('-' * 70) 
         if debug >= 2:
             print('-' * 70)
             print(f"Model status: {LpStatus[model.status]}")
@@ -1628,7 +1772,7 @@ def warm_exact(dec_conq, matrix_name,model_name, rows, cols, row_names, col_name
             solution = {
                 var.name: var.varValue
                 for var in model.variables()
-                    if var.varValue != 0# and var_name.startswith("row") or var_name.startswith("col")
+                    if var.varValue ==1 # and var_name.startswith("row") or var_name.startswith("col")
             }
             # Read results and classify into rows and columns
             rows_res = [var_name[4:] for var_name in solution if var_name.startswith("row")]
@@ -1720,6 +1864,8 @@ def warm_exact(dec_conq, matrix_name,model_name, rows, cols, row_names, col_name
     #QBC_time_g = print_log_output(model, QBC_time_h, obj_value, len(rows_res), len(cols_res))
     rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density  = update_data(rows, cols, edges_1, rows_res, cols_res, debug) 
     nb_edges_1 = len(edges_1_rem)
+    # recently added 
+    nb_edges_0_rem, nb_edges_1_rem, sparsity, density = density_calcul(rows_rem, cols_rem)
     if debug >=1:
         print()
         print('-' * 40)
@@ -1747,7 +1893,20 @@ def warm_exact(dec_conq, matrix_name,model_name, rows, cols, row_names, col_name
 ####################################################################
 
 def update_data(rows_data, cols_data, edges_1, rows_res, cols_res, debug):
-    #updates  rows_data, cols_data, edges_1 and returs them in rows_rem, cols_rem, edges_1_rem. To compute that we use rows_del, cols_del, rows_res, cols_res information
+    """
+    Arguments:
+    ----------
+    rows_data: list of tuples (row, degree) of rows in the matrix.
+    cols_data: list of tuples (col, degree) of columns in the matrix.
+    edges_1: list of tuples (row, col) corresponding to the ones of the matrix.
+    Updates  rows_data, cols_data, edges_1 and returns them in rows_rem, cols_rem, edges_1_rem. To compute that we use rows_res, cols_res information. The last one corresponds to the remaining rows and columns in the matrix (i.e., the solution of the ILP model).
+
+    Returns:
+    --------
+    rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density 
+        
+    """
+    
     # first step
     # Convert rows_del to a set for faster lookup
     # print("\n-- Update Debugging Step: edges  --")
@@ -1780,13 +1939,15 @@ def update_data(rows_data, cols_data, edges_1, rows_res, cols_res, debug):
     # print("rows_del_set =", rows_del_set)
     # print("cols_del_set =", cols_del_set)
     # print("\n-- Update Debugging Step: input rows_col_remaining_sets --")
-        print("rows_data =", rows_data) 
-        print("cols_data =", cols_data) 
-        #print("edges 1 =", edges_1)  
+        print("rows_res =", rows_res)
+        print("cols_res =", cols_res) 
+       #print("edges 1 =", edges_1)  
         print("rows_res_set =", rows_res_set) 
         print("cols_res_set =", cols_res_set)
         #print("  edges_1_del  =",  edges_1_del) 
         #print("  edges_1_rem  =",  edges_1_rem)
+        print("rows_data =", rows_data) 
+        print("cols_data =", cols_data) 
 
  # Step 3: Update column degrees in cols_data
     col_degree_map = {col: degree for col, degree in cols_data}
@@ -1800,8 +1961,16 @@ def update_data(rows_data, cols_data, edges_1, rows_res, cols_res, debug):
         print("row_degree_map =", row_degree_map) 
     # Reduce the count of rows/cols degrees based on removed edges 1 
     for row, col in edges_1_del :  # Loop only through removed edges
-        row_degree_map[row] = max(0, row_degree_map[row] - 1)  # Reduce degree only if that row was involved
-        col_degree_map[col] = max(0, col_degree_map[col] - 1)  # Reduce degree only if that column was involved
+        if row in row_degree_map:  # Ensure the row exists in the dictionary
+            row_degree_map[row] = max(0, row_degree_map[row] - 1)
+        else:
+            print(f"!!!!!!Warning: Row {row} not found in row_degree_map")  # Debugging line
+        #row_degree_map[row] = max(0, row_degree_map[row] - 1)  # Reduce degree only if that row was involved
+        if col in col_degree_map:  # Ensure the column exists in the dictionary
+            col_degree_map[col] = max(0, col_degree_map[col] - 1)
+        else:
+            print(f"!!!!!!Warning: col {col} not found in col_degree_map")  # 
+        #col_degree_map[col] = max(0, col_degree_map[col] - 1)  # Reduce degree only if that column was involved
 
     #print("\n-- Debugging Step: Updated ROW/Column Degrees --")
     # print("Updated row_degree_map =", row_degree_map)
@@ -1818,33 +1987,38 @@ def update_data(rows_data, cols_data, edges_1, rows_res, cols_res, debug):
     #print("row_rem_length=",row_rem_length, "col_rem_length=",col_rem_length  )
     # print("rows_rem =",rows_rem, "row_rem_length=",row_rem_length )
     # print("cols_rem =",cols_rem, "col_rem_length=",col_rem_length )
-    nb_edges_1_rem = sum(degree for _, degree in rows_rem)
+    #nb_edges_1_rem = sum(degree for _, degree in rows_rem)
     size = row_rem_length * col_rem_length
-    nb_edges_0_rem = size - nb_edges_1_rem
-    density = nb_edges_1_rem/size
-    if debug >= 4:
-        print("\n-- Update Debugging Step 3 : input data  and later  updates --")
-        print()
-        print("col_degree_map reduced =", col_degree_map) 
-        print("row_degree_map reduced =", row_degree_map) 
-        print("cols_rem   =", cols_rem ) 
-        print("rows_rem   =", rows_rem ) 
-        print(" nb_edges_1_rem   =", nb_edges_1_rem ) 
-        print(" nb_edges_0_rem   =", nb_edges_0_rem )
-        print("row_rem_length=", row_rem_length,"col_rem_length =", col_rem_length)
-        print("Stats in updata_data : row_rem_length =",row_rem_length,"col_rem_length =",col_rem_length, "nb_edges_0_rem=", nb_edges_0_rem, "nb_edges_1_rem=", nb_edges_1_rem, " !!!!! density =", density)
-        print()
+    #nb_edges_0_rem = size - nb_edges_1_rem
+    nb_edges_0_rem, nb_edges_1_rem, sparsity, density = density_calcul(rows_rem, cols_rem)
+    if size != 0:
+        #density = nb_edges_1_rem/size
+        if debug >= 3:
+            print("\n-- Update Debugging Step 3 : input data  and later  updates --")
+            print()
+            print("col_degree_map reduced =", col_degree_map) 
+            print("row_degree_map reduced =", row_degree_map) 
+            print("cols_rem   =", cols_rem ) 
+            print("rows_rem   =", rows_rem ) 
+            print(" nb_edges_1_rem   =", nb_edges_1_rem ) 
+            print(" nb_edges_0_rem   =", nb_edges_0_rem )
+            print("row_rem_length=", row_rem_length,"col_rem_length =", col_rem_length)
+            print("Stats in updata_data : row_rem_length =",row_rem_length,"col_rem_length =",col_rem_length, "nb_edges_0_rem=", nb_edges_0_rem, "nb_edges_1_rem=", nb_edges_1_rem, " !!!!! density =", density)
+            print()
     if size == 0:
-        sys.exit("Terminating program due to matrix degeneration EXIT 2.")
-
-
-    #rows_last = [tup for tup in rows_rem if tup[0] in rows_res_set] # ??? should be  rows_last = rows_res 
-    #edges_0_row_last = [edge for edge in edges_0_row_rem if edge[0] in rows_rem]
-    #edges_1_last = [edge for edge in edges_1_row_rem if edge[0] in rows_rem]
-    #edges_0_col_last = [edge for edge in edges_0_col_rem  if edge[0] in cols_rem]
-    #edges_1_col_last = [edge for edge in edges_1_col_rem  if edge[0]  in cols_rem]
-    # print("cols_data_new =", cols_rem)
-    # print("rows_data_new =", rows_rem)
+        if debug >= 4:
+            print("\n-- Update Debugging Step 3 : input data  and later  updates --")
+            print()
+            print("col_degree_map reduced =", col_degree_map) 
+            print("row_degree_map reduced =", row_degree_map) 
+            print("cols_rem   =", cols_rem ) 
+            print("rows_rem   =", rows_rem ) 
+            print(" nb_edges_1_rem   =", nb_edges_1_rem ) 
+            print(" nb_edges_0_rem   =", nb_edges_0_rem )
+            print("row_rem_length=", row_rem_length,"col_rem_length =", col_rem_length)
+            print("Stats in updata_data : row_rem_length =",row_rem_length,"col_rem_length =",col_rem_length, "nb_edges_0_rem=", nb_edges_0_rem, "nb_edges_1_rem=", nb_edges_1_rem, "  density  non determined,  !!! size =", size)
+        print()
+        sys.exit("Terminating program due to matrix degeneration EXIT 200.")
 
     return rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density 
  
@@ -2102,7 +2276,7 @@ def parse_arguments():
     )
 
     argparser.add_argument(
-        '--timelimit', nargs='?', required=False, const=1, type=int, default=100, 
+        '--timelimit', nargs='?', required=False, const=1, type=int, default=1800, 
         help='Select the time limit for all models except knapsacks',
     )
 
@@ -2118,13 +2292,49 @@ def parse_arguments():
         sys.exit(1)
 
     return (arg.filepath, arg.model, arg.rho, arg.delta,  arg.threshold, arg.dec_conq)
+    
+def get_submatrices(rows_data, cols_data, edges, rows_res, cols_res):       
+    """
+    Computes submatrices M1 and M2 from the original matrix M.
 
-def get_submatrices(rows_data, cols_data, edges, rows_res, cols_res):
+    Arguments:
+    ----------
+    rows_data: list of tuples (row, degree) of rows in the matrix.
+    cols_data: list of tuples (col, degree) of columns in the matrix.
+    edges: list of tuples (row, col) corresponding to the ones of the matrix.
+    rows_res: list of row indices or list of tuples (row, degree).
+    cols_res: list of column indices or list of tuples (col, degree).
+
+    Returns:
+    --------
+    (rows_M1, cols_M1, edges_M1), (rows_M2, cols_M2, edges_M2)
+    """
+
+    # Extract only indices if tuples are given
+    rows_res_set = {row if isinstance(row, int) else row[0] for row in rows_res}
+    cols_res_set = {col if isinstance(col, int) else col[0] for col in cols_res}
+
+    # Compute M1 (Excludes selected rows)
+    rows_M1 = [(row, deg) for row, deg in rows_data if row not in rows_res_set]
+    edges_M1 = [(r, c) for r, c in edges if r not in rows_res_set]
+    cols_M1 = [(col, sum(1 for r, c in edges_M1 if c == col)) for col, _ in cols_data]
+
+    # Compute M2 (Excludes selected columns)
+    cols_M2 = [(col, deg) for col, deg in cols_data if col not in cols_res_set]
+    edges_M2 = [(r, c) for r, c in edges if c not in cols_res_set]
+    rows_M2 = [(row, sum(1 for r, c in edges_M2 if r == row)) for row, _ in rows_data]
+
+    return (rows_M1, cols_M1, edges_M1), (rows_M2, cols_M2, edges_M2)
+
+
+def get_submatrices_old(rows_data, cols_data, edges, rows_res, cols_res):
     # suppose that rows_data and cols_data are the rows and columns of the original matrix M. Let rows_res and cols_res are the rows and columns of a found submatrix M0.  We want to compute the submatrices M1 and M2 such that M1=[rows_M - rows_res, cols_M] and M2=[rows_M, cols_M - cols_res]
     # Compute M1 and M2s
     # Convert row and column data to sets for easy removal
-    rows_res_set = set(row for row, _ in rows_res)
-    cols_res_set = set(col for col, _ in cols_res)
+    # rows_res_set = set(row for row, _ in rows_res)
+    # cols_res_set = set(col for col, _ in cols_res)
+    rows_res_set = set(row for row in rows_res)
+    cols_res_set = set(col for col in cols_res)
 
     # Compute M1
     rows_M1 = [(row, deg) for row, deg in rows_data if row not in rows_res_set]
@@ -2208,17 +2418,41 @@ def affichage(dec_conq,matrix_name, rows_res, cols_res, density, nb_ones, iter, 
     print('-' * 70)
     print()
     if debug >=1:
-        rows_last = [str(c) for c, _ in rows_res]
-        rows_last = [int(r) for r in rows_last]
-        cols_last = [str(c) for c, _ in cols_res]
-        cols_last = [int(c) for c in cols_last]             
-        print(" ***Solution Rows indices :", rows_last )
-        print(" ***Solution Cols indices :", cols_last )
+        # rows_last = [str(c) for c, _ in rows_res]
+        # rows_last = [int(r) for r in rows_last]
+        # cols_last = [str(c) for c, _ in cols_res]
+        # cols_last = [int(c) for c in cols_last]             
+        # print(" ***Solution Rows indices :", rows_last )
+        # print(" ***Solution Cols indices :", cols_last )
         if debug >= 3:
                 print(" Remaining Rows with degree :", rows_res )
                 print(" Remaining Cols with degree :", cols_res )
     return matrix_name, rows_res, cols_res, density, nb_ones, global_time
 
+def final_print(dec_conq, rows, cols, edges, model, rho, delta):
+    nbi_0, nbi_1, sparsity, density = density_calcul(rows, cols)
+    print('-' * 70)
+    print('-' * 70)
+    nb_ext = 2**dec_conq
+    nb_int = nb_ext - 1 
+    print(f""" 
+    End of computations for matrix  {file_path} with rows: {len(rows)} and columns {len(cols)}
+    with  input density : {density:.3f} and number of ones: {len(edges)}
+    using  model: {selected_model}  with quasi-biclique error: {delta} and density_threshold: {threshold:.3f} 
+    and zero deletion rate (rho): {rho} and debug: {debug}
+    Decrease and conquer levels:  {dec_conq}, # ext task: {nb_ext}, int task : {nb_int} 
+    The solution has been found in matrix : {best_task}  with 
+    size max clique  {best_obj}, # rows: {len(best_rows)} # columns: {len(best_cols)},
+    # solved  tasks : {solved_count}, # skipped  tasks : {skipped_count}  # fathomed tasks : {fathomed_count}
+    """)
+    print('-' * 70)
+    print()
+    # print(f"***We solved instance {file_path} at level {dec_conq} and with model:  {model}***")
+    # print("Size of current matrix : ", len(rows), "*", len(cols), "=", len(rows) * len(cols), "; dec_conq:", dec_conq)
+    # print("number input zeros : ",nbi_0, "; number input ones : ",nbi_1, )            
+    # print("rho = ",rho, "; delta : ", delta)
+    #     # Safe printing: Convert None to "N/A" or provide a default value
+    # print(f"Input density : {density:.3f}" if density is not None else "Input density: N/A",  f"; density_threshold: {threshold:.5f}")
 
 def last_affichage(winning_matrix, matrix_name, rows_res, cols_res, density, nb_ones, global_time):
     # pretty print the results
@@ -2264,6 +2498,221 @@ def get_complement_edges(rows, cols, edges):
     
     return edges_compl 
 
+
+# Function to add tasks to the priority queue
+def add_task(matrix_name, rows, cols, edges, obj):
+    edge_count = len(edges)  # Use number of edges instead of size
+    heapq.heappush(QUEUE, (-edge_count, edge_count, (matrix_name, rows, cols, edges, obj)))  # Negative for max-heap
+# Function to add tasks to the priority queue
+
+def process_tasks(selected_model, QBC_time):
+    global QUEUE, PROCESSED_OBJS, EVALUATED_QUEUE
+
+    best_task = None  # Track the best task number
+    best_obj = float('-inf')  # Track the highest objective value
+
+    solved_count = 0  # Count of tasks that were solved
+    skipped_count = 0  # Count of tasks that were skipped
+
+    while QUEUE:
+        _, edge_count, (matrix_name, rows, cols, edges, obj_val) = heapq.heappop(QUEUE)  # Extract highest priority task
+
+        # Check fathoming condition: If a processed obj >= edge_count of this task, skip it
+        if any(obj >= edge_count for obj in PROCESSED_OBJS):
+            print(f"Skipping {matrix_name} (edges {edge_count}) - Fathomed by an earlier task.")
+            skipped_count += 1  # Increment skipped task count
+            continue
+
+        # Solve the problem
+        start_solving_task_count = time.time()
+        KP_time = 0
+        dec_conq = 0
+        print() 
+        print(f"***QUEUE Processing of task number {matrix_name} with (edges {edge_count}) selected_model {selected_model} dec_conq {dec_conq} delta {delta} threshold {threshold} rho {rho} QBC_time {QBC_time} ***")
+        print() 
+
+        results = solve(dec_conq, matrix_name, rows, cols, edges, selected_model, KP_time, QBC_time, rho, delta, threshold)
+        
+        # Unpack results
+        (rows_res, cols_res, density, nb_ones, iter, KP_time, 
+        kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 
+        QBC_time_h, QBC_time_g) = results
+        
+        # Display results
+        view = affichage(dec_conq, matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  
+                         kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
+        
+        (matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g) = view 
+
+        # Compute objective function
+        obj = len(rows_res) * len(cols_res)  # Replace with actual computation
+        PROCESSED_OBJS.append(obj)  # Store obj value
+        end_solving_task_count = time.time()
+        solved_count += 1  # Increment solved task count
+
+        print(f"PROCESSED TASK NUMBER {matrix_name} with (edges {edge_count}) -> obj = {obj}  with solving TIME : {end_solving_task_count - start_solving_task_count:.4f} sec" )
+
+        # Store the evaluated task
+        EVALUATED_QUEUE.append((matrix_name, rows, cols, edge_count, obj, len(rows_res), len(cols_res)))
+
+        # Update best task if this one is better
+        if obj > best_obj:
+            best_obj = obj
+            best_task = matrix_name
+            best_rows = rows_res
+            best_cols = cols_res
+            best_density = density
+
+    # Count fathomed tasks
+    fathomed_count = sum(1 for matrix_name, rows, cols, edge_count, obj, nb_rows, nb_cols in EVALUATED_QUEUE if obj < best_obj)
+
+    # Return the best task, best objective, evaluated queue, fathomed count, solved count, and skipped count
+    return best_task, best_obj, best_rows, best_cols, best_density, EVALUATED_QUEUE, fathomed_count, solved_count, skipped_count
+
+def process_tasks_OLD(selected_model, QBC_time):
+    global QUEUE, PROCESSED_OBJS, EVALUATED_QUEUE
+
+    best_task = None  # Track the best task number
+    best_obj = float('-inf')  # Track the highest objective value
+
+    while QUEUE:
+        _, edge_count, (matrix_name, rows, cols, edges, obj_val) = heapq.heappop(QUEUE)  # Extract highest priority task
+
+        # Check fathoming condition: If a processed obj >= edge_count of this task, skip it
+        if any(obj >= edge_count for obj in PROCESSED_OBJS):
+            print(f"SKIPPING task number {matrix_name} (edges {edge_count}) - Fathomed by an earlier task.")
+            continue
+
+        # Solve the problem
+        KP_time = 0
+        dec_conq = 0
+        print() 
+        print(f"***QUEUE Processing of task number {matrix_name} with (edges {edge_count}) selected_model {selected_model} dec_conq {dec_conq} delta {delta} threshold {threshold} rho {rho} QBC_time {QBC_time} ***")
+        print() 
+
+        results = solve(dec_conq, matrix_name, rows, cols, edges, selected_model, KP_time, QBC_time, rho, delta, threshold)
+        
+        # Unpack results
+        (rows_res, cols_res, density, nb_ones, iter, KP_time, 
+        kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 
+        QBC_time_h, QBC_time_g) = results
+        
+        # Display results
+        view = affichage(dec_conq, matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  
+                         kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
+        
+        (matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g) = view 
+
+        # Compute objective function
+        obj = len(rows_res) * len(cols_res)  # Replace with actual computation
+        PROCESSED_OBJS.append(obj)  # Store obj value
+
+        print(f"PROCESSED TASK NUMBER {matrix_name} with (edges {edge_count}) -> obj = {obj}")
+
+        # Store the evaluated task
+        EVALUATED_QUEUE.append((matrix_name, rows, cols, edge_count, obj, len(rows_res), len(cols_res)))
+
+        # Update best task if this one is better
+        if obj > best_obj:
+            best_obj = obj
+            best_task = matrix_name
+            best_rows = rows_res
+            best_cols = cols_res
+            best_density = density
+
+    # Count fathomed tasks
+    fathomed_count = sum(1 for matrix_name, rows, cols, edge_count, obj, nb_rows, nb_cols in EVALUATED_QUEUE if obj < best_obj)
+
+    # Return the best task, best objective, evaluated queue, and fathomed count
+    return best_task, best_obj, best_rows, best_cols, best_density, EVALUATED_QUEUE, fathomed_count
+
+# Function to add tasks to the priority queue
+def add_task_OLD(matrix_name, rows, cols, edges):
+    size = len(rows) * len(cols)  # Compute the size
+    heapq.heappush(QUEUE, (-size, size, (matrix_name, rows, cols, edges)))  # Negative for max-heap
+
+
+def process_tasks_OMD(selected_model, QBC_time):
+    global QUEUE, PROCESSED_OBJS
+
+    best_task = None  # Track the best task number
+    best_obj = float('-inf')  # Track the highest objective value
+
+    while QUEUE:
+        _, size, (matrix_name, rows, cols, edges) = heapq.heappop(QUEUE)  # Extract highest priority task
+
+        # Check fathoming condition: If a processed obj >= size of this task, skip it
+        if any(obj >= size for obj in PROCESSED_OBJS):
+            print(f"Skipping {matrix_name} (size {size}) - Fathomed by an earlier task.")
+            continue
+
+        # Solve the problem
+        KP_time = 0
+        dec_conq = 0
+        print() 
+        print(f"***QUEUE Processing of task number {matrix_name} with (size {size}) selected_model {selected_model} dec_conq {dec_conq} delta {delta} threshold {threshold} rho {rho} QBC_time {QBC_time} ***")
+        print() 
+
+        results = solve(dec_conq, matrix_name, rows, cols, edges, selected_model, KP_time, QBC_time, rho, delta, threshold)
+        
+        # Unpack results
+        (rows_res, cols_res, density, nb_ones, iter, KP_time, 
+        kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 
+        QBC_time_h, QBC_time_g) = results
+        
+        # Display results
+        view = affichage(dec_conq, matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  
+                         kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
+        
+        (matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g) = view 
+
+        # Compute objective function
+        obj = len(rows_res) * len(cols_res)  # Replace with actual computation
+        PROCESSED_OBJS.append(obj)  # Store obj value
+
+        print(f"PROCESSED TASK NUMBER {matrix_name} with (size {size}) -> obj = {obj}")
+
+        # Update best task if this one is better
+        if obj > best_obj:
+            best_obj = obj
+            best_task = matrix_name
+
+    # Return the best task and its objective value
+    return best_task, best_obj if best_task is not None else (None, None)
+
+
+def process_tasks_OLD(selected_model, QBC_time):
+    global QUEUE
+    
+    while QUEUE:
+        _, size, (matrix_name, rows, cols, edges) = heapq.heappop(QUEUE)  # Extract highest priority task
+        
+        # Check fathoming condition: If a processed obj >= size of this task, skip it
+        if any(obj >= size for obj in PROCESSED_OBJS):
+            print(f"Skipping {matrix_name} (size {size}) - Fathomed by an earlier task.")
+            continue
+        # Solve the problem
+        KP_time = 0
+        dec_conq = 0
+        print() 
+        print(f"***QUEUE Processing of task number {matrix_name} with (size {size}) selected_model {selected_model} dec_conq {dec_conq} delta {delta} threshold {threshold} rho {rho} QBC_time {QBC_time} ***")
+        print() 
+        results = solve(dec_conq, matrix_name, rows, cols, edges, selected_model, KP_time, QBC_time, rho, delta, threshold)
+        # Unpack results
+        (rows_res, cols_res, density, nb_ones, iter, KP_time, 
+        kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 
+        QBC_time_h, QBC_time_g) = results
+        # Display results
+        view = affichage(dec_conq, matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
+        (matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g) = view 
+        # Process the task (dummy computation)
+        obj = len(rows_res) * len(cols_res)  # Replace with your actual computation
+        #obj = compute_obj(matrix_name, rows, cols, edges)  # Replace with your actual computation
+        PROCESSED_OBJS.append(obj)  # Store obj value
+        
+        print(f"PROCESSED TASK NUMBER  {matrix_name} with  (size {size}) -> obj = {obj}")
+
+
 def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QBC_time):
     """
     Implements a decrease-and-conquer approach to solve the problem.
@@ -2284,6 +2733,151 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
     """
     # Compute complementary row and column indices
     if dec_conq == 0: # No decrease-and-conquer
+        add_task(matrix_name, rows, cols, edges_1,None)  # Add the task to the priority queue
+        # Compute the density and  number of ones in the matrix
+        nb_zeros, nb_ones, sparsity, density = density_calcul(rows, cols)
+        if debug >= 2:
+            print() 
+            print(f"Task with matrix {matrix_name} with size ({len(rows)},{len(cols)}) and density {density} and number of ones {nb_ones}  and number of zeros {nb_zeros} has been added to the queue.")
+        return  matrix_name, rows, cols, density, nb_ones, QBC_time
+        # Solve the problem
+        # results = solve(dec_conq, matrix_name, rows, cols, edges_1, selected_model, KP_time, QBC_time, rho, delta, threshold)
+        # # # Unpack results
+        # (rows_res, cols_res, density, nb_ones, iter, KP_time, kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g) = results
+        # # # Display results
+        # view = affichage(dec_conq, matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
+        # (matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g) = view 
+        # return matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g
+        #sys.exit(" Terminating program because dec_conq == 0. End of computations!  EXIT 0")
+    if dec_conq >= 1:
+        # Compute complementary row and column indices
+        rows_compl, cols_compl, edges_compl = get_complement_rowcols(rows, cols, edges_1)
+        # Solve the problem
+        results = solve(dec_conq, matrix_name, rows_compl, cols_compl, edges_compl, selected_model, KP_time, QBC_time, rho, delta, threshold)
+        # Unpack results
+        (rows_res, cols_res, density, nb_ones, iter, KP_time, 
+        kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 
+        QBC_time_h, QBC_time_g) = results
+        # Display results
+        view = affichage(dec_conq, matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
+        ( matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g) = view 
+        # print("rows =", rows)
+        # print("cols =", cols)
+        # print("edges_1 =", edges_1)
+        # print("rows_res =", rows_res)
+        # print("cols_res =", cols_res)
+
+        # Compute the density and  number of ones in the matrix
+        # Compute submatrices M1 and M2
+        print("dec_conq=", dec_conq)
+        #sys.exit("Terminating program for cheking . EXIT 108.")
+        ML, MR = get_submatrices(rows, cols, edges_1, rows_res, cols_res)
+        #ML, MR = get_submatrices(rows_compl, cols_compl, edges_compl, rows_res, cols_res)
+    else:
+        print("dec_conq=", dec_conq)
+        sys.exit("Terminating program due to invalid value for dec_conq. EXIT 1.")
+    # Debugging output
+    node = 2*matrix_name
+    node1= node + 1
+    if debug >= 1:
+        print(f"\n Level {dec_conq-1}, Matrix {node}:")
+        print("Size Rows:", len(ML[0]))
+        print("Size Cols:", len(ML[1]))
+        print(f"\n Level {dec_conq-1} Matrix  {node1}:")
+        print("Size Rows:", len(MR[0]))
+        print("Size Cols:", len(MR[1]))
+    if debug >= 3:
+        print(f"\n Level {dec_conq-1}  Matrix {node} Rows:", ML[0])
+        print(f"Level  {dec_conq-1}  Matrix {node} Cols:", ML[1])
+        print(f"Level  {dec_conq-1}  Matrix {node} Edges :", ML[2])
+        print(f"\n Level  {dec_conq-1}  Matrix {node1} Rows:", MR[0])
+        print(f"Level {dec_conq-1}  Matrix {node1} Cols:", MR[1])
+        print(f"Level {dec_conq-1}  Matrix {node1} Edges :", MR[2])
+    #sys.exit("Terminating program for cheking . EXIT 108.")
+    if len(ML[0]) <=  min_number_rows or len(ML[1]) <=  min_number_cols:
+        nb_ones_left = 0
+        global_time_left = 0
+        node_left = None
+        rows_ind_left = None 
+        cols_ind_left = None
+        density_left = None
+        if debug >= 2:
+            print() 
+            print(f" Node {node} has been fathomed because of min number rows = {min_number_rows} or min number columns = {min_number_cols} "  )
+            #sys.exit("Terminating program for cheking . EXIT 111.")
+            print() 
+        #sys.exit("Terminating program for cheking . EXIT 111.")
+    else:
+        result_left = decrease_and_conquer(dec_conq-1, node, ML[0], ML[1], ML[2], KP_time, QBC_time)
+        node_left, rows_ind_left, cols_ind_left, density_left, nb_ones_left, global_time_left  = result_left
+        if debug >= 2:
+            print()  
+            print(f" Return from {node} with winning node = {node_left}" )
+    if len(MR[0]) <=  min_number_rows or len(MR[1]) <=  min_number_cols:
+        nb_ones_right = 0
+        global_time_right = 0
+        node_right = None
+        rows_ind_right = None
+        cols_ind_right = None
+        density_right = None
+        if debug >= 2:
+            print() 
+            print(f" Node {node} has been fathomed because of min number rows = {min_number_rows} or min number columns = {min_number_cols} "  )
+            #sys.exit("Terminating program for cheking . EXIT 111.")
+            print() 
+    else:
+        if debug >= 2:
+            print() 
+            print(f"calling decrease_and_conquer for node {node+1}" )
+        result_right = decrease_and_conquer(dec_conq-1, node+1, MR[0], MR[1], MR[2], KP_time, QBC_time)
+        node_right, rows_ind_right, cols_ind_right, density_right, nb_ones_right, global_time_right = result_right
+        if debug >= 2:
+            print() 
+            print(f"return in decrease_and_conquer from {node+1} with winning node = {node_right}" )
+    if nb_ones_left > nb_ones_right:
+        rows_ind = rows_ind_left
+        cols_ind = cols_ind_left
+        density = density_left
+        nb_ones = nb_ones_left
+        winning_node = node_left
+    if nb_ones_left <= nb_ones_right:
+        rows_ind = rows_ind_right
+        cols_ind = cols_ind_right
+        density = density_right
+        nb_ones = nb_ones_right
+        winning_node = node_right
+    global_time = global_time_left + global_time_right
+    if debug >= 2:
+            print() 
+            print(f"return in decrease_and_conquer from {matrix_name} with winning node = {winning_node}" )
+
+    return winning_node, rows_ind, cols_ind, density, nb_ones, global_time
+
+
+def decrease_and_conquer_BIS(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QBC_time):
+    """
+    Implements a decrease-and-conquer approach to solve the problem.
+
+    Args:
+        matrix_name (int): Name of the matrix, e.i. nulber of the corresponding node. 
+        dec_conq : level of the decrease and conquer approach. If dec_conq = 0, the decrease and conquer approach is not applied and the original matrix is used directly for computatiion. When dec_conq >= 1, the decrease and conquer approach is utilized and the matrix is reduced and divided into two smaller submatrices. One of them contains the maximun size clique. The process is repeated recursively until dec_conq = 0.
+        rows (list of tuples): List of (row_index, degree) for rows.
+        cols (list of tuples): List of (col_index, degree) for columns.
+        edges_1 (list of tuples): List of existing edges (row_index, col_index).
+        KP_time (float): Time taken for the greedy approach.
+        QBC_time (float): Time taken for the quasi-biclique approach.
+
+    Returns:
+        M1, M2: Two submatrices.
+        KP_time: Updated KP_time.
+        QBC_time_g: Updated QBC_time_g.
+    """
+    # Compute complementary row and column indices
+    if dec_conq == 0: # No decrease-and-conquer
+        # add_task(matrix_name, rows, cols, edges_1)  # Add the task to the priority queue
+        # nb_ones = len(rows) * len(cols)  # Compute the number of ones in the matrix
+        # density = nb_ones / (len(rows) * len(cols))  # Compute the density
+        # return  matrix_name, rows, cols, density, nb_ones, QBC_time
         # Solve the problem
         results = solve(dec_conq, matrix_name, rows, cols, edges_1, selected_model, KP_time, QBC_time, rho, delta, threshold)
         # Unpack results
@@ -2307,7 +2901,6 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         # Display results
         view = affichage(dec_conq, matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
         ( matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g) = view 
-        #affichage(dec_conq,matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
         # Compute submatrices M1 and M2
         ML, MR = get_submatrices(rows, cols, edges_1, rows_res, cols_res)
     else:
@@ -2328,13 +2921,30 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         print(f"Level  {dec_conq-1}  Matrix {node} Cols:", ML[1])
         print(f"\n Level  {dec_conq-1}  Matrix {node1} Rows:", MR[0])
         print(f"Level {dec_conq-1}  Matrix {node1} Cols:", MR[1])
-    result_left = decrease_and_conquer(dec_conq-1, node, ML[0], ML[1], ML[2], KP_time, QBC_time)
-    #print(f"Returned values: {result_left}, Length: {len(result_left)}")  # Check how many values are returned
-    node_left, rows_ind_left, cols_ind_left, density_left, nb_ones_left, global_time_left = result_left  # Ensure it's 6 values
-    #node_left, rows_ind_left, cols_ind_left, density_left, nb_ones_left, global_time_left = decrease_and_conquer(dec_conq-1, node,  ML[0], ML[1], ML[2], KP_time, QBC_time)
-    print(f"return from {node} with QBC_time_left {global_time_left}" )
-    node_right, rows_ind_right, cols_ind_right, density_right, nb_ones_right, global_time_right = decrease_and_conquer(dec_conq-1,node+1, MR[0], MR[1], MR[2], KP_time, QBC_time)
-    print(f"return from {node+1} with QBC_time_right {global_time_right}" )
+    if len(ML[0]) <=  min_number_rows or len(ML[1]) <=  min_number_cols:
+        nb_ones_left = 0
+        global_time_left = 0
+        node_left = None
+        rows_ind_left = None 
+        cols_ind_left = None
+        density_left = None
+        print(f" Node {node} has been fathomed because of min number rows = {min_number_rows} or min number columns = {min_number_cols} "  )
+    else:
+        result_left = decrease_and_conquer(dec_conq-1, node, ML[0], ML[1], ML[2], KP_time, QBC_time)
+        node_left, rows_ind_left, cols_ind_left, density_left, nb_ones_left, global_time_left  = result_left 
+        print(f" Return from {node} with winning node = {node_left}" )
+    if len(MR[0]) <=  min_number_rows or len(MR[1]) <=  min_number_cols:
+        nb_ones_right = 0
+        global_time_right = 0
+        node_right = None
+        rows_ind_right = None
+        cols_ind_right = None
+        density_right = None
+        print(f" Node {node1} has been fathomed because of min number rows = { min_number_rows} or min number columns = {min_number_cols} "  )
+    else:
+        result_right = decrease_and_conquer(dec_conq-1, node+1, MR[0], MR[1], MR[2], KP_time, QBC_time)
+        node_right, rows_ind_right, cols_ind_right, density_right, nb_ones_right, global_time_right = result_right
+        print(f"return from {node+1} with winning node = {node_right}" )
     if nb_ones_left > nb_ones_right:
         rows_ind = rows_ind_left
         cols_ind = cols_ind_left
@@ -2348,9 +2958,100 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         nb_ones = nb_ones_right
         winning_node = node_right
     global_time = global_time_left + global_time_right
+    print(f"return from {matrix_name} with winning node = {winning_node}" )
     return winning_node, rows_ind, cols_ind, density, nb_ones, global_time
 
+def write_matrix(rows_data, cols_data, edges):
+    """
+    Arguments:
+    ----------
+    rows_data: list of tuples (row, degree) of rows in the matrix.
+    cols_data: list of tuples (col, degree) of columns in the matrix.
+    edges: list of tuples (row, col) corresponding to the ones of the matrix.
+
+    Returns:
+    --------
+    a csv file with the matrix data.
+    """
+        
+    # Extract row and column indices
+    row_indices = [row for row, _ in rows_data]
+    col_indices = [col for col, _ in cols_data]
+
+    # Sort indices to ensure correct ordering
+    row_indices.sort()
+    col_indices.sort()
+
+    # Create a matrix initialized with zeros
+    matrix = {row: {col: 0 for col in col_indices} for row in row_indices}
+
+    # Fill the matrix with ones based on edges
+    for row, col in edges:
+        if row in row_indices and col in col_indices:
+            matrix[row][col] = 1
+
+    # Write to CSV
+    csv_filename = "matrix.csv"
+    with open(csv_filename, mode="w", newline="") as file:
+        writer = csv.writer(file)
+
+        # Write header (column labels)
+        writer.writerow([""] + [f"c{col}" for col in col_indices])
+
+        # Write rows with data
+        for row in row_indices:
+            writer.writerow([f"r{row}"] + [matrix[row][col] for col in col_indices])
+
+    print(f"Matrix saved to {csv_filename}")
+
+
+def count_ones_in_submatrix(edges, row_indices, col_indices):
+    """
+    Counts the number of ones in the submatrix B of the given matrix M.
+
+    :param matrix: List of tuples representing the edges (row, col) in M
+    :param row_indices: Set of row indices defining submatrix B
+    :param col_indices: Set of column indices defining submatrix B
+    :return: Number of ones in the submatrix B
+    """
+    count = sum(1 for row, col in edges if row in row_indices and col in col_indices)
+    return count
+
+# # Define the original matrix M as a list of (row, col) pairs
+# matrix_M = [
+#     (0, 0),
+#     (0, 1),
+#     (1, 0),
+#     (1, 1),
+#     (2, 1),
+#     (2, 2)
+# ]
+
+    # # Define the row and column indices for submatrix B
+    # row_indices_B = {0, 1}
+    # col_indices_B = {0, 1}
+
+    # # Count ones in submatrix B
+    # num_ones = count_ones_in_submatrix(matrix_M, row_indices_B, col_indices_B)
+
+    # # Print the result
+    # print(f"Number of ones in submatrix B: {num_ones}")
+
+
+
 if __name__ == '__main__':
+    import time
+    min_number_rows = 3
+    min_number_cols = 3
+    # Define a priority queue (max-heap using negative size)
+    QUEUE = []
+    COPY_QUEUE = []
+    PROCESSED_OBJS = []  # Store processed obj values
+    # List to store evaluated tasks
+    EVALUATED_QUEUE = []
+    import heapq
+
+    start_model_building_and_solving = time.time()
     # Read the arguments
     file_path, selected_model, rho, delta,  threshold, dec_conq= parse_arguments()
     p = file_path 
@@ -2375,7 +3076,7 @@ if __name__ == '__main__':
     ###################################################################
     nb_eges_0 = len(edges_compl)
     nb_eges_1 = len(edges_1)
-    if debug >= 3:
+    if debug >= 2:
             print('-' * 40)
             if p.lower().endswith('.txt'):
                 print(f" Input Data in txt files : {file_path}")
@@ -2397,15 +3098,111 @@ if __name__ == '__main__':
                     #print("Adjacency Matrix:\n", comp_df)
             print('-' * 40)
     # # end fetching input data
-    # start computations
+    # start tasks_generation  and computations
+    in_rows = rows
+    in_cols = cols 
+    in_edges_1 = edges_1
+    start_tasks_generation = time.time()
     KP_time = 0.0
     QBC_time = 0.0 
     #dec_conq = 2
     node = 1
     winning_node, rows, cols, density, nb_ones, global_time = decrease_and_conquer(dec_conq, node , rows, cols, edges_1, KP_time, QBC_time)
+    end_tasks_generation = time.time()
     print()
-    print(f"return from matrix {node} with global time  {global_time:.3f}")
-    last_affichage(winning_node, node, rows, cols, density, nb_ones, global_time)
+    print('-' * 70)
+    print()
+    print(f"End of tasks generation stage. Last generated task from matrix {node} with winning node {winning_node} and global time {global_time:.7f}")     
+    #   f"rows = {rows}, \n"
+    #   f"cols = {cols}, \n"
+    #   f"density = {density}, nb_ones = {nb_ones}")
+    
+    #last_affichage(winning_node, node, rows, cols, density, nb_ones, global_time)
+    # queue_data = [(matrix_name, size) for _, size, (matrix_name, _, _, _) in QUEUE]
+    # print(tabulate(queue_data, headers=["Matrix Name", "Size"], tablefmt="grid"))
+    #first_task = QUEUE[0] if QUEUE else None  # Get the first task safely
+    #print(first_task)
+    # print("Matrix Name | Size")
+    # print("-------------------")
+    # for _, size, (matrix_name, _, _, _) in QUEUE:
+    #     print(f"{matrix_name:<12} | {size}")
+    print()
+    print('-' * 70)
+    print(f" Size of the queue: {len(QUEUE)}")
+    for _, size, (matrix_name, rows, cols, edges, obj) in QUEUE:
+        print(f" Matrix: {matrix_name}, Size: {size}, Number Rows: {len(rows)},  Number Cols: {len(cols)},  Number Edges: {len(edges)}, obj {obj}")
+    print()
+    print('-' * 70)
+    print()
+    import heapq
+    COPY_QUEUE = list(QUEUE)  # Copy the heap
+    heapq.heapify(COPY_QUEUE)  # Ensure it maintains heap properties
+    start_tasks_solving = time.time()
+    best_task, best_obj, best_rows, best_cols, best_density, EVALUATED_QUEUE, fathomed_count, solved_count, skipped_count = process_tasks(selected_model, global_time)
+    end_tasks_solving = time.time()
+    print()
+    print(f"Best task: {best_task}, Best objective: {best_obj} with # rows {len(best_rows)} and # cols {len(best_cols)}")
+    print(f" Number of fathomed tasks : {fathomed_count}")
+    print()
+    print('-' * 70)
+        # Print evaluated queue
+    print("\nEvaluated Queue:")
+    # for task in EVALUATED_QUEUE:
+    #     print(task)
+    # print()
+    print('-' * 70)
+    print(f" Size of the evaluated  queue: {len(EVALUATED_QUEUE)}")
+    for matrix_name, rows, cols, edge_count, obj, nb_rows_res, nb_cols_res in EVALUATED_QUEUE:
+        #size = len(rows)*len(cols)
+        print(f" Matrix: {matrix_name}, # Rows: {len(rows)},  # Cols: {len(cols)},  # Edges: {edge_count}, size max clique  {obj}, # rows: {nb_rows_res} # columns: {nb_cols_res}")
+    print()
+    print('-' * 70)
+    print()
+    print('-' * 70)
+    sorted_copy_queue = sorted(COPY_QUEUE, key=lambda x: x[1], reverse=True)
+    print(f"Size of the COPY_QUEUE: {len(sorted_copy_queue)}")
+    for _, size, (matrix_name, task_rows, task_cols, edges, obj) in sorted_copy_queue:
+        print(f"Matrix: {matrix_name}, Size: {size}, Number Rows: {len(task_rows)}, Number Cols: {len(task_cols)}, Number Edges: {len(edges)}")
+    print()
+    print('-' * 70)
+    print("***End of computations !!!")
+    print()
+    final_print(dec_conq, in_rows, in_cols, in_edges_1,selected_model, rho, delta)
+    print(f"Best task: {best_task}, Best objective: {best_obj} with # rows {len(best_rows)} and # cols {len(best_cols)}")
+    print()
+    print('-' * 70)
+    end_model_building_and_solving = time.time()
+    print(f" Model building and solving global time: {end_model_building_and_solving - start_model_building_and_solving:.4f} sec")
+    print(f" Tasks_generation time: {end_tasks_generation  - start_tasks_generation :.4f} sec")
+    print(f" Tasks_pure_solving time: {end_tasks_solving  - start_tasks_solving:.4f} sec")
+    # Your matrix data
+    # rows_data = [(0, 7), (1, 5), (2, 10), (3, 9), (4, 4), (5, 5), (6, 4), (7, 4), (8, 9), (9, 7)] 
+    # cols_data = [(0, 10), (1, 5), (2, 4), (3, 3), (4, 6), (5, 9), (6, 4), (7, 9), (8, 9), (9, 5)] 
+    # edges = [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 9), (1, 0), (1, 1), (1, 5), (1, 7), (1, 8), (2, 0), (2, 1), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (2, 7), (2, 8), (2, 9), (3, 0), (3, 1), (3, 2), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (4, 0), (4, 5), (4, 7), (4, 8), (5, 0), (5, 4), (5, 7), (5, 8), (5, 9), (6, 0), (6, 5), (6, 7), (6, 8), (7, 0), (7, 5), (7, 7), (7, 8), (8, 0), (8, 1), (8, 2), (8, 4), (8, 5), (8, 6), (8, 7), (8, 8), (8, 9), (9, 0), (9, 4), (9, 5), (9, 6), (9, 7), (9, 8), (9, 9)]
+    # rows_data = [(0, 5), (1, 1), (2, 6), (3, 5), (4, 0), (5, 2), (6, 0), (7, 0), (8, 5), (9, 3)] 
+    # cols_data = [(1, 5), (2, 4), (3, 3), (4, 6), (6, 4), (9, 5)] 
+    # edges = [(0, 1), (0, 2), (0, 3), (0, 4), (0, 9), (1, 1), (2, 1), (2, 2), (2, 3), (2, 4), 
+    #         (2, 6), (2, 9), (3, 1), (3, 2), (3, 3), (3, 4), (3, 6), (5, 4), (5, 9), (8, 1), 
+    #         (8, 2), (8, 4), (8, 6), (8, 9), (9, 4), (9, 6), (9, 9)]
+    #write_matrix(rows_data, cols_data, edges)
+
+    print()
+    print(f"size egdes_1: {len(in_edges_1)}")
+    print()
+    #print(f"egdes_1: {in_edges_1}")
+
+    row_indices = [row for row, _ in best_rows]
+    col_indices = [col for col, _ in best_cols]
+
+    row_set = set(row_indices)
+    col_set = set(col_indices)
+    if debug >= 2:
+        print(f"row_set: {row_set}")
+        print(f"col_set: {col_set}")
+    num_ones = count_ones_in_submatrix(in_edges_1,  row_set,  col_set)
+
+    # Print the result
+    print(f"Number of ones in the best submatrix : {num_ones}")
     sys.exit("***Computation done EXIT 108 !!!")
     # ################################################
  

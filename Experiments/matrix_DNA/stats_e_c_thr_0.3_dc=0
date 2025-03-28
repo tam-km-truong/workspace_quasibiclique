@@ -1,0 +1,123 @@
+
+----------------------------------------------------------------------
+
+End of tasks generation stage. Last generated task from matrix 1 with winning node 1 and global time 0.0000000
+
+----------------------------------------------------------------------
+ Size of the queue: 1
+ Matrix: 1, Size: 2518, Number Rows: 470,  Number Cols: 100,  Number Edges: 2518, obj None
+
+----------------------------------------------------------------------
+
+
+***QUEUE Processing of task number 1 with (edges 2518) selected_model max_e_c dec_conq 0 delta 0.0 threshold 0.3 rho 0.1 QBC_time 0.0 ***
+
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 1 in  data/matrix_DNA.csv at level 0 and with model:  max_e_c***
+Size of current matrix :  470 * 100 = 47000 ; dec_conq: 0
+number input zeros :  44482 ; number input ones :  2518
+rho =  0.1 ; delta :  0.0
+Input density : 0.054 ; density_threshold: 0.30000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+            End of greedy approaches. Exit while loop. I did: 15 iterations
+            Density : 0.315 > 0.3
+            It took me : 0.180 time
+            Found matrix of size : (74, 18) and density : 0.315
+            
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+Model status: Optimal
+Solution saved to Experiments/matrix_DNA/results_h_0_M_1.csv
+
+----------------------------------------
+ results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining number  Rows  : 19
+Number of Remaining number Columns : 6
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 114 Density : 1.0 current obj value 281.0
+----------------------------------------
+
+ !!!!!!!!!!!!!!!!!! I got a lower bound  114
+*****Model in warm start is infeasible.!!!*** 
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 1
+        with delta =  0.0
+        Found matrix of size : (19, 6)
+        and density : 1.0
+        and # of ones : 114
+        and Heuristic QBC time   : 0.04628
+        and Global QBC  time  : 0.06799
+        
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 1 in  data/matrix_DNA.csv at level 0 and debug  1
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (19,6), with  density : 1.0 and number of ones: 114
+    Global Time (in sec): 0.248
+    Total Time in QBC approaches: 0.068
+    Time in greedy approach: 0.180,  size of matrix found by greedy : (74,18) 
+    With density : 0.315 and # ones : 419 
+    Time in heuristic only : 0.046 
+    Time in warm start only : 0.022
+    Number of iterations in greedy approach: 15
+    Percentage of greedy approach run time in global run time : 72.55% 
+    Percentage of heuristic run time in QBC run time : 68.07%
+    With zero deletion rate (rho): 0.1 and threshold: 0.3
+    
+----------------------------------------------------------------------
+
+PROCESSED TASK NUMBER 1 with (edges 2518) -> obj = 114
+
+Best task: 1, Best objective: 114 with # rows 19 and # cols 6
+ Number of fathomed tasks : 0
+
+----------------------------------------------------------------------
+
+Evaluated Queue:
+----------------------------------------------------------------------
+ Size of the evaluated  queue: 1
+ Matrix: 1, # Rows: 470,  # Cols: 100,  # Edges: 2518, size max clique  114, # rows: 19 # columns: 6
+
+----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+Size of the COPY_QUEUE: 1
+Matrix: 1, Size: 2518, Number Rows: 470, Number Cols: 100, Number Edges: 2518
+
+----------------------------------------------------------------------
+***End of computations !!!
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+ 
+    End of computations for matrix  data/matrix_DNA.csv with rows: 470 and columns 100
+    with  input density : 0.054 and number of ones: 2518
+    using  model: max_e_c  with quasi-biclique error: 0.0 and density_threshold: 0.300 
+    and zero deletion rate (rho): 0.1 and debug: 1
+    Decrease and conquer levels:  0, # ext task: 1, int task : 0 
+    The solution has been found in matrix : 1  with 
+    size max clique  114, # rows: 19 # columns: 6,
+    # solved  tasks : 1, # skipped  tasks : 0  # fathomed tasks : 0
+    
+----------------------------------------------------------------------
+
+Best task: 1, Best objective: 114 with # rows 19 and # cols 6
+
+----------------------------------------------------------------------
+ Model building and solving global time: 1.3707 sec
+ Tasks_generation time: 0.0000 sec
+ Tasks_pure_solving time: 0.3217 sec

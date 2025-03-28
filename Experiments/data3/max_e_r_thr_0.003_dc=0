@@ -1,0 +1,109 @@
+----------------------------------------
+ Input Data in csv files : data/data3.csv
+Number Rows Data : 50
+Number Cols Data : 50
+Number Edges_1 : 892
+Number Edges_0 : 1608
+----------------------------------------
+
+Task with matrix 1 with size (50,50) and density 0.3568 and number of ones 892  and number of zeros 1608 has been added to the queue.
+
+----------------------------------------------------------------------
+
+End of tasks generation stage. Last generated task from matrix 1 with winning node 1 and global time 0.0000000,
+rows = [(0, 0), (1, 4), (2, 2), (3, 37), (4, 3), (5, 4), (6, 31), (7, 1), (8, 2), (9, 5), (10, 31), (11, 4), (12, 32), (13, 4), (14, 33), (15, 0), (16, 32), (17, 34), (18, 35), (19, 33), (20, 4), (21, 4), (22, 31), (23, 4), (24, 32), (25, 34), (26, 1), (27, 33), (28, 3), (29, 33), (30, 36), (31, 4), (32, 33), (33, 2), (34, 32), (35, 32), (36, 3), (37, 33), (38, 5), (39, 33), (40, 34), (41, 33), (42, 33), (43, 2), (44, 31), (45, 1), (46, 2), (47, 32), (48, 3), (49, 2)], 
+cols = [(0, 0), (1, 5), (2, 0), (3, 26), (4, 25), (5, 2), (6, 28), (7, 26), (8, 26), (9, 2), (10, 25), (11, 27), (12, 23), (13, 25), (14, 26), (15, 26), (16, 3), (17, 25), (18, 28), (19, 27), (20, 25), (21, 27), (22, 28), (23, 4), (24, 24), (25, 26), (26, 22), (27, 2), (28, 5), (29, 6), (30, 25), (31, 23), (32, 24), (33, 24), (34, 4), (35, 26), (36, 26), (37, 0), (38, 3), (39, 26), (40, 3), (41, 24), (42, 3), (43, 26), (44, 5), (45, 5), (46, 25), (47, 27), (48, 23), (49, 26)], 
+density = 0.3568, nb_ones = 892
+
+----------------------------------------------------------------------
+
+ Size of the queue: 1
+ Matrix: 1, Size: 2500, Number Rows: 50,  Number Cols: 50,  Number Edges: 892
+
+----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+
+
+***QUEUE Processing of task number 1 with (size 2500) selected_model max_e_r dec_conq 0 delta 0.0 threshold 0.003 rho 0.1 QBC_time 0.0 ***
+
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 1 in  data/data3.csv at level 0 and with model:  max_e_r***
+Size of current matrix :  50 * 50 = 2500 ; dec_conq: 0
+number input zeros :  1608 ; number input ones :  892
+rho =  0.1 ; delta :  0.0
+Input density : 0.357 ; density_threshold: 0.00300
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+----------------------------------------------------------------------
+Model status: Optimal
+----------------------------------------------------------------------
+Computed Objective Value: 420.0
+Model status: Optimal
+Solution saved to Experiments/data3/results_0_M_1.csv
+
+----------------------------------------------------------------------
+Stats
+ Model solved : max_e_r  Local Time:  - (real) 0.24123 - (Local CPU) 0.24123 - (Global CPU) 0.24123
+
+ Solve status: Optimal Objective value: 420.0 nb_rows 20 nb_cols 21
+----------------------------------------
+
+----------------------------------------
+Results from update_data after solving model = max_e_r  with delta =   0.0 and dec_conq=  0
+Number of Remaining  Rows  : 20
+Number of Remaining Columns : 21
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 420 Density : 1.0 current obj value 420.0
+----------------------------------------
+
+----------------------------------------
+
+Exit from the heuristic (or exact  approach)  max_e_r  with delta= 0.0 Found matrix with rows_res of lenght = 20  and cols_res of lenght = 21
+----------------------------------------
+
+        Exit from the exact approach: max_e_r for matrix 1
+        with delta =  0.0
+        Found matrix of size : (20, 21)
+        and density : 1.0
+        and # of ones : 420
+        and Heuristic QBC time   : 0.00000
+        and Global QBC  time  : 0.24123
+        
+ Remaining Rows  : [(3, 21), (6, 21), (12, 21), (14, 21), (16, 21), (17, 21), (18, 21), (22, 21), (25, 21), (29, 21), (30, 21), (32, 21), (34, 21), (35, 21), (37, 21), (39, 21), (41, 21), (42, 21), (44, 21), (47, 21)]
+ Remaining  Cols  : [(3, 20), (4, 20), (8, 20), (10, 20), (11, 20), (14, 20), (15, 20), (17, 20), (18, 20), (19, 20), (20, 20), (22, 20), (24, 20), (30, 20), (35, 20), (41, 20), (43, 20), (46, 20), (47, 20), (48, 20), (49, 20)]
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 1 in  data/data3.csv at level 0 and debug  2
+    With  model: max_e_r and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (20,21), with  density : 1.0 and number of ones: 420
+    Global Time (in sec): 0.241
+    Total Time in QBC approaches: 0.241
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.003
+    
+----------------------------------------------------------------------
+
+PROCESSED TASK NUMBER 1 with (size 2500) -> obj = 420
+
+Best task: 1, Best objective: 420
+
+***End of computations !!!
+
+ Model building and solving global time: 0.2864 sec
+ Tasks_generation  time: 0.0245 sec
+ Process tasks pure solving time: 0.2619 sec

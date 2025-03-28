@@ -1,0 +1,81 @@
+
+----------------------------------------------------------------------
+
+End of tasks generation stage. Last generated task from matrix 1 with winning node 1 and global time 0.0000000
+
+----------------------------------------------------------------------
+ Size of the queue: 1
+ Matrix: 1, Size: 892, Number Rows: 50,  Number Cols: 50,  Number Edges: 892, obj None
+
+----------------------------------------------------------------------
+
+
+***QUEUE Processing of task number 1 with (edges 892) selected_model max_e_r dec_conq 0 delta 0.0 threshold 0.03 rho 0.1 QBC_time 0.0 ***
+
+Solution saved to Experiments/data3/results_0_M_1.csv
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 1 in  data/data3.csv at level 0 and debug  0
+    With  model: max_e_r and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (20,21), with  density : 1.0 and number of ones: 420
+    Global Time (in sec): 0.218
+    Total Time in QBC approaches: 0.218
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.03
+    
+----------------------------------------------------------------------
+
+PROCESSED TASK NUMBER 1 with (edges 892) -> obj = 420
+
+Best task: 1, Best objective: 420 with # rows 20 and # cols 21
+ Number of fathomed tasks : 0
+
+----------------------------------------------------------------------
+
+Evaluated Queue:
+----------------------------------------------------------------------
+ Size of the evaluated  queue: 1
+ Matrix: 1, # Rows: 50,  # Cols: 50,  # Edges: 892, size max clique  420, # rows: 20 # columns: 21
+
+----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+Size of the COPY_QUEUE: 1
+Matrix: 1, Size: 892, Number Rows: 50, Number Cols: 50, Number Edges: 892
+
+----------------------------------------------------------------------
+***End of computations !!!
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+ 
+    End of computations for matrix  data/data3.csv with rows: 50 and columns 50
+    with  input density : 0.357 and number of ones: 892
+    using  model: max_e_r  with quasi-biclique error: 0.0 and density_threshold: 0.030 
+    and zero deletion rate (rho): 0.1 and debug: 0
+    Decrease and conquer levels:  0, # ext task: 1, int task : 0 
+    The solution has been found in matrix : 1  with 
+    size max clique  420, # rows: 20 # columns: 21,
+    # solved  tasks : 1, # skipped  tasks : 0  # fathomed tasks : 0
+    
+----------------------------------------------------------------------
+
+Best task: 1, Best objective: 420 with # rows 20 and # cols 21
+
+----------------------------------------------------------------------
+ Model building and solving global time: 0.2828 sec
+ Tasks_generation time: 0.0000 sec
+ Tasks_pure_solving time: 0.2502 sec
+
+size egdes_1: 892
+
+row_set: {3, 6, 12, 14, 16, 17, 18, 22, 25, 29, 30, 32, 34, 35, 37, 39, 41, 42, 44, 47}
+col_set: {3, 4, 8, 10, 11, 14, 15, 17, 18, 19, 20, 22, 24, 30, 35, 41, 43, 46, 47, 48, 49}
+Number of ones in submatrix B: 420

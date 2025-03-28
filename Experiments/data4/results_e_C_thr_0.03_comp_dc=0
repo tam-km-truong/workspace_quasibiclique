@@ -1,0 +1,130 @@
+
+----------------------------------------------------------------------
+
+End of tasks generation stage. Last generated task from matrix 1 with winning node 1 and global time 0.0000000
+
+----------------------------------------------------------------------
+ Size of the queue: 1
+ Matrix: 1, Size: 11122, Number Rows: 55,  Number Cols: 274,  Number Edges: 11122, obj None
+
+----------------------------------------------------------------------
+
+
+***QUEUE Processing of task number 1 with (edges 11122) selected_model max_e_c dec_conq 0 delta 0.0 threshold 0.03 rho 0.1 QBC_time 0.0 ***
+
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 1 in  data/data4.csv at level 0 and with model:  max_e_c***
+Size of current matrix :  55 * 274 = 15070 ; dec_conq: 0
+number input zeros :  3948 ; number input ones :  11122
+rho =  0.1 ; delta :  0.0
+Input density : 0.738 ; density_threshold: 0.03000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+Model status: Optimal
+Solution saved to Experiments/data4/results_h_0_M_1.csv
+
+----------------------------------------
+ results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining number  Rows  : 38
+Number of Remaining number Columns : 58
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 2204 Density : 1.0 current obj value 11838.0
+----------------------------------------
+
+ !!!!!!!!!!!!!!!!!! I got a lower bound  2204
+*****Model in warm start is feasible. Improving the solution!!!*** 
+Solution saved to Experiments/data4/results_wstart_0_M_1.csv
+
+
+----------------------------------------
+ results from updating data after solving model = max_e_wr  delta =   0.0
+Number of Remaining  Rows  : 25
+Number of Remaining number Columns : 106
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 2650 Density : 1.0
+----------------------------------------
+
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 1
+        with delta =  0.0
+        Found matrix of size : (25, 106)
+        and density : 1.0
+        and # of ones : 2650
+        and Heuristic QBC time   : 0.27712
+        and Global QBC  time  : 823.81423
+        
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 1 in  data/data4.csv at level 0 and debug  1
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (25,106), with  density : 1.0 and number of ones: 2650
+    Global Time (in sec): 823.814
+    Total Time in QBC approaches: 823.814
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.277 
+    Time in warm start only : 823.537
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 0.03%
+    With zero deletion rate (rho): 0.1 and threshold: 0.03
+    
+----------------------------------------------------------------------
+
+PROCESSED TASK NUMBER 1 with (edges 11122) -> obj = 2650  with solving TIME : 825.1098 sec
+
+Best task: 1, Best objective: 2650 with # rows 25 and # cols 106
+ Number of fathomed tasks : 0
+
+----------------------------------------------------------------------
+
+Evaluated Queue:
+----------------------------------------------------------------------
+ Size of the evaluated  queue: 1
+ Matrix: 1, # Rows: 55,  # Cols: 274,  # Edges: 11122, size max clique  2650, # rows: 25 # columns: 106
+
+----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+Size of the COPY_QUEUE: 1
+Matrix: 1, Size: 11122, Number Rows: 55, Number Cols: 274, Number Edges: 11122
+
+----------------------------------------------------------------------
+***End of computations !!!
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+ 
+    End of computations for matrix  data/data4.csv with rows: 55 and columns 274
+    with  input density : 0.738 and number of ones: 11122
+    using  model: max_e_c  with quasi-biclique error: 0.0 and density_threshold: 0.030 
+    and zero deletion rate (rho): 0.1 and debug: 1
+    Decrease and conquer levels:  0, # ext task: 1, int task : 0 
+    The solution has been found in matrix : 1  with 
+    size max clique  2650, # rows: 25 # columns: 106,
+    # solved  tasks : 1, # skipped  tasks : 0  # fathomed tasks : 0
+    
+----------------------------------------------------------------------
+
+Best task: 1, Best objective: 2650 with # rows 25 and # cols 106
+
+----------------------------------------------------------------------
+ Model building and solving global time: 826.0723 sec
+ Tasks_generation time: 0.0000 sec
+ Tasks_pure_solving time: 825.1098 sec
+
+size egdes_1: 11122
+
+Number of ones in the best submatrix : 2650

@@ -1,0 +1,102 @@
+
+
+
+----------------------------------------------------------------------
+
+End of tasks generation stage. Last generated task from matrix 1 with winning node 1 and global time 0.0000000
+
+----------------------------------------------------------------------
+ Size of the queue: 1
+ Matrix: 1, Size: 613, Number Rows: 314,  Number Cols: 360,  Number Edges: 613, obj None
+
+----------------------------------------------------------------------
+
+
+***QUEUE Processing of task number 1 with (edges 613) selected_model max_e_r dec_conq 0 delta 0.0 threshold 0.01 rho 0.7 QBC_time 0.0 ***
+
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 1 in  data/sandi.csv at level 0 and with model:  max_e_r***
+Size of current matrix :  314 * 360 = 113040 ; dec_conq: 0
+number input zeros :  112427 ; number input ones :  613
+rho =  0.7 ; delta :  0.0
+Input density : 0.005 ; density_threshold: 0.01000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+            End of greedy approaches. Exit while loop. I did: 1 iterations
+            Density : 0.033 > 0.01
+            It took me : 0.016 time
+            Found matrix of size : (71, 77) and density : 0.033
+            
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+Model status: Optimal
+Solution saved to Experiments/sandi/results_0_M_1.csv
+
+----------------------------------------
+Results from update_data after solving model = max_e_r  with delta =   0.0 and dec_conq=  0
+Number of Remaining  Rows  : 2
+Number of Remaining Columns : 6
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 12 Density : 1.0 current obj value 12.0
+----------------------------------------
+
+----------------------------------------
+
+        Exit from the exact approach: max_e_r for matrix 1
+        with delta =  0.0
+        Found matrix of size : (2, 6)
+        and density : 1.0
+        and # of ones : 12
+        and Heuristic QBC time   : 0.00000
+        and Global QBC  time  : 0.17177
+        
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 1 in  data/sandi.csv at level 0 and debug  1
+    With  model: max_e_r and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (2,6), with  density : 1.0 and number of ones: 12
+    Global Time (in sec): 0.188
+    Total Time in QBC approaches: 0.172
+    Time in greedy approach: 0.016,  size of matrix found by greedy : (71,77) 
+    With density : 0.033 and # ones : 178 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 1
+    Percentage of greedy approach run time in global run time : 8.51% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.7 and threshold: 0.01
+    
+----------------------------------------------------------------------
+
+PROCESSED TASK NUMBER 1 with (edges 613) -> obj = 12
+
+Best task: 1, Best objective: 12
+ Number of fathomed tasks : 0
+
+----------------------------------------------------------------------
+
+Evaluated Queue:
+----------------------------------------------------------------------
+ Size of the queue: 1
+ Matrix: 1, Number Rows: 314,  Number Cols: 360,  Number Edges: 613, size max clique  12
+
+----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+Size of the COPY_QUEUE: 1
+Matrix: 1, Size: 613, Number Rows: 314, Number Cols: 360, Number Edges: 613
+
+----------------------------------------------------------------------
+***End of computations !!!
+
+ Model building and solving global time: 0.8936 sec
+ Tasks_generation time: 0.0000 sec
+ Tasks_pure_solving time: 0.2127 sec

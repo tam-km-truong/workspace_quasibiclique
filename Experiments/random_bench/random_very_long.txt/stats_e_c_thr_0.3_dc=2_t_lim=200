@@ -1,0 +1,585 @@
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 1 in  data/random_bench/random_very_long.txt at level 2 and with model:  max_e_c***
+Size of current matrix :  100 * 100 = 10000 ; dec_conq: 2
+number input zeros :  8092 ; number input ones :  1908
+rho =  0.1 ; delta :  0.0
+Input density : 0.191 ; density_threshold: 0.30000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+            End of greedy approaches. Exit while loop. I did: 9 iterations
+            Density : 0.306 > 0.3
+            It took me : 0.100 time
+            Found matrix of size : (42, 39) and density : 0.306
+            
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+Model status: Optimal
+Solution saved to Experiments/random_bench/random_very_long.txt/results_h_2_M_1.csv
+
+----------------------------------------
+ results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining number  Rows  : 11
+Number of Remaining number Columns : 2
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 22 Density : 1.0 current obj value 166.0
+----------------------------------------
+
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 1
+        with delta =  0.0
+        Found matrix of size : (11, 2)
+        and density : 1.0
+        and # of ones : 22
+        and Heuristic QBC time   : 0.24423
+        and Global QBC  time  : 0.24423
+        
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 1 in  data/random_bench/random_very_long.txt at level 2 and debug  1
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (11,2), with  density : 1.0 and number of ones: 22
+    Global Time (in sec): 0.344
+    Total Time in QBC approaches: 0.244
+    Time in greedy approach: 0.100,  size of matrix found by greedy : (42,39) 
+    With density : 0.306 and # ones : 502 
+    Time in heuristic only : 0.244 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 9
+    Percentage of greedy approach run time in global run time : 29.05% 
+    Percentage of heuristic run time in QBC run time : 100.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.3
+    
+----------------------------------------------------------------------
+
+dec_conq= 2
+
+ Level 1, Matrix 2:
+Size Rows: 89
+Size Cols: 100
+
+ Level 1 Matrix  3:
+Size Rows: 100
+Size Cols: 98
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 2 in  data/random_bench/random_very_long.txt at level 1 and with model:  max_e_c***
+Size of current matrix :  89 * 100 = 8900 ; dec_conq: 1
+number input zeros :  7226 ; number input ones :  1674
+rho =  0.1 ; delta :  0.0
+Input density : 0.188 ; density_threshold: 0.30000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+            End of greedy approaches. Exit while loop. I did: 9 iterations
+            Density : 0.302 > 0.3
+            It took me : 0.196 time
+            Found matrix of size : (37, 39) and density : 0.302
+            
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+Model status: Optimal
+Solution saved to Experiments/random_bench/random_very_long.txt/results_h_1_M_2.csv
+
+----------------------------------------
+ results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining number  Rows  : 8
+Number of Remaining number Columns : 2
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 16 Density : 1.0 current obj value 135.0
+----------------------------------------
+
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 2
+        with delta =  0.0
+        Found matrix of size : (8, 2)
+        and density : 1.0
+        and # of ones : 16
+        and Heuristic QBC time   : 0.21158
+        and Global QBC  time  : 0.21158
+        
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 2 in  data/random_bench/random_very_long.txt at level 1 and debug  1
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (8,2), with  density : 1.0 and number of ones: 16
+    Global Time (in sec): 0.407
+    Total Time in QBC approaches: 0.212
+    Time in greedy approach: 0.196,  size of matrix found by greedy : (37,39) 
+    With density : 0.302 and # ones : 436 
+    Time in heuristic only : 0.212 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 9
+    Percentage of greedy approach run time in global run time : 48.05% 
+    Percentage of heuristic run time in QBC run time : 100.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.3
+    
+----------------------------------------------------------------------
+
+dec_conq= 1
+
+ Level 0, Matrix 4:
+Size Rows: 81
+Size Cols: 100
+
+ Level 0 Matrix  5:
+Size Rows: 89
+Size Cols: 98
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 3 in  data/random_bench/random_very_long.txt at level 1 and with model:  max_e_c***
+Size of current matrix :  100 * 98 = 9800 ; dec_conq: 1
+number input zeros :  7952 ; number input ones :  1848
+rho =  0.1 ; delta :  0.0
+Input density : 0.189 ; density_threshold: 0.30000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+            End of greedy approaches. Exit while loop. I did: 9 iterations
+            Density : 0.301 > 0.3
+            It took me : 0.196 time
+            Found matrix of size : (42, 38) and density : 0.301
+            
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+Model status: Optimal
+Solution saved to Experiments/random_bench/random_very_long.txt/results_h_1_M_3.csv
+
+----------------------------------------
+ results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining number  Rows  : 2
+Number of Remaining number Columns : 10
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 20 Density : 1.0 current obj value 148.0
+----------------------------------------
+
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 3
+        with delta =  0.0
+        Found matrix of size : (2, 10)
+        and density : 1.0
+        and # of ones : 20
+        and Heuristic QBC time   : 0.20342
+        and Global QBC  time  : 0.20342
+        
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 3 in  data/random_bench/random_very_long.txt at level 1 and debug  1
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (2,10), with  density : 1.0 and number of ones: 20
+    Global Time (in sec): 0.399
+    Total Time in QBC approaches: 0.203
+    Time in greedy approach: 0.196,  size of matrix found by greedy : (42,38) 
+    With density : 0.301 and # ones : 481 
+    Time in heuristic only : 0.203 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 9
+    Percentage of greedy approach run time in global run time : 49.04% 
+    Percentage of heuristic run time in QBC run time : 100.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.3
+    
+----------------------------------------------------------------------
+
+dec_conq= 1
+
+ Level 0, Matrix 6:
+Size Rows: 98
+Size Cols: 98
+
+ Level 0 Matrix  7:
+Size Rows: 100
+Size Cols: 88
+
+----------------------------------------------------------------------
+
+End of tasks generation stage. Last generated task from matrix 1 with winning node 6 and global time 0.0000000
+
+----------------------------------------------------------------------
+ Size of the queue: 4
+ Matrix: 6, Size: 7806, Number Rows: 98,  Number Cols: 98,  Number Edges: 7806, obj None
+ Matrix: 7, Size: 7178, Number Rows: 100,  Number Cols: 88,  Number Edges: 7178, obj None
+ Matrix: 5, Size: 7096, Number Rows: 89,  Number Cols: 98,  Number Edges: 7096, obj None
+ Matrix: 4, Size: 6604, Number Rows: 81,  Number Cols: 100,  Number Edges: 6604, obj None
+
+----------------------------------------------------------------------
+
+
+***QUEUE Processing of task number 6 with (edges 7806) selected_model max_e_c dec_conq 0 delta 0.0 threshold 0.3 rho 0.1 QBC_time 0.0 ***
+
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 6 in  data/random_bench/random_very_long.txt at level 0 and with model:  max_e_c***
+Size of current matrix :  98 * 98 = 9604 ; dec_conq: 0
+number input zeros :  1798 ; number input ones :  7806
+rho =  0.1 ; delta :  0.0
+Input density : 0.813 ; density_threshold: 0.30000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+Model status: Optimal
+Solution saved to Experiments/random_bench/random_very_long.txt/results_h_0_M_6.csv
+
+----------------------------------------
+ results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining number  Rows  : 2
+Number of Remaining number Columns : 80
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 160 Density : 1.0 current obj value 6592.0
+----------------------------------------
+
+ !!!!!!!!!!!!!!!!!! I got a lower bound  160
+*****Model in warm start is feasible. Improving the solution!!!*** 
+Solution saved to Experiments/random_bench/random_very_long.txt/results_wstart_0_M_6.csv
+
+
+----------------------------------------
+ results from updating data after solving model = max_e_wr  delta =   0.0
+Number of Remaining  Rows  : 15
+Number of Remaining number Columns : 29
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 435 Density : 1.0
+----------------------------------------
+
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 6
+        with delta =  0.0
+        Found matrix of size : (15, 29)
+        and density : 1.0
+        and # of ones : 435
+        and Heuristic QBC time   : 41.76352
+        and Global QBC  time  : 241.93907
+        
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 6 in  data/random_bench/random_very_long.txt at level 0 and debug  1
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (15,29), with  density : 1.0 and number of ones: 435
+    Global Time (in sec): 241.939
+    Total Time in QBC approaches: 241.939
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 41.764 
+    Time in warm start only : 200.176
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 17.26%
+    With zero deletion rate (rho): 0.1 and threshold: 0.3
+    
+----------------------------------------------------------------------
+
+PROCESSED TASK NUMBER 6 with (edges 7806) -> obj = 435
+
+***QUEUE Processing of task number 7 with (edges 7178) selected_model max_e_c dec_conq 0 delta 0.0 threshold 0.3 rho 0.1 QBC_time 0.0 ***
+
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 7 in  data/random_bench/random_very_long.txt at level 0 and with model:  max_e_c***
+Size of current matrix :  100 * 88 = 8800 ; dec_conq: 0
+number input zeros :  1622 ; number input ones :  7178
+rho =  0.1 ; delta :  0.0
+Input density : 0.816 ; density_threshold: 0.30000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+Model status: Optimal
+Solution saved to Experiments/random_bench/random_very_long.txt/results_h_0_M_7.csv
+
+----------------------------------------
+ results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining number  Rows  : 2
+Number of Remaining number Columns : 72
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 144 Density : 1.0 current obj value 6071.0
+----------------------------------------
+
+ !!!!!!!!!!!!!!!!!! I got a lower bound  144
+*****Model in warm start is feasible. Improving the solution!!!*** 
+Solution saved to Experiments/random_bench/random_very_long.txt/results_wstart_0_M_7.csv
+
+
+----------------------------------------
+ results from updating data after solving model = max_e_wr  delta =   0.0
+Number of Remaining  Rows  : 16
+Number of Remaining number Columns : 28
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 448 Density : 1.0
+----------------------------------------
+
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 7
+        with delta =  0.0
+        Found matrix of size : (16, 28)
+        and density : 1.0
+        and # of ones : 448
+        and Heuristic QBC time   : 28.24396
+        and Global QBC  time  : 228.40725
+        
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 7 in  data/random_bench/random_very_long.txt at level 0 and debug  1
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (16,28), with  density : 1.0 and number of ones: 448
+    Global Time (in sec): 228.407
+    Total Time in QBC approaches: 228.407
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 28.244 
+    Time in warm start only : 200.163
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 12.37%
+    With zero deletion rate (rho): 0.1 and threshold: 0.3
+    
+----------------------------------------------------------------------
+
+PROCESSED TASK NUMBER 7 with (edges 7178) -> obj = 448
+
+***QUEUE Processing of task number 5 with (edges 7096) selected_model max_e_c dec_conq 0 delta 0.0 threshold 0.3 rho 0.1 QBC_time 0.0 ***
+
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 5 in  data/random_bench/random_very_long.txt at level 0 and with model:  max_e_c***
+Size of current matrix :  89 * 98 = 8722 ; dec_conq: 0
+number input zeros :  1626 ; number input ones :  7096
+rho =  0.1 ; delta :  0.0
+Input density : 0.814 ; density_threshold: 0.30000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+Model status: Optimal
+Solution saved to Experiments/random_bench/random_very_long.txt/results_h_0_M_5.csv
+
+----------------------------------------
+ results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining number  Rows  : 2
+Number of Remaining number Columns : 82
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 164 Density : 1.0 current obj value 6150.0
+----------------------------------------
+
+ !!!!!!!!!!!!!!!!!! I got a lower bound  164
+*****Model in warm start is feasible. Improving the solution!!!*** 
+Solution saved to Experiments/random_bench/random_very_long.txt/results_wstart_0_M_5.csv
+
+
+----------------------------------------
+ results from updating data after solving model = max_e_wr  delta =   0.0
+Number of Remaining  Rows  : 17
+Number of Remaining number Columns : 26
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 442 Density : 1.0
+----------------------------------------
+
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 5
+        with delta =  0.0
+        Found matrix of size : (17, 26)
+        and density : 1.0
+        and # of ones : 442
+        and Heuristic QBC time   : 12.27833
+        and Global QBC  time  : 212.44491
+        
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 5 in  data/random_bench/random_very_long.txt at level 0 and debug  1
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (17,26), with  density : 1.0 and number of ones: 442
+    Global Time (in sec): 212.445
+    Total Time in QBC approaches: 212.445
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 12.278 
+    Time in warm start only : 200.167
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 5.78%
+    With zero deletion rate (rho): 0.1 and threshold: 0.3
+    
+----------------------------------------------------------------------
+
+PROCESSED TASK NUMBER 5 with (edges 7096) -> obj = 442
+
+***QUEUE Processing of task number 4 with (edges 6604) selected_model max_e_c dec_conq 0 delta 0.0 threshold 0.3 rho 0.1 QBC_time 0.0 ***
+
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 4 in  data/random_bench/random_very_long.txt at level 0 and with model:  max_e_c***
+Size of current matrix :  81 * 100 = 8100 ; dec_conq: 0
+number input zeros :  1496 ; number input ones :  6604
+rho =  0.1 ; delta :  0.0
+Input density : 0.815 ; density_threshold: 0.30000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+Model status: Optimal
+Solution saved to Experiments/random_bench/random_very_long.txt/results_h_0_M_4.csv
+
+----------------------------------------
+ results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining number  Rows  : 2
+Number of Remaining number Columns : 82
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 164 Density : 1.0 current obj value 5631.0
+----------------------------------------
+
+ !!!!!!!!!!!!!!!!!! I got a lower bound  164
+*****Model in warm start is feasible. Improving the solution!!!*** 
+Solution saved to Experiments/random_bench/random_very_long.txt/results_wstart_0_M_4.csv
+
+
+----------------------------------------
+ results from updating data after solving model = max_e_wr  delta =   0.0
+Number of Remaining  Rows  : 23
+Number of Remaining number Columns : 19
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 437 Density : 1.0
+----------------------------------------
+
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 4
+        with delta =  0.0
+        Found matrix of size : (23, 19)
+        and density : 1.0
+        and # of ones : 437
+        and Heuristic QBC time   : 23.05557
+        and Global QBC  time  : 223.20597
+        
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 4 in  data/random_bench/random_very_long.txt at level 0 and debug  1
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (23,19), with  density : 1.0 and number of ones: 437
+    Global Time (in sec): 223.206
+    Total Time in QBC approaches: 223.206
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 23.056 
+    Time in warm start only : 200.150
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 10.33%
+    With zero deletion rate (rho): 0.1 and threshold: 0.3
+    
+----------------------------------------------------------------------
+
+PROCESSED TASK NUMBER 4 with (edges 6604) -> obj = 437
+
+Best task: 7, Best objective: 448 with # rows 16 and # cols 28
+ Number of fathomed tasks : 3
+
+----------------------------------------------------------------------
+
+Evaluated Queue:
+----------------------------------------------------------------------
+ Size of the evaluated  queue: 4
+ Matrix: 6, # Rows: 98,  # Cols: 98,  # Edges: 7806, size max clique  435, # rows: 15 # columns: 29
+ Matrix: 7, # Rows: 100,  # Cols: 88,  # Edges: 7178, size max clique  448, # rows: 16 # columns: 28
+ Matrix: 5, # Rows: 89,  # Cols: 98,  # Edges: 7096, size max clique  442, # rows: 17 # columns: 26
+ Matrix: 4, # Rows: 81,  # Cols: 100,  # Edges: 6604, size max clique  437, # rows: 23 # columns: 19
+
+----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+Size of the COPY_QUEUE: 4
+Matrix: 6, Size: 7806, Number Rows: 98, Number Cols: 98, Number Edges: 7806
+Matrix: 7, Size: 7178, Number Rows: 100, Number Cols: 88, Number Edges: 7178
+Matrix: 5, Size: 7096, Number Rows: 89, Number Cols: 98, Number Edges: 7096
+Matrix: 4, Size: 6604, Number Rows: 81, Number Cols: 100, Number Edges: 6604
+
+----------------------------------------------------------------------
+***End of computations !!!
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+ 
+    End of computations for matrix  data/random_bench/random_very_long.txt with rows: 100 and columns 100
+    with  input density : 0.809 and number of ones: 8092
+    using  model: max_e_c  with quasi-biclique error: 0.0 and density_threshold: 0.300 
+    and zero deletion rate (rho): 0.1 and debug: 1
+    Decrease and conquer levels:  2, # ext task: 4, int task : 3 
+    The solution has been found in matrix : 7  with 
+    size max clique  448, # rows: 16 # columns: 28,
+    # solved  tasks : 4, # skipped  tasks : 0  # fathomed tasks : 3
+    
+----------------------------------------------------------------------
+
+Best task: 7, Best objective: 448 with # rows 16 and # cols 28
+
+----------------------------------------------------------------------
+ Model building and solving global time: 910.9100 sec
+ Tasks_generation time: 2.2546 sec
+ Tasks_pure_solving time: 908.2184 sec

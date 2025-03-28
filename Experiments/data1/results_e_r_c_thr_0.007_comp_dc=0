@@ -1,0 +1,216 @@
+----------------------------------------
+ Input Data in csv files : data/data1.csv
+Number Rows Data : 10
+Number Cols Data : 10
+Number Edges_1 : 36
+Number Edges_0 : 64
+ Rows Data : [(0, 3), (1, 5), (2, 0), (3, 1), (4, 6), (5, 5), (6, 6), (7, 6), (8, 1), (9, 3)]
+ Cols Data : [(0, 0), (1, 5), (2, 6), (3, 7), (4, 4), (5, 1), (6, 6), (7, 1), (8, 1), (9, 5)]
+  row_names : Index(['r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7', 'r8', 'r9', 'r10'], dtype='object')
+  col_names : Index(['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10'], dtype='object')
+ Edges_1 : [(0, 6), (0, 7), (0, 8), (1, 2), (1, 3), (1, 4), (1, 6), (1, 9), (3, 9), (4, 1), (4, 2), (4, 3), (4, 4), (4, 6), (4, 9), (5, 1), (5, 2), (5, 3), (5, 5), (5, 6), (6, 1), (6, 2), (6, 3), (6, 4), (6, 6), (6, 9), (7, 1), (7, 2), (7, 3), (7, 4), (7, 6), (7, 9), (8, 3), (9, 1), (9, 2), (9, 3)]
+ Edges_0 : [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 9), (1, 0), (1, 1), (1, 5), (1, 7), (1, 8), (2, 0), (2, 1), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (2, 7), (2, 8), (2, 9), (3, 0), (3, 1), (3, 2), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (4, 0), (4, 5), (4, 7), (4, 8), (5, 0), (5, 4), (5, 7), (5, 8), (5, 9), (6, 0), (6, 5), (6, 7), (6, 8), (7, 0), (7, 5), (7, 7), (7, 8), (8, 0), (8, 1), (8, 2), (8, 4), (8, 5), (8, 6), (8, 7), (8, 8), (8, 9), (9, 0), (9, 4), (9, 5), (9, 6), (9, 7), (9, 8), (9, 9)]
+----------------------------------------
+
+Task with matrix 1 with size (10,10) and density 0.36 and number of ones 36  and number of zeros 64 has been added to the queue.
+
+----------------------------------------------------------------------
+
+End of tasks generation stage. Last generated task from matrix 1 with winning node 1 and global time 0.0000000
+
+----------------------------------------------------------------------
+ Size of the queue: 1
+ Matrix: 1, Size: 36, Number Rows: 10,  Number Cols: 10,  Number Edges: 36, obj None
+
+----------------------------------------------------------------------
+
+
+***QUEUE Processing of task number 1 with (edges 36) selected_model max_e_r dec_conq 0 delta 0.0 threshold 0.007 rho 0.1 QBC_time 0.0 ***
+
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 1 in  data/data1.csv at level 0 and with model:  max_e_r***
+Size of current matrix :  10 * 10 = 100 ; dec_conq: 0
+number input zeros :  64 ; number input ones :  36
+rho =  0.1 ; delta :  0.0
+Input density : 0.360 ; density_threshold: 0.00700
+rows = [(0, 3), (1, 5), (2, 0), (3, 1), (4, 6), (5, 5), (6, 6), (7, 6), (8, 1), (9, 3)]
+cols = [(0, 0), (1, 5), (2, 6), (3, 7), (4, 4), (5, 1), (6, 6), (7, 1), (8, 1), (9, 5)]
+row_names = Index(['r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7', 'r8', 'r9', 'r10'], dtype='object')
+col_names = Index(['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10'], dtype='object')
+edges_1 = [(0, 6), (0, 7), (0, 8), (1, 2), (1, 3), (1, 4), (1, 6), (1, 9), (3, 9), (4, 1), (4, 2), (4, 3), (4, 4), (4, 6), (4, 9), (5, 1), (5, 2), (5, 3), (5, 5), (5, 6), (6, 1), (6, 2), (6, 3), (6, 4), (6, 6), (6, 9), (7, 1), (7, 2), (7, 3), (7, 4), (7, 6), (7, 9), (8, 3), (9, 1), (9, 2), (9, 3)]
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+ Start exact approaches with :
+rows_in = [(0, 3), (1, 5), (2, 0), (3, 1), (4, 6), (5, 5), (6, 6), (7, 6), (8, 1), (9, 3)]
+cols_in = [(0, 0), (1, 5), (2, 6), (3, 7), (4, 4), (5, 1), (6, 6), (7, 1), (8, 1), (9, 5)]
+row_names_in = Index(['r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7', 'r8', 'r9', 'r10'], dtype='object')
+col_names_in = Index(['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10'], dtype='object')
+edges_1_in = [(0, 6), (0, 7), (0, 8), (1, 2), (1, 3), (1, 4), (1, 6), (1, 9), (3, 9), (4, 1), (4, 2), (4, 3), (4, 4), (4, 6), (4, 9), (5, 1), (5, 2), (5, 3), (5, 5), (5, 6), (6, 1), (6, 2), (6, 3), (6, 4), (6, 6), (6, 9), (7, 1), (7, 2), (7, 3), (7, 4), (7, 6), (7, 9), (8, 3), (9, 1), (9, 2), (9, 3)]
+edges_1_in = [(0, 6), (0, 7), (0, 8), (1, 2), (1, 3), (1, 4), (1, 6), (1, 9), (3, 9), (4, 1), (4, 2), (4, 3), (4, 4), (4, 6), (4, 9), (5, 1), (5, 2), (5, 3), (5, 5), (5, 6), (6, 1), (6, 2), (6, 3), (6, 4), (6, 6), (6, 9), (7, 1), (7, 2), (7, 3), (7, 4), (7, 6), (7, 9), (8, 3), (9, 1), (9, 2), (9, 3)]
+
+----------------------------------------
+******** Solving model  ******** max_e_r  with delta =  0.0
+ # rows_data = 10  # cols_data = 10  # edges = 36
+ # rows_data = [(0, 3), (1, 5), (2, 0), (3, 1), (4, 6), (5, 5), (6, 6), (7, 6), (8, 1), (9, 3)] 
+, # cols_data = [(0, 0), (1, 5), (2, 6), (3, 7), (4, 4), (5, 1), (6, 6), (7, 1), (8, 1), (9, 5)] 
+, # edges = [(0, 6), (0, 7), (0, 8), (1, 2), (1, 3), (1, 4), (1, 6), (1, 9), (3, 9), (4, 1), (4, 2), (4, 3), (4, 4), (4, 6), (4, 9), (5, 1), (5, 2), (5, 3), (5, 5), (5, 6), (6, 1), (6, 2), (6, 3), (6, 4), (6, 6), (6, 9), (7, 1), (7, 2), (7, 3), (7, 4), (7, 6), (7, 9), (8, 3), (9, 1), (9, 2), (9, 3)]
+row_threshold= 1
+col_threshold= 1
+
+----------------------------------------
+----------------------------------------------------------------------
+Model status: Optimal
+----------------------------------------------------------------------
+Computed Objective Value: 20.0
+Model status: Optimal
+Solution saved to Experiments/data1/results_0_M_1.csv
+
+-- Debugging Step: checking extracted solution after solving model **** -- max_e_r
+len_rows_res= 4
+row_res= [1, 4, 6, 7]
+len_cols_res= 5
+cols_res= [2, 3, 4, 6, 9]
+nb row_names, = 10
+row_names_res = ['r2', 'r5', 'r7', 'r8']
+col_names_res = ['c3', 'c4', 'c5', 'c7', 'c10']
+ nb col_names, = 10
+
+----------------------------------------
+
+----------------------------------------------------------------------
+Stats
+ Model solved : max_e_r  Local Time:  - (real) 0.01262 - (Local CPU) 0.01262 - (Global CPU) 0.01262
+
+ Solve status: Optimal Objective value: 20.0 nb_rows 4 nb_cols 5
+----------------------------------------
+
+-- Update Debugging Step 1 : input data  and first updates --
+rows_res = [1, 4, 6, 7]
+cols_res = [2, 3, 4, 6, 9]
+rows_res_set = {1, 4, 6, 7}
+cols_res_set = {2, 3, 4, 6, 9}
+rows_data = [(0, 3), (1, 5), (2, 0), (3, 1), (4, 6), (5, 5), (6, 6), (7, 6), (8, 1), (9, 3)]
+cols_data = [(0, 0), (1, 5), (2, 6), (3, 7), (4, 4), (5, 1), (6, 6), (7, 1), (8, 1), (9, 5)]
+
+-- Update Debugging Step 2 : input data  and later  updates --
+
+col_degree_map = {0: 0, 1: 5, 2: 6, 3: 7, 4: 4, 5: 1, 6: 6, 7: 1, 8: 1, 9: 5}
+row_degree_map = {0: 3, 1: 5, 2: 0, 3: 1, 4: 6, 5: 5, 6: 6, 7: 6, 8: 1, 9: 3}
+
+-- Update Debugging Step 3 : input data  and later  updates --
+
+col_degree_map reduced = {0: 0, 1: 0, 2: 4, 3: 4, 4: 4, 5: 0, 6: 4, 7: 0, 8: 0, 9: 4}
+row_degree_map reduced = {0: 0, 1: 5, 2: 0, 3: 0, 4: 5, 5: 0, 6: 5, 7: 5, 8: 0, 9: 0}
+cols_rem   = [(2, 4), (3, 4), (4, 4), (6, 4), (9, 4)]
+rows_rem   = [(1, 5), (4, 5), (6, 5), (7, 5)]
+ nb_edges_1_rem   = 20
+ nb_edges_0_rem   = 0
+row_rem_length= 5 col_rem_length = 4
+Stats in updata_data : row_rem_length = 5 col_rem_length = 4 nb_edges_0_rem= 0 nb_edges_1_rem= 20  !!!!! density = 1.0
+
+
+----------------------------------------
+Results from update_data after solving model = max_e_r  with delta =   0.0 and dec_conq=  0
+Number of Remaining  Rows  : 4
+Number of Remaining Columns : 5
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 20 Density : 1.0 current obj value 20.0
+----------------------------------------
+
+----------------------------------------
+
+Exit from the heuristic (or exact  approach)  max_e_r  with delta= 0.0 Found matrix with rows_res of lenght = 4  and cols_res of lenght = 5
+ Original Rows  : [(0, 3), (1, 5), (2, 0), (3, 1), (4, 6), (5, 5), (6, 6), (7, 6), (8, 1), (9, 3)]
+ Original Cold  : [(0, 0), (1, 5), (2, 6), (3, 7), (4, 4), (5, 1), (6, 6), (7, 1), (8, 1), (9, 5)]
+ Remaining Rows  : [1, 4, 6, 7]
+ Remaining  Cols  : [2, 3, 4, 6, 9]
+ Remaining Rows with degree : [(1, 5), (4, 5), (6, 5), (7, 5)]
+ Remaining  Cols with degree : [(2, 4), (3, 4), (4, 4), (6, 4), (9, 4)]
+----------------------------------------
+
+        Exit from the exact approach: max_e_r for matrix 1
+        with delta =  0.0
+        Found matrix of size : (4, 5)
+        and density : 1.0
+        and # of ones : 20
+        and Heuristic QBC time   : 0.00000
+        and Global QBC  time  : 0.01262
+        
+ Remaining Rows  : [(1, 5), (4, 5), (6, 5), (7, 5)]
+ Remaining  Cols  : [(2, 4), (3, 4), (4, 4), (6, 4), (9, 4)]
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 1 in  data/data1.csv at level 0 and debug  4
+    With  model: max_e_r and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (4,5), with  density : 1.0 and number of ones: 20
+    Global Time (in sec): 0.013
+    Total Time in QBC approaches: 0.013
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.000 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 0.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.007
+    
+----------------------------------------------------------------------
+
+ Remaining Rows with degree : [(1, 5), (4, 5), (6, 5), (7, 5)]
+ Remaining Cols with degree : [(2, 4), (3, 4), (4, 4), (6, 4), (9, 4)]
+PROCESSED TASK NUMBER 1 with (edges 36) -> obj = 20
+
+Best task: 1, Best objective: 20 with # rows 4 and # cols 5
+ Number of fathomed tasks : 0
+
+----------------------------------------------------------------------
+
+Evaluated Queue:
+----------------------------------------------------------------------
+ Size of the evaluated  queue: 1
+ Matrix: 1, # Rows: 10,  # Cols: 10,  # Edges: 36, size max clique  20, # rows: 4 # columns: 5
+
+----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+Size of the COPY_QUEUE: 1
+Matrix: 1, Size: 36, Number Rows: 10, Number Cols: 10, Number Edges: 36
+
+----------------------------------------------------------------------
+***End of computations !!!
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+ 
+    End of computations for matrix  data/data1.csv with rows: 10 and columns 10
+    with  input density : 0.360 and number of ones: 36
+    using  model: max_e_r  with quasi-biclique error: 0.0 and density_threshold: 0.007 
+    and zero deletion rate (rho): 0.1 and debug: 4
+    Decrease and conquer levels:  0, # ext task: 1, int task : 0 
+    The solution has been found in matrix : 1  with 
+    size max clique  20, # rows: 4 # columns: 5,
+    # solved  tasks : 1, # skipped  tasks : 0  # fathomed tasks : 0
+    
+----------------------------------------------------------------------
+
+Best task: 1, Best objective: 20 with # rows 4 and # cols 5
+
+----------------------------------------------------------------------
+ Model building and solving global time: 0.0192 sec
+ Tasks_generation time: 0.0000 sec
+ Tasks_pure_solving time: 0.0144 sec
+
+size egdes_1: 36
+
+egdes_1: [(0, 6), (0, 7), (0, 8), (1, 2), (1, 3), (1, 4), (1, 6), (1, 9), (3, 9), (4, 1), (4, 2), (4, 3), (4, 4), (4, 6), (4, 9), (5, 1), (5, 2), (5, 3), (5, 5), (5, 6), (6, 1), (6, 2), (6, 3), (6, 4), (6, 6), (6, 9), (7, 1), (7, 2), (7, 3), (7, 4), (7, 6), (7, 9), (8, 3), (9, 1), (9, 2), (9, 3)]
+row_set: {1, 4, 6, 7}
+col_set: {2, 3, 4, 6, 9}
+Number of ones in submatrix B: 20
