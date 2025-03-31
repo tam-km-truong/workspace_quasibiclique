@@ -11,7 +11,7 @@ an instance
  python3 quasi_clique_comb.py --filepath data/data4.csv   --model  max_e_h  --rho 0.1  --delta 0.1 --debug 0  --threshold 0.83 --dec_conq0 
 
 """
-#from pulp import value, LpStatus, GUROBI_CMD
+from pulp import value, LpStatus, GUROBI_CMD
 import sys
 import csv 
 import re
@@ -315,6 +315,8 @@ def max_e_wr(rows_data, cols_data, edges, rows_res, cols_res, prev_obj, delta):
 
 # Warm start (PuLP way: use setInitialValue if needed)
     # Set and store initial values
+    #Attention: check what happens when the lower bound is given by previous bound !!!!!!!!!!!!!!!!!!!!!!!!
+    ####################################################
     #row_indices: list[int] = []
     #column_indices: list[int] = []
     cells_indices = []
@@ -1263,7 +1265,7 @@ def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, rh
 # ============================================================================ #
 
 
-def solve(dec_conq, matrix_name, rows, cols, edges_1, model, KP_time, QBC_time, rho=1.0, delta=0.1, density_threshold=0.87):
+def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, KP_time, QBC_time, rho=1.0, delta=0.1, density_threshold=0.87):
     """
     Function to solve the maximum biclique problem, this function reads the data,
     create a LP model using the data and return a list of rows and a list of 
@@ -1382,7 +1384,7 @@ def solve(dec_conq, matrix_name, rows, cols, edges_1, model, KP_time, QBC_time, 
             print("edges_1_in =", edges_1_in)
     #sys.exit("Terminating program before calling exact exit 10 !!!!")
     if model == "max_e_c" or dec_conq >= 1: 
-        rows_res, cols_res, density, nb_edges_1, QBC_time_h, QBC_time_g = warm_exact(dec_conq, matrix_name,model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
+        rows_res, cols_res, density, nb_edges_1, QBC_time_h, QBC_time_g = warm_exact(prev_lower_bound,dec_conq, matrix_name,model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
         #sys.exit("Terminating program before calling exact exit 10 !!!!")  
     else:
         rows_res, cols_res, density, nb_edges_1, QBC_time_g = exact(dec_conq, matrix_name, model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
@@ -1489,7 +1491,11 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
         obj_value = 0  # ✅ Fallback value if model failed
 
     # ✅ Only proceed with saving the solution if the model found a feasible solution
-    if model.status in [1, 2, 9]:  
+    if model.status in [1, 2, 9]: 
+        if model.status == 9: 
+            print()
+            print(f" !!!!! When soving matrix {matrix_name} with  model {model_name} the time limit of {timelimit} has been reached ")
+            print()  
         # Save the solution to a CSV file 
         if p.lower().endswith('.csv'):
             file_path_no_ext = file_path.replace(".csv", "").replace("data/", "")
@@ -1590,7 +1596,7 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
 ###############################################################################
 # END OF EXACT 
 # ########################################################################  
-def warm_exact(dec_conq, matrix_name,model_name, rows, cols, row_names, col_names, edges_1, delta, debug, QBC_time):
+def warm_exact(prev_lower_bound, dec_conq, matrix_name,model_name, rows, cols, row_names, col_names, edges_1, delta, debug, QBC_time):
     """
     Arguments:
     ----------
@@ -1627,7 +1633,7 @@ def warm_exact(dec_conq, matrix_name,model_name, rows, cols, row_names, col_name
             obj_value = value(model.objective) # ✅ Extract objective value
             if debug >= 2:
                 print('-' * 70)
-                print(f"Computed Objective Value: {obj_value}")
+                print(f"Computed by max_e_h Objective Value : {obj_value}")
             # Extract solution values (only nonzero rows and columns)
             solution = {
                 var.name: var.varValue
@@ -1659,10 +1665,8 @@ def warm_exact(dec_conq, matrix_name,model_name, rows, cols, row_names, col_name
             writer = csv.writer(file)
             # Write the objective value
             #if model_name == 'max_e_h':
-            lower_bound = len(rows_res)*len(cols_res)
-            writer.writerow(["Objective Value",lower_bound ])
-            if debug >= 1:
-                print(f" A lower_bound = {lower_bound} has been found by max_e_h ")
+            lower_bound = len(rows_res)*len(cols_res)    
+            writer.writerow(["Obj value",lower_bound ])
             # else:
             #     writer.writerow(["Objective Value", obj_value])
             # Write number of rows
@@ -1749,7 +1753,16 @@ def warm_exact(dec_conq, matrix_name,model_name, rows, cols, row_names, col_name
         return rows_res, cols_res, density, nb_edges_1, QBC_time_h, QBC_time_h  
     #the task is going to be solved 
     #model.Params.Cutoff = lower_bound
-    model = max_e_wr(rows, cols, edges_1, rows_res, cols_res, nb_edges_1, delta)
+    if prev_lower_bound != None: 
+        if prev_lower_bound >= 1+ nb_edges_1:
+            lower_bound = prev_lower_bound
+            if debug >= 1:
+                print(f" A lower_bound = {lower_bound} has been previously found and given as input. ")
+    else:   
+        lower_bound = nb_edges_1 
+        if debug >= 1:
+            print(f" A lower_bound = {lower_bound} has been found by max_e_h ")
+    model = max_e_wr(rows, cols, edges_1, rows_res, cols_res, lower_bound, delta)
     try:
         # Solve the model with Gurobi
         model.solve(GUROBI_CMD(msg=False, timeLimit= timelimit))#, options=[("MIPGap", 0.03)]))
@@ -1785,11 +1798,18 @@ def warm_exact(dec_conq, matrix_name,model_name, rows, cols, row_names, col_name
     # Check if the model has an optimal/feasible solution
     QBC_time_g = print_log_output(model, QBC_time_h, obj_value, len(rows_res), len(cols_res))
     if   model.status == 0:
-         print("*****Model in warm start is infeasible.!!!*** ")
+         print("*****Model in warm start is infeasible.!!! The given lower bound cannot be improved.*** ")
          #the solution found by the heuristic cannot be improved. Return it as the final solution
-         return rows_rem, cols_rem, density, nb_edges_1, QBC_time_h, QBC_time_g 
-    print("*****Model in warm start is feasible. Improving the solution!!!*** ")
+         return rows_rem, cols_rem, density, lower_bound, QBC_time_h, QBC_time_g 
+    if debug >= 1:
+        print("*****Model in warm start is feasible. Improving the solution!!!*** ")
+        print(f"model status = {model.status}, LPstatus {LpStatus[model.status]}")
     if model.status in [1, 2, 9]:  # 1 = Optimal, 2 = Feasible, 9 = Time limit reached
+        #if model.status == 9:
+        if LpStatus[model.status] == 9:
+            print()
+            print(f" !!!!! When soving matrix {matrix_name} with  model {model_name} the time limit of {timelimit} has been reached ")
+            print() 
     # Save the solution to a file
         file_path_no_ext = file_path.replace(".csv", "").replace("data/", "")
         solution_file = f"Experiments/{file_path_no_ext}/results_wstart_{dec_conq}_M_{matrix_name}.csv"
@@ -2438,8 +2458,9 @@ def final_print(dec_conq, rows, cols, edges, model, rho, delta):
     print(f""" 
     End of computations for matrix  {file_path} with rows: {len(rows)} and columns {len(cols)}
     with  input density : {density:.3f} and number of ones: {len(edges)}
-    using  model: {selected_model}  with quasi-biclique error: {delta} and density_threshold: {threshold:.3f} 
-    and zero deletion rate (rho): {rho} and debug: {debug}
+    time limit has been set to {timelimit}
+    using  model: {selected_model}  with quasi-biclique error: {delta} 
+    nd density_threshold: {threshold:.3f} and zero deletion rate (rho): {rho} and debug: {debug}
     Decrease and conquer levels:  {dec_conq}, # ext task: {nb_ext}, int task : {nb_int} 
     The solution has been found in matrix : {best_task}  with 
     size max clique  {best_obj}, # rows: {len(best_rows)} # columns: {len(best_cols)},
@@ -2505,12 +2526,89 @@ def add_task(matrix_name, rows, cols, edges, obj):
     heapq.heappush(QUEUE, (-edge_count, edge_count, (matrix_name, rows, cols, edges, obj)))  # Negative for max-heap
 # Function to add tasks to the priority queue
 
+def process_tasks_NEW(given_best_task, given_lower_bound, selected_model, QBC_time):
+    global QUEUE, PROCESSED_OBJS, EVALUATED_QUEUE
+
+    #best_task = None  # Track the best task number
+    best_task = given_best_task  # Track the best task number
+    #best_obj = float('-inf')  # Track the highest objective value
+    best_obj = given_lower_bound  # Track the highest objective value
+    #prev_lower_bound  = None 
+    prev_lower_bound  = given_lower_bound 
+    solved_count = 0  # Count of tasks that were solved
+    skipped_count = 0  # Count of tasks that were skipped
+
+    while QUEUE:
+        _, edge_count, (matrix_name, rows, cols, edges, obj_val) = heapq.heappop(QUEUE)  # Extract highest priority task
+        #Modify the above in a way that the highest priority task sets to the given_best_task  while here we just read the elements of the QUEUE
+
+        # Check fathoming condition: If a processed obj >= edge_count of this task, skip it
+        if any(obj >= edge_count for obj in PROCESSED_OBJS):
+            print(f"Skipping {matrix_name} (edges {edge_count}) - Fathomed by an earlier task.")
+            skipped_count += 1  # Increment skipped task count
+            continue
+        # my proposal is :
+        if  best_obj >= edge_count:
+            print(f"Skipping {matrix_name} (edges {edge_count}) - Fathomed by an earlier task.")
+            skipped_count += 1  # Increment skipped task count
+            continue
+        # end my proposal  
+
+        # Solve the problem
+        start_solving_task_count = time.time()
+        #prev_lower_bound = obj_val 
+        KP_time = 0
+        dec_conq = 0
+        print() 
+        print(f"***QUEUE We currently process task number {matrix_name} with (edges {edge_count}) selected_model {selected_model} dec_conq {dec_conq} delta {delta} threshold {threshold} rho {rho} QBC_time {QBC_time} ***")
+        print() 
+
+        results = solve(prev_lower_bound,dec_conq, matrix_name, rows, cols, edges, selected_model, KP_time, QBC_time, rho, delta, threshold)
+        
+        # Unpack results
+        (rows_res, cols_res, density, nb_ones, iter, KP_time, 
+        kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 
+        QBC_time_h, QBC_time_g) = results
+        
+        # Display results
+        view = affichage(dec_conq, matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  
+                         kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
+        
+        (matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g) = view 
+
+        # Compute objective function
+        obj = len(rows_res) * len(cols_res)  # Replace with actual computation
+        #PROCESSED_OBJS.append(obj)  # Store obj value
+        #we dont need to store obj value
+        end_solving_task_count = time.time()
+        solved_count += 1  # Increment solved task count
+
+        print(f"We finished TASK NUMBER {matrix_name} with (edges {edge_count}) -> obj = {obj}  with solving TIME : {end_solving_task_count - start_solving_task_count:.4f} sec" )
+
+        # Store the evaluated task
+        #EVALUATED_QUEUE.append((matrix_name, rows, cols, edge_count, obj, len(rows_res), len(cols_res)))
+        # we dont need any more to append since we do as below
+
+        # Update best task if this one is better
+        if obj > best_obj:
+            best_obj = obj
+            best_task = matrix_name
+            best_rows = rows_res
+            best_cols = cols_res
+            best_density = density
+
+    # Count fathomed tasks
+    fathomed_count = sum(1 for matrix_name, rows, cols, edge_count, obj, nb_rows, nb_cols in EVALUATED_QUEUE if obj < best_obj)
+
+    # Return the best task, best objective, evaluated queue, fathomed count, solved count, and skipped count
+    return best_task, best_obj, best_rows, best_cols, best_density, EVALUATED_QUEUE, fathomed_count, solved_count, skipped_count
+
 def process_tasks(selected_model, QBC_time):
     global QUEUE, PROCESSED_OBJS, EVALUATED_QUEUE
 
     best_task = None  # Track the best task number
     best_obj = float('-inf')  # Track the highest objective value
-
+    prev_lower_bound  = None 
     solved_count = 0  # Count of tasks that were solved
     skipped_count = 0  # Count of tasks that were skipped
 
@@ -2525,13 +2623,14 @@ def process_tasks(selected_model, QBC_time):
 
         # Solve the problem
         start_solving_task_count = time.time()
+        prev_lower_bound = obj_val 
         KP_time = 0
         dec_conq = 0
         print() 
         print(f"***QUEUE Processing of task number {matrix_name} with (edges {edge_count}) selected_model {selected_model} dec_conq {dec_conq} delta {delta} threshold {threshold} rho {rho} QBC_time {QBC_time} ***")
         print() 
 
-        results = solve(dec_conq, matrix_name, rows, cols, edges, selected_model, KP_time, QBC_time, rho, delta, threshold)
+        results = solve(prev_lower_bound,dec_conq, matrix_name, rows, cols, edges, selected_model, KP_time, QBC_time, rho, delta, threshold)
         
         # Unpack results
         (rows_res, cols_res, density, nb_ones, iter, KP_time, 
@@ -2632,7 +2731,7 @@ def add_task_OLD(matrix_name, rows, cols, edges):
     heapq.heappush(QUEUE, (-size, size, (matrix_name, rows, cols, edges)))  # Negative for max-heap
 
 
-def process_tasks_OMD(selected_model, QBC_time):
+def process_tasks_OLD(selected_model, QBC_time):
     global QUEUE, PROCESSED_OBJS
 
     best_task = None  # Track the best task number
@@ -2753,7 +2852,7 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         # Compute complementary row and column indices
         rows_compl, cols_compl, edges_compl = get_complement_rowcols(rows, cols, edges_1)
         # Solve the problem
-        results = solve(dec_conq, matrix_name, rows_compl, cols_compl, edges_compl, selected_model, KP_time, QBC_time, rho, delta, threshold)
+        results = solve(None,dec_conq, matrix_name, rows_compl, cols_compl, edges_compl, selected_model, KP_time, QBC_time, rho, delta, threshold)
         # Unpack results
         (rows_res, cols_res, density, nb_ones, iter, KP_time, 
         kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 
@@ -3113,20 +3212,7 @@ if __name__ == '__main__':
     print('-' * 70)
     print()
     print(f"End of tasks generation stage. Last generated task from matrix {node} with winning node {winning_node} and global time {global_time:.7f}")     
-    #   f"rows = {rows}, \n"
-    #   f"cols = {cols}, \n"
-    #   f"density = {density}, nb_ones = {nb_ones}")
-    
-    #last_affichage(winning_node, node, rows, cols, density, nb_ones, global_time)
-    # queue_data = [(matrix_name, size) for _, size, (matrix_name, _, _, _) in QUEUE]
-    # print(tabulate(queue_data, headers=["Matrix Name", "Size"], tablefmt="grid"))
-    #first_task = QUEUE[0] if QUEUE else None  # Get the first task safely
-    #print(first_task)
-    # print("Matrix Name | Size")
-    # print("-------------------")
-    # for _, size, (matrix_name, _, _, _) in QUEUE:
-    #     print(f"{matrix_name:<12} | {size}")
-    print()
+
     print('-' * 70)
     print(f" Size of the queue: {len(QUEUE)}")
     for _, size, (matrix_name, rows, cols, edges, obj) in QUEUE:
