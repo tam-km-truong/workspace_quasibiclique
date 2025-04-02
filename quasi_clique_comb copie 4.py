@@ -1288,7 +1288,7 @@ def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, K
         print('-' * 70)
         print(f"***Stats Current Input for matrix {matrix_name} in  {file_path} at level {dec_conq} and with model:  {model}***")
         print("Size of current matrix : ", len(rows), "*", len(cols), "=", len(rows) * len(cols), "; dec_conq:", dec_conq)
-        print("Prev_lower_bound : ",prev_lower_bound,"number input zeros : ",nbi_0, "; number input ones : ",nbi_1)            
+        print("number input zeros : ",nbi_0, "; number input ones : ",nbi_1)            
         print("rho = ",rho, "; delta : ", delta)
         # Safe printing: Convert None to "N/A" or provide a default value
         print(f"Input density : {density:.3f}" if density is not None else "Input density: N/A",  f"; density_threshold: {density_threshold:.5f}")
@@ -1724,7 +1724,7 @@ def warm_exact(prev_lower_bound, dec_conq, matrix_name,model_name, rows, cols, r
     if debug >=1:
         print()
         print('-' * 40)
-        print(f"Results from updating data after solving model = {model.name}", " delta =  ", delta)
+        print(f" results from updating data after solving model = {model.name}", " delta =  ", delta)
         print("Number of Remaining number  Rows  :", len(rows_res))
         print("Number of Remaining number Columns :", len(cols_rem))
         print("Remaining  number Edges_0 P:", nb_edges_0_rem, "Remaining  number Edges_1 :", nb_edges_1, "Density :", density , "current obj value", obj_value)
@@ -1753,17 +1753,15 @@ def warm_exact(prev_lower_bound, dec_conq, matrix_name,model_name, rows, cols, r
         return rows_res, cols_res, density, nb_edges_1, QBC_time_h, QBC_time_h  
     #the task is going to be solved 
     #model.Params.Cutoff = lower_bound
-    #if prev_lower_bound != None: 
-    if prev_lower_bound >= 1+ nb_edges_1:
-        lower_bound = prev_lower_bound
-        if debug >= 1:
-            print(f" A lower_bound = {lower_bound} has been previously found and given as input. ")
+    if prev_lower_bound != None: 
+        if prev_lower_bound >= 1+ nb_edges_1:
+            lower_bound = prev_lower_bound
+            if debug >= 1:
+                print(f" A lower_bound = {lower_bound} has been previously found and given as input. ")
     else:   
         lower_bound = nb_edges_1 
         if debug >= 1:
             print(f" A lower_bound = {lower_bound} has been found by max_e_h ")
-    if debug >= 1:
-        print(f" Start computing max_er with lower_bound =  {lower_bound}. ")
     model = max_e_wr(rows, cols, edges_1, rows_res, cols_res, lower_bound, delta)
     try:
         # Solve the model with Gurobi
@@ -1799,14 +1797,12 @@ def warm_exact(prev_lower_bound, dec_conq, matrix_name,model_name, rows, cols, r
             print(f"Model status: {LpStatus[model.status]}")
     # Check if the model has an optimal/feasible solution
     QBC_time_g = print_log_output(model, QBC_time_h, obj_value, len(rows_res), len(cols_res))
-    if  model.status == 0:
-        print("*****Model in warm start is infeasible.!!! The given lower bound cannot be improved. Return the below data*** ")
-        #the solution found by the heuristic cannot be improved. Return it as the final solution
-        if debug >=3:
-            print(f"rows_rem: {rows_rem}, \n  cols_rem: {cols_rem},  \n  rows_res: {rows_res},  \n  cols_res: {cols_res},  \n  lower_bound  {lower_bound}")
-        return rows_rem, cols_rem, density, lower_bound, QBC_time_h, QBC_time_g 
+    if   model.status == 0:
+         print("*****Model in warm start is infeasible.!!! The given lower bound cannot be improved.*** ")
+         #the solution found by the heuristic cannot be improved. Return it as the final solution
+         return rows_rem, cols_rem, density, lower_bound, QBC_time_h, QBC_time_g 
     if debug >= 1:
-        print("*****Model in warm start is feasible. The solution has been improved !!!*** ")
+        print("*****Model in warm start is feasible. Improving the solution!!!*** ")
         print(f"model status = {model.status}, LPstatus {LpStatus[model.status]}")
     if model.status in [1, 2, 9]:  # 1 = Optimal, 2 = Feasible, 9 = Time limit reached
         #if model.status == 9:
@@ -2453,7 +2449,7 @@ def affichage(dec_conq,matrix_name, rows_res, cols_res, density, nb_ones, iter, 
                 print(" Remaining Cols with degree :", cols_res )
     return matrix_name, rows_res, cols_res, density, nb_ones, global_time
 
-def final_print(dec_conq, rows, cols, edges, model,solved_count, fathomed_count,nb_skipped, rho, delta):
+def final_print(dec_conq, rows, cols, edges, model, rho, delta):
     nbi_0, nbi_1, sparsity, density = density_calcul(rows, cols)
     print('-' * 70)
     print('-' * 70)
@@ -2468,7 +2464,7 @@ def final_print(dec_conq, rows, cols, edges, model,solved_count, fathomed_count,
     Decrease and conquer levels:  {dec_conq}, # ext task: {nb_ext}, int task : {nb_int} 
     The solution has been found in matrix : {best_task}  with 
     size max clique  {best_obj}, # rows: {len(best_rows)} # columns: {len(best_cols)},
-    # solved  tasks : {solved_count},  # fathomed tasks : {fathomed_count} # skipped tasks : {nb_skipped}
+    # solved  tasks : {solved_count}, # skipped  tasks : {skipped_count}  # fathomed tasks : {fathomed_count}
     """)
     print('-' * 70)
     print()
@@ -2530,63 +2526,84 @@ def add_task(matrix_name, rows, cols, edges, obj):
     heapq.heappush(QUEUE, (-edge_count, edge_count, (matrix_name, rows, cols, edges, obj)))  # Negative for max-heap
 # Function to add tasks to the priority queue
 
-def process_tasks(selected_model, global_time):
-    global QUEUE, EVALUATED_QUEUE
+def process_tasks_NEW(given_best_task, given_lower_bound, selected_model, QBC_time):
+    global QUEUE, PROCESSED_OBJS, EVALUATED_QUEUE
 
-    best_matrix = None  # Track the best task number
-    best_obj = float('-inf')  # Track the highest objective value
-    #best_obj = given_lower_bound  # Track the highest objective value
-    #prev_lower_bound  = float('-inf') 
-    #prev_lower_bound  = given_lower_bound 
+    #best_task = None  # Track the best task number
+    best_task = given_best_task  # Track the best task number
+    #best_obj = float('-inf')  # Track the highest objective value
+    best_obj = given_lower_bound  # Track the highest objective value
+    #prev_lower_bound  = None 
+    prev_lower_bound  = given_lower_bound 
     solved_count = 0  # Count of tasks that were solved
     skipped_count = 0  # Count of tasks that were skipped
-    fathomed_count = 0 # Count for fathomed tasks
-    dec_conq = 0
-    KP_time = 0
-    all_checked = False
-    while QUEUE: 
+
+    while QUEUE:
         _, edge_count, (matrix_name, rows, cols, edges, obj_val) = heapq.heappop(QUEUE)  # Extract highest priority task
-        if best_obj >= edge_count :
-            print(f"Task {matrix_name} with edges count {edge_count}) has been skipped by the best task  {best_matrix} with obj  : {best_obj}.")
-            print(f"All other tasks are also skipped because the queue is sorted")
-            return best_matrix, best_obj, best_rows, best_cols, best_density, EVALUATED_QUEUE, fathomed_count, solved_count
+        #Modify the above in a way that the highest priority task sets to the given_best_task  while here we just read the elements of the QUEUE
+
+        # Check fathoming condition: If a processed obj >= edge_count of this task, skip it
+        if any(obj >= edge_count for obj in PROCESSED_OBJS):
+            print(f"Skipping {matrix_name} (edges {edge_count}) - Fathomed by an earlier task.")
+            skipped_count += 1  # Increment skipped task count
+            continue
+        # my proposal is :
+        if  best_obj >= edge_count:
+            print(f"Skipping {matrix_name} (edges {edge_count}) - Fathomed by an earlier task.")
+            skipped_count += 1  # Increment skipped task count
+            continue
+        # end my proposal  
+
         # Solve the problem
         start_solving_task_count = time.time()
         #prev_lower_bound = obj_val 
+        KP_time = 0
+        dec_conq = 0
         print() 
-        print(f"***QUEUE We currently process task number {matrix_name} with (edges {len(edges)}) selected_model {selected_model} dec_conq {dec_conq} delta {delta} threshold {threshold} rho {rho} QBC_time {QBC_time} ***")
+        print(f"***QUEUE We currently process task number {matrix_name} with (edges {edge_count}) selected_model {selected_model} dec_conq {dec_conq} delta {delta} threshold {threshold} rho {rho} QBC_time {QBC_time} ***")
         print() 
-        results = solve(best_obj,dec_conq, matrix_name, rows, cols, edges, selected_model, KP_time, QBC_time, rho, delta, threshold)   
+
+        results = solve(prev_lower_bound,dec_conq, matrix_name, rows, cols, edges, selected_model, KP_time, QBC_time, rho, delta, threshold)
+        
         # Unpack results
         (rows_res, cols_res, density, nb_ones, iter, KP_time, 
         kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 
         QBC_time_h, QBC_time_g) = results
+        
         # Display results
-        view = affichage(dec_conq, matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time, kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)     
+        view = affichage(dec_conq, matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  
+                         kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
+        
         (matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g) = view 
+
         # Compute objective function
         obj = len(rows_res) * len(cols_res)  # Replace with actual computation
+        #PROCESSED_OBJS.append(obj)  # Store obj value
+        #we dont need to store obj value
         end_solving_task_count = time.time()
         solved_count += 1  # Increment solved task count
-        print(f"I solved TASK NUMBER {matrix_name} with (edges: {edge_count}) and obj: {obj}  with solving TIME : {end_solving_task_count - start_solving_task_count:.4f} sec" )
-        # Count fathomed tasks
-        if best_obj >= obj:
-            print(f"Task {matrix_name} with obj  {obj} has been fathomed by the best task {best_matrix} with obj  : {best_obj}.")
-            fathomed_count  += 1 
-            continue 
+
+        print(f"We finished TASK NUMBER {matrix_name} with (edges {edge_count}) -> obj = {obj}  with solving TIME : {end_solving_task_count - start_solving_task_count:.4f} sec" )
+
+        # Store the evaluated task
+        #EVALUATED_QUEUE.append((matrix_name, rows, cols, edge_count, obj, len(rows_res), len(cols_res)))
+        # we dont need any more to append since we do as below
+
+        # Update best task if this one is better
         if obj > best_obj:
             best_obj = obj
-            best_matrix = matrix_name
+            best_task = matrix_name
             best_rows = rows_res
             best_cols = cols_res
             best_density = density
-            print(f"Task {best_matrix} with obj {best_obj}) is the current record.")
-        # Store the evaluated task
-        EVALUATED_QUEUE.append((matrix_name, rows, cols, edge_count, obj, len(rows_res), len(cols_res)))
-    # Return the best task, best objective, evaluated queue, fathomed count, solved count, and skipped count
-    return best_matrix, best_obj, best_rows, best_cols, best_density, EVALUATED_QUEUE, fathomed_count, solved_count 
 
-def process_tasks_PREV(selected_model, QBC_time):
+    # Count fathomed tasks
+    fathomed_count = sum(1 for matrix_name, rows, cols, edge_count, obj, nb_rows, nb_cols in EVALUATED_QUEUE if obj < best_obj)
+
+    # Return the best task, best objective, evaluated queue, fathomed count, solved count, and skipped count
+    return best_task, best_obj, best_rows, best_cols, best_density, EVALUATED_QUEUE, fathomed_count, solved_count, skipped_count
+
+def process_tasks(selected_model, QBC_time):
     global QUEUE, PROCESSED_OBJS, EVALUATED_QUEUE
 
     best_task = None  # Track the best task number
@@ -2800,8 +2817,8 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
     Implements a decrease-and-conquer approach to solve the problem.
 
     Args:
-        matrix_name (int): number of the corresponding matrix. 
-        dec_conq : level of the decrease and conquer approach. If dec_conq = 0, the decrease and conquer approach is not applied and the original matrix is used directly for computatiion. When dec_conq >= 1, the decrease and conquer approach is utilized. As a result, the matrix is reduced and divided into two smaller submatrices that certainly contain the maximun size clique. The process is repeated recursively until dec_conq = 0.
+        matrix_name (int): Name of the matrix, e.i. nulber of the corresponding node. 
+        dec_conq : level of the decrease and conquer approach. If dec_conq = 0, the decrease and conquer approach is not applied and the original matrix is used directly for computatiion. When dec_conq >= 1, the decrease and conquer approach is utilized and the matrix is reduced and divided into two smaller submatrices. One of them contains the maximun size clique. The process is repeated recursively until dec_conq = 0.
         rows (list of tuples): List of (row_index, degree) for rows.
         cols (list of tuples): List of (col_index, degree) for columns.
         edges_1 (list of tuples): List of existing edges (row_index, col_index).
@@ -2815,14 +2832,22 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
     """
     # Compute complementary row and column indices
     if dec_conq == 0: # No decrease-and-conquer
-        temp_obj =  float('-inf') 
-        add_task(matrix_name, rows, cols, edges_1, temp_obj)  # Add the task to the priority queue
+        add_task(matrix_name, rows, cols, edges_1,None)  # Add the task to the priority queue
         # Compute the density and  number of ones in the matrix
         nb_zeros, nb_ones, sparsity, density = density_calcul(rows, cols)
         if debug >= 2:
             print() 
             print(f"Task with matrix {matrix_name} with size ({len(rows)},{len(cols)}) and density {density} and number of ones {nb_ones}  and number of zeros {nb_zeros} has been added to the queue.")
         return  matrix_name, rows, cols, density, nb_ones, QBC_time
+        # Solve the problem
+        # results = solve(dec_conq, matrix_name, rows, cols, edges_1, selected_model, KP_time, QBC_time, rho, delta, threshold)
+        # # # Unpack results
+        # (rows_res, cols_res, density, nb_ones, iter, KP_time, kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g) = results
+        # # # Display results
+        # view = affichage(dec_conq, matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
+        # (matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g) = view 
+        # return matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g
+        #sys.exit(" Terminating program because dec_conq == 0. End of computations!  EXIT 0")
     if dec_conq >= 1:
         # Compute complementary row and column indices
         rows_compl, cols_compl, edges_compl = get_complement_rowcols(rows, cols, edges_1)
@@ -2875,7 +2900,7 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         rows_ind_left = None 
         cols_ind_left = None
         density_left = None
-        if debug >= 1:
+        if debug >= 2:
             print() 
             print(f" Node {node} has been fathomed because of min number rows = {min_number_rows} or min number columns = {min_number_cols} "  )
             #sys.exit("Terminating program for cheking . EXIT 111.")
@@ -2894,9 +2919,9 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         rows_ind_right = None
         cols_ind_right = None
         density_right = None
-        if debug >= 1:
+        if debug >= 2:
             print() 
-            print(f" Node {node1} has been fathomed because of min number rows = {min_number_rows} or min number columns = {min_number_cols} "  )
+            print(f" Node {node} has been fathomed because of min number rows = {min_number_rows} or min number columns = {min_number_cols} "  )
             #sys.exit("Terminating program for cheking . EXIT 111.")
             print() 
     else:
@@ -3185,9 +3210,9 @@ if __name__ == '__main__':
     end_tasks_generation = time.time()
     print()
     print('-' * 70)
-    print() 
-    print(f"End of tasks generation stage. Last generated task from matrix {node} with winning node {winning_node}")
-    print(f"Tasks_generation time: {end_tasks_generation  - start_tasks_generation :.4f} sec")     
+    print()
+    print(f"End of tasks generation stage. Last generated task from matrix {node} with winning node {winning_node} and global time {global_time:.7f}")     
+
     print('-' * 70)
     print(f" Size of the queue: {len(QUEUE)}")
     for _, size, (matrix_name, rows, cols, edges, obj) in QUEUE:
@@ -3199,9 +3224,13 @@ if __name__ == '__main__':
     COPY_QUEUE = list(QUEUE)  # Copy the heap
     heapq.heapify(COPY_QUEUE)  # Ensure it maintains heap properties
     start_tasks_solving = time.time()
-    best_task, best_obj, best_rows, best_cols, best_density, EVALUATED_QUEUE, fathomed_count, solved_count = process_tasks(selected_model, global_time)
+    best_task, best_obj, best_rows, best_cols, best_density, EVALUATED_QUEUE, fathomed_count, solved_count, skipped_count = process_tasks(selected_model, global_time)
     end_tasks_solving = time.time()
-    nb_skipped = len(COPY_QUEUE)- fathomed_count - solved_count
+    print()
+    print(f"Best task: {best_task}, Best objective: {best_obj} with # rows {len(best_rows)} and # cols {len(best_cols)}")
+    print(f" Number of fathomed tasks : {fathomed_count}")
+    print()
+    print('-' * 70)
         # Print evaluated queue
     print("\nEvaluated Queue:")
     # for task in EVALUATED_QUEUE:
@@ -3222,14 +3251,9 @@ if __name__ == '__main__':
         print(f"Matrix: {matrix_name}, Size: {size}, Number Rows: {len(task_rows)}, Number Cols: {len(task_cols)}, Number Edges: {len(edges)}")
     print()
     print('-' * 70)
-    print()
-    print(f"Best task: {best_task}, Best objective: {best_obj} with # rows {len(best_rows)} and # cols {len(best_cols)}")
-    print(f"Number of solved tasks: {solved_count}, Number of fathomed tasks: {fathomed_count}, Number of skipped tasks: {nb_skipped}")
-    print()
-    print('-' * 70)
     print("***End of computations !!!")
     print()
-    final_print(dec_conq, in_rows, in_cols, in_edges_1,selected_model, solved_count, fathomed_count,nb_skipped, rho, delta)
+    final_print(dec_conq, in_rows, in_cols, in_edges_1,selected_model, rho, delta)
     print(f"Best task: {best_task}, Best objective: {best_obj} with # rows {len(best_rows)} and # cols {len(best_cols)}")
     print()
     print('-' * 70)
@@ -3249,7 +3273,7 @@ if __name__ == '__main__':
     #write_matrix(rows_data, cols_data, edges)
 
     print()
-    print(f"size edges_1: {len(in_edges_1)}")
+    print(f"size egdes_1: {len(in_edges_1)}")
     print()
     #print(f"egdes_1: {in_edges_1}")
 
