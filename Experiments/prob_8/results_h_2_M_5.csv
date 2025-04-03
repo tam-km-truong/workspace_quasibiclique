@@ -1,66 +1,13 @@
-Objective Value,232
-# of rows,4
-# of columns,58
+Obj value,18
+# of rows,6
+# of columns,3
 Variable,Value
-col_101,1.0
-col_110,1.0
-col_113,1.0
-col_114,1.0
-col_118,1.0
-col_119,1.0
-col_123,1.0
-col_124,1.0
-col_132,1.0
-col_136,1.0
-col_138,1.0
 col_139,1.0
-col_140,1.0
-col_143,1.0
-col_150,1.0
-col_177,1.0
+col_18,1.0
 col_21,1.0
-col_220,1.0
-col_229,1.0
-col_232,1.0
-col_236,1.0
-col_238,1.0
-col_24,1.0
-col_245,1.0
-col_248,1.0
-col_25,1.0
-col_251,1.0
-col_26,1.0
-col_265,1.0
-col_284,1.0
-col_29,1.0
-col_313,1.0
-col_316,1.0
-col_317,1.0
-col_32,1.0
-col_327,1.0
-col_328,1.0
-col_333,1.0
-col_334,1.0
-col_338,1.0
-col_340,1.0
-col_347,1.0
-col_36,1.0
-col_375,1.0
-col_379,1.0
-col_38,1.0
-col_41,1.0
-col_44,1.0
-col_47,1.0
-col_55,1.0
-col_58,1.0
-col_62,1.0
-col_63,1.0
-col_80,1.0
-col_81,1.0
-col_83,1.0
-col_91,1.0
-col_97,1.0
-row_17,1.0
-row_24,1.0
-row_36,1.0
-row_40,1.0
+row_23,1.0
+row_30,1.0
+row_44,1.0
+row_60,1.0
+row_62,1.0
+row_9,1.0
