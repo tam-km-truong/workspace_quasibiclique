@@ -1,5 +1,5 @@
-Objective Value,420
-# of rows,20
+Obj value,357
+# of rows,17
 # of columns,21
 Variable,Value
 col_10,1.0
@@ -23,17 +23,14 @@ col_47,1.0
 col_48,1.0
 col_49,1.0
 col_8,1.0
-row_12,1.0
 row_14,1.0
 row_16,1.0
 row_17,1.0
 row_18,1.0
-row_22,1.0
 row_25,1.0
 row_29,1.0
 row_3,1.0
 row_30,1.0
-row_32,1.0
 row_34,1.0
 row_35,1.0
 row_37,1.0

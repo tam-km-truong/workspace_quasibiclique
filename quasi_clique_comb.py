@@ -8,7 +8,8 @@ Install Gurobi Solver with free academic licence using your University account a
 Install Pandas, using PyPI or Conda. A detailed installation tutorial can be find at: https://pandas.pydata.org/docs/getting_started/install.html
 
 an instance 
- python3 quasi_clique_comb.py --filepath data/data4.csv   --model  max_e_h  --rho 0.1  --delta 0.1 --debug 0  --threshold 0.83 --dec_conq0 
+ python3 quasi_clique_comb.py --filepath data/data3.csv   --model  max_e_c  --rho 0.1  --delta 0.1 --debug 0  --threshold 0.83 --dec_conq 0 --timelimit 100 
+
 
 """
 from pulp import value, LpStatus, GUROBI_CMD
@@ -2574,7 +2575,7 @@ def process_tasks(selected_model, global_time):
             print(f"Task {matrix_name} with obj  {obj} has been fathomed by the best task {best_matrix} with obj  : {best_obj}.")
             fathomed_count  += 1 
             continue 
-        if obj > best_obj:
+        if obj > best_obj: 
             best_obj = obj
             best_matrix = matrix_name
             best_rows = rows_res
@@ -3201,7 +3202,7 @@ if __name__ == '__main__':
     start_tasks_solving = time.time()
     best_task, best_obj, best_rows, best_cols, best_density, EVALUATED_QUEUE, fathomed_count, solved_count = process_tasks(selected_model, global_time)
     end_tasks_solving = time.time()
-    nb_skipped = len(COPY_QUEUE)- fathomed_count - solved_count
+    nb_skipped = len(COPY_QUEUE)- solved_count
         # Print evaluated queue
     print("\nEvaluated Queue:")
     # for task in EVALUATED_QUEUE:
