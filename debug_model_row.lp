@@ -1,23 +1,24 @@
 \* row_knapsack_problem *\
 Minimize
-knapsack: 18 row_10 + 18 row_12 + 18 row_14 + 17 row_16 + 18 row_17
- + 18 row_18 + 16 row_19 + 17 row_22 + 18 row_24 + 18 row_25 + 18 row_27
- + 18 row_29 + 19 row_3 + 18 row_30 + 18 row_32 + 17 row_34 + 18 row_35
- + 18 row_37 + 17 row_39 + 18 row_40 + 18 row_41 + 17 row_42 + 18 row_44
- + 17 row_47 + 18 row_6
+knapsack: 8 row_10 + 3 row_11 + 8 row_12 + 8 row_14 + 8 row_16 + 8 row_17
+ + 8 row_18 + 6 row_19 + 2 row_20 + 3 row_21 + 8 row_22 + 8 row_24 + 8 row_25
+ + 8 row_27 + 8 row_29 + 8 row_3 + 8 row_30 + 8 row_32 + 8 row_34 + 8 row_35
+ + 8 row_37 + 7 row_39 + 8 row_40 + 8 row_41 + 7 row_42 + 8 row_44 + 8 row_47
+ + 8 row_6 + 3 row_9
 Subject To
-sensitivity: 2 row_10 + 2 row_12 + 2 row_14 + 3 row_16 + 2 row_17 + 2 row_18
- + 4 row_19 + 3 row_22 + 2 row_24 + 2 row_25 + 2 row_27 + 2 row_29 + row_3
- + 2 row_30 + 2 row_32 + 3 row_34 + 2 row_35 + 2 row_37 + 3 row_39 + 2 row_40
- + 2 row_41 + 3 row_42 + 2 row_44 + 3 row_47 + 2 row_6 >= 160.8
+sensitivity: 5 row_11 + 2 row_19 + 6 row_20 + 5 row_21 + row_39 + row_42
+ + 5 row_9 >= 2.5
 Bounds
  row_10 <= 1
+ row_11 <= 1
  row_12 <= 1
  row_14 <= 1
  row_16 <= 1
  row_17 <= 1
  row_18 <= 1
  row_19 <= 1
+ row_20 <= 1
+ row_21 <= 1
  row_22 <= 1
  row_24 <= 1
  row_25 <= 1
@@ -36,4 +37,5 @@ Bounds
  row_44 <= 1
  row_47 <= 1
  row_6 <= 1
+ row_9 <= 1
 End

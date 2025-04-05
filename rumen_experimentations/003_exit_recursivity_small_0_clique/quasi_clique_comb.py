@@ -2849,6 +2849,19 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         # Display results
         view = affichage(dec_conq, matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
         ( matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g) = view 
+        if len(rows_res) <=  min_number_rows or len(cols_res) <=  min_number_cols:
+            if debug >= 1:
+                print()
+                print(f"Zero clique too small. Task with matrix {matrix_name} with size ({len(rows)},{len(cols)}) has been added to the queue.") 
+            temp_obj =  float('-inf') 
+            add_task(matrix_name, rows, cols, edges_1, temp_obj)  # Add the task to the priority queue
+            # Compute the density and  number of ones in the matrix
+            #nb_zeros, nb_ones, sparsity, density = density_calcul(rows, cols)
+            nb_ones = 0
+            QBC_time = 0
+            density = 0
+            #return  matrix_name, rows, cols, density, nb_ones, QBC_time    
+            return  matrix_name, None, None, density, nb_ones, QBC_time
         # print("rows =", rows)
         # print("cols =", cols)
         # print("edges_1 =", edges_1)
