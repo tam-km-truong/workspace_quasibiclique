@@ -1,0 +1,83 @@
+
+----------------------------------------------------------------------
+
+End of tasks generation stage. Last generated task from matrix 1 with winning node 1
+Tasks_generation time: 0.0000 sec
+----------------------------------------------------------------------
+ Size of the queue: 1
+ Matrix: 1, Size: 892, Number Rows: 50,  Number Cols: 50,  Number Edges: 892, obj -inf
+
+----------------------------------------------------------------------
+
+
+***QUEUE We currently process task number 1 with (edges 892) selected_model max_e_c dec_conq 0 delta 0.1 threshold 0.83 rho 0.1 QBC_time 0.0 ***
+
+Solution saved to Experiments/data3/results_h_0_M_1.csv
+ !!!!!!!!!!!!!!!!!! I got a lower bound  515
+*****Model in warm start is infeasible.!!! The given lower bound cannot be improved. Return the below data*** 
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 1 in  data/data3.csv at level 0 and debug  0
+    With  model: max_e_c and quasi-biclique error: 0.1 
+    Size of Remaining matrix : (25,21), with  density : 0.9809523809523809 and number of ones: 515
+    Global Time (in sec): 0.358
+    Total Time in QBC approaches: 0.050
+    Time in greedy approach: 0.308,  size of matrix found by greedy : (30,21) 
+    With density : 0.846 and # ones : 533 
+    Time in heuristic only : 0.022 
+    Time in warm start only : 0.028
+    Number of iterations in greedy approach: 10
+    Percentage of greedy approach run time in global run time : 86.05% 
+    Percentage of heuristic run time in QBC run time : 43.69%
+    With zero deletion rate (rho): 0.1 and threshold: 0.83
+    
+----------------------------------------------------------------------
+
+I solved TASK NUMBER 1 with (edges: 892) and obj: 525  with solving TIME : 0.4040 sec
+Task 1 with obj 525) is the current record.
+
+Evaluated Queue:
+----------------------------------------------------------------------
+ Size of the evaluated  queue: 1
+ Matrix: 1, # Rows: 50,  # Cols: 50,  # Edges: 892, size max clique  525, # rows: 25 # columns: 21
+
+----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+Size of the COPY_QUEUE: 1
+Matrix: 1, Size: 892, Number Rows: 50, Number Cols: 50, Number Edges: 892
+
+----------------------------------------------------------------------
+
+Best task: 1, Best objective: 525 with # rows 25 and # cols 21
+Number of solved tasks: 1, Number of fathomed tasks: 0, Number of skipped tasks: 0
+
+----------------------------------------------------------------------
+***End of computations !!!
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+ 
+    End of computations for matrix  data/data3.csv with rows: 50 and columns 50
+    with  input density : 0.357 and number of ones: 892
+    time limit has been set to 100
+    using  model: max_e_c  with quasi-biclique error: 0.1 
+    nd density_threshold: 0.830 and zero deletion rate (rho): 0.1 and debug: 0
+    Decrease and conquer levels:  0, # ext task: 1, int task : 0 
+    The solution has been found in matrix : 1  with 
+    size max clique  525, # rows: 25 # columns: 21,
+    # solved  tasks : 1,  # fathomed tasks : 0 # skipped tasks : 0
+    
+----------------------------------------------------------------------
+
+Best task: 1, Best objective: 525 with # rows 25 and # cols 21
+
+----------------------------------------------------------------------
+ Model building and solving global time: 0.4415 sec
+ Tasks_generation time: 0.0000 sec
+ Tasks_pure_solving time: 0.4040 sec
+
+size edges_1: 892
+
+Number of ones in the best submatrix : 515

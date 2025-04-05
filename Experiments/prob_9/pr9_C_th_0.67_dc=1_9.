@@ -1,0 +1,203 @@
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 1 in  data/prob_9.csv at level 1 and with model:  max_e_c***
+Size of current matrix :  45 * 200 = 9000 ; dec_conq: 1
+Prev_lower_bound :  None number input zeros :  6527 ; number input ones :  2473
+rho =  0.1 ; delta :  0.1
+Input density : 0.275 ; density_threshold: 0.67000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+            End of greedy approaches. Exit while loop. I did: 11 iterations
+            Density : 0.689 > 0.67
+            It took me : 0.356 time
+            Found matrix of size : (19, 72) and density : 0.689
+            
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.1
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+Model status: Optimal
+Solution saved to Experiments/prob_9/results_h_1_M_1.csv
+
+----------------------------------------
+Results from updating data after solving model = max_e_h  delta =   0.1
+Number of Remaining number  Rows  : 11
+Number of Remaining number Columns : 70
+Remaining  number Edges_0 P: 2 Remaining  number Edges_1 : 768 Density : 0.9974025974025974 current obj value 1700.0
+----------------------------------------
+
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 1
+        with delta =  0.1
+        Found matrix of size : (11, 70)
+        and density : 0.9974025974025974
+        and # of ones : 768
+        and Heuristic QBC time   : 0.04644
+        and Global QBC  time  : 0.04644
+        
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 1 in  data/prob_9.csv at level 1 and debug  1
+    With  model: max_e_c and quasi-biclique error: 0.1 
+    Size of Remaining matrix : (11,70), with  density : 0.9974025974025974 and number of ones: 768
+    Global Time (in sec): 0.402
+    Total Time in QBC approaches: 0.046
+    Time in greedy approach: 0.356,  size of matrix found by greedy : (19,72) 
+    With density : 0.689 and # ones : 942 
+    Time in heuristic only : 0.046 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 11
+    Percentage of greedy approach run time in global run time : 88.46% 
+    Percentage of heuristic run time in QBC run time : 100.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.67
+    
+----------------------------------------------------------------------
+
+dec_conq= 1
+
+ Level 0, Matrix 2:
+Size Rows: 34
+Size Cols: 200
+
+ Level 0 Matrix  3:
+Size Rows: 45
+Size Cols: 130
+
+----------------------------------------------------------------------
+
+End of tasks generation stage. Last generated task from matrix 1 with winning node 2
+Tasks_generation time: 0.9790 sec
+----------------------------------------------------------------------
+ Size of the queue: 2
+ Matrix: 2, Size: 6127, Number Rows: 34,  Number Cols: 200,  Number Edges: 6127, obj -inf
+ Matrix: 3, Size: 4431, Number Rows: 45,  Number Cols: 130,  Number Edges: 4431, obj -inf
+
+----------------------------------------------------------------------
+
+
+***QUEUE We currently process task number 2 with (edges 6127) selected_model max_e_c dec_conq 0 delta 0.1 threshold 0.67 rho 0.1 QBC_time 0.0 ***
+
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 2 in  data/prob_9.csv at level 0 and with model:  max_e_c***
+Size of current matrix :  34 * 200 = 6800 ; dec_conq: 0
+Prev_lower_bound :  -inf number input zeros :  673 ; number input ones :  6127
+rho =  0.1 ; delta :  0.1
+Input density : 0.901 ; density_threshold: 0.67000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.1
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+Model status: Optimal
+Solution saved to Experiments/prob_9/results_h_0_M_2.csv
+
+----------------------------------------
+Results from updating data after solving model = max_e_h  delta =   0.1
+Number of Remaining number  Rows  : 32
+Number of Remaining number Columns : 142
+Remaining  number Edges_0 P: 189 Remaining  number Edges_1 : 4355 Density : 0.9584066901408451 current obj value 10403.0
+----------------------------------------
+
+ A lower_bound = 4355 has been found by max_e_h 
+ Start computing max_er with lower_bound =  4355. 
+ !!!!!!!!!!!!!!!!!! I got a lower bound  4355
+*****Model in warm start is infeasible.!!! The given lower bound cannot be improved. Return the below data*** 
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 2
+        with delta =  0.1
+        Found matrix of size : (32, 142)
+        and density : 0.9584066901408451
+        and # of ones : 4355
+        and Heuristic QBC time   : 0.21000
+        and Global QBC  time  : 7.44807
+        
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 2 in  data/prob_9.csv at level 0 and debug  1
+    With  model: max_e_c and quasi-biclique error: 0.1 
+    Size of Remaining matrix : (32,142), with  density : 0.9584066901408451 and number of ones: 4355
+    Global Time (in sec): 7.448
+    Total Time in QBC approaches: 7.448
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.210 
+    Time in warm start only : 7.238
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 2.82%
+    With zero deletion rate (rho): 0.1 and threshold: 0.67
+    
+----------------------------------------------------------------------
+
+I solved TASK NUMBER 2 with (edges: 6127) and obj: 4544  with solving TIME : 8.0382 sec
+Task 2 with obj 4544) is the current record.
+Task 3 with edges count 4431) has been skipped by the best task  2 with obj  : 4544.
+All other tasks are also skipped because the queue is sorted
+
+Evaluated Queue:
+----------------------------------------------------------------------
+ Size of the evaluated  queue: 1
+ Matrix: 2, # Rows: 34,  # Cols: 200,  # Edges: 6127, size max clique  4544, # rows: 32 # columns: 142
+
+----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+Size of the COPY_QUEUE: 2
+Matrix: 2, Size: 6127, Number Rows: 34, Number Cols: 200, Number Edges: 6127
+Matrix: 3, Size: 4431, Number Rows: 45, Number Cols: 130, Number Edges: 4431
+
+----------------------------------------------------------------------
+
+Best task: 2, Best objective: 4544 with # rows 32 and # cols 142
+Number of solved tasks: 1, Number of fathomed tasks: 0, Number of skipped tasks: 1
+
+----------------------------------------------------------------------
+***End of computations !!!
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+ 
+    End of computations for matrix  data/prob_9.csv with rows: 45 and columns 200
+    with  input density : 0.725 and number of ones: 6527
+    time limit has been set to 100
+    using  model: max_e_c  with quasi-biclique error: 0.1 
+    nd density_threshold: 0.670 and zero deletion rate (rho): 0.1 and debug: 1
+    Decrease and conquer levels:  1, # ext task: 2, int task : 1 
+    The solution has been found in matrix : 2  with 
+    size max clique  4544, # rows: 32 # columns: 142,
+    # solved  tasks : 1,  # fathomed tasks : 0 # skipped tasks : 1
+    
+----------------------------------------------------------------------
+
+Best task: 2, Best objective: 4544 with # rows 32 and # cols 142
+
+----------------------------------------------------------------------
+ Model building and solving global time: 9.5539 sec
+ Tasks_generation time: 0.9790 sec
+ Tasks_pure_solving time: 8.0383 sec
+
+size edges_1: 6527
+
+Number of ones in the best submatrix : 4355

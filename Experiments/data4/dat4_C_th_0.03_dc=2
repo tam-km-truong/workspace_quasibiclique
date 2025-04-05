@@ -1,0 +1,452 @@
+----------------------------------------
+ Input Data in csv files : data/data4.csv
+Number Rows Data : 55
+Number Cols Data : 274
+Number Edges_1 : 11122
+Number Edges_0 : 3948
+----------------------------------------
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 1 in  data/data4.csv at level 2 and with model:  max_e_c***
+Size of current matrix :  55 * 274 = 15070 ; dec_conq: 2
+Prev_lower_bound :  None number input zeros :  11122 ; number input ones :  3948
+rho =  0.1 ; delta :  0.1
+Input density : 0.262 ; density_threshold: 0.03000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.1
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+----------------------------------------------------------------------
+Model status: Optimal
+----------------------------------------------------------------------
+Computed by max_e_h Objective Value : 4854.0
+Model status: Optimal
+Solution saved to Experiments/data4/results_h_2_M_1.csv
+
+----------------------------------------------------------------------
+Stats
+ Model solved : max_e_h  Local Time:  - (real) 0.52464 - (Local CPU) 0.52463 - (Global CPU) 0.52463
+
+ Solve status: Optimal Objective value: 4854.0 nb_rows 14 nb_cols 132
+----------------------------------------
+
+----------------------------------------
+Results from updating data after solving model = max_e_h  delta =   0.1
+Number of Remaining number  Rows  : 14
+Number of Remaining number Columns : 132
+Remaining  number Edges_0 P: 53 Remaining  number Edges_1 : 1795 Density : 0.9713203463203464 current obj value 4854.0
+----------------------------------------
+
+----------------------------------------
+
+Exit from the heuristic (or exact  approach)  max_e_c  with delta= 0.1 Found matrix with rows_res of lenght = 14  and cols_res of lenght = 132
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 1
+        with delta =  0.1
+        Found matrix of size : (14, 132)
+        and density : 0.9713203463203464
+        and # of ones : 1795
+        and Heuristic QBC time   : 0.52463
+        and Global QBC  time  : 0.52463
+        
+ Remaining Rows  : [0, 1, 13, 14, 15, 16, 34, 37, 38, 40, 41, 47, 50, 52]
+ Remaining  Cols  : [10, 100, 102, 106, 108, 110, 111, 113, 114, 116, 118, 120, 122, 123, 124, 125, 126, 130, 133, 136, 137, 139, 141, 142, 144, 146, 147, 149, 150, 156, 163, 164, 165, 167, 168, 169, 170, 172, 174, 175, 176, 179, 184, 186, 187, 188, 19, 194, 195, 200, 206, 207, 208, 21, 211, 214, 217, 22, 220, 222, 224, 225, 226, 230, 231, 232, 234, 239, 240, 241, 242, 244, 246, 247, 248, 249, 25, 253, 254, 255, 256, 257, 259, 262, 264, 266, 27, 273, 28, 29, 3, 31, 32, 33, 34, 36, 37, 38, 4, 41, 43, 44, 45, 46, 47, 5, 50, 51, 53, 55, 56, 57, 58, 6, 61, 65, 66, 70, 74, 76, 8, 82, 84, 9, 90, 91, 92, 94, 95, 96, 98, 99]
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 1 in  data/data4.csv at level 2 and debug  2
+    With  model: max_e_c and quasi-biclique error: 0.1 
+    Size of Remaining matrix : (14,132), with  density : 0.9713203463203464 and number of ones: 1795
+    Global Time (in sec): 0.525
+    Total Time in QBC approaches: 0.525
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.525 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 100.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.03
+    
+----------------------------------------------------------------------
+
+dec_conq= 2
+
+ Level 1, Matrix 2:
+Size Rows: 41
+Size Cols: 274
+
+ Level 1 Matrix  3:
+Size Rows: 55
+Size Cols: 142
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 2 in  data/data4.csv at level 1 and with model:  max_e_c***
+Size of current matrix :  41 * 274 = 11234 ; dec_conq: 1
+Prev_lower_bound :  None number input zeros :  9991 ; number input ones :  1243
+rho =  0.1 ; delta :  0.1
+Input density : 0.111 ; density_threshold: 0.03000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.1
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+----------------------------------------------------------------------
+Model status: Optimal
+----------------------------------------------------------------------
+Computed by max_e_h Objective Value : 1133.0
+Model status: Optimal
+Solution saved to Experiments/data4/results_h_1_M_2.csv
+
+----------------------------------------------------------------------
+Stats
+ Model solved : max_e_h  Local Time:  - (real) 0.41297 - (Local CPU) 0.41297 - (Global CPU) 0.41297
+
+ Solve status: Optimal Objective value: 1133.0 nb_rows 37 nb_cols 2
+----------------------------------------
+
+----------------------------------------
+Results from updating data after solving model = max_e_h  delta =   0.1
+Number of Remaining number  Rows  : 37
+Number of Remaining number Columns : 2
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 74 Density : 1.0 current obj value 1133.0
+----------------------------------------
+
+----------------------------------------
+
+Exit from the heuristic (or exact  approach)  max_e_c  with delta= 0.1 Found matrix with rows_res of lenght = 37  and cols_res of lenght = 2
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 2
+        with delta =  0.1
+        Found matrix of size : (37, 2)
+        and density : 1.0
+        and # of ones : 74
+        and Heuristic QBC time   : 0.41297
+        and Global QBC  time  : 0.41297
+        
+ Remaining Rows  : [10, 11, 12, 17, 18, 19, 2, 20, 21, 23, 24, 25, 26, 27, 28, 29, 3, 32, 33, 35, 36, 39, 4, 42, 43, 44, 45, 46, 48, 49, 5, 51, 54, 6, 7, 8, 9]
+ Remaining  Cols  : [129, 204]
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 2 in  data/data4.csv at level 1 and debug  2
+    With  model: max_e_c and quasi-biclique error: 0.1 
+    Size of Remaining matrix : (37,2), with  density : 1.0 and number of ones: 74
+    Global Time (in sec): 0.413
+    Total Time in QBC approaches: 0.413
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.413 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 100.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.03
+    
+----------------------------------------------------------------------
+
+dec_conq= 1
+
+ Level 0, Matrix 4:
+Size Rows: 4
+Size Cols: 274
+
+ Level 0 Matrix  5:
+Size Rows: 41
+Size Cols: 272
+
+Task with matrix 4 with size (4,274) and density 0.8284671532846716 and number of ones 908  and number of zeros 188 has been added to the queue.
+
+ Return from 4 with winning node = 4
+
+calling decrease_and_conquer for node 5
+
+Task with matrix 5 with size (41,272) and density 0.8955344332855093 and number of ones 9987  and number of zeros 1165 has been added to the queue.
+
+return in decrease_and_conquer from 5 with winning node = 5
+
+return in decrease_and_conquer from 2 with winning node = 5
+
+ Return from 2 with winning node = 5
+
+calling decrease_and_conquer for node 3
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 3 in  data/data4.csv at level 1 and with model:  max_e_c***
+Size of current matrix :  55 * 142 = 7810 ; dec_conq: 1
+Prev_lower_bound :  None number input zeros :  6011 ; number input ones :  1799
+rho =  0.1 ; delta :  0.1
+Input density : 0.230 ; density_threshold: 0.03000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.1
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+----------------------------------------------------------------------
+Model status: Optimal
+----------------------------------------------------------------------
+Computed by max_e_h Objective Value : 986.0
+Model status: Optimal
+Solution saved to Experiments/data4/results_h_1_M_3.csv
+
+----------------------------------------------------------------------
+Stats
+ Model solved : max_e_h  Local Time:  - (real) 21.76707 - (Local CPU) 21.76684 - (Global CPU) 21.76684
+
+ Solve status: Optimal Objective value: 986.0 nb_rows 26 nb_cols 2
+----------------------------------------
+
+----------------------------------------
+Results from updating data after solving model = max_e_h  delta =   0.1
+Number of Remaining number  Rows  : 26
+Number of Remaining number Columns : 2
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 52 Density : 1.0 current obj value 986.0
+----------------------------------------
+
+----------------------------------------
+
+Exit from the heuristic (or exact  approach)  max_e_c  with delta= 0.1 Found matrix with rows_res of lenght = 26  and cols_res of lenght = 2
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 3
+        with delta =  0.1
+        Found matrix of size : (26, 2)
+        and density : 1.0
+        and # of ones : 52
+        and Heuristic QBC time   : 21.76684
+        and Global QBC  time  : 21.76684
+        
+ Remaining Rows  : [1, 10, 11, 13, 15, 17, 18, 19, 20, 22, 23, 25, 26, 28, 30, 35, 38, 4, 40, 41, 48, 49, 50, 51, 52, 54]
+ Remaining  Cols  : [160, 203]
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 3 in  data/data4.csv at level 1 and debug  2
+    With  model: max_e_c and quasi-biclique error: 0.1 
+    Size of Remaining matrix : (26,2), with  density : 1.0 and number of ones: 52
+    Global Time (in sec): 21.767
+    Total Time in QBC approaches: 21.767
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 21.767 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 100.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.03
+    
+----------------------------------------------------------------------
+
+dec_conq= 1
+
+ Level 0, Matrix 6:
+Size Rows: 29
+Size Cols: 142
+
+ Level 0 Matrix  7:
+Size Rows: 55
+Size Cols: 140
+
+Task with matrix 6 with size (29,142) and density 0.7838756677999029 and number of ones 3228  and number of zeros 890 has been added to the queue.
+
+ Return from 6 with winning node = 6
+
+calling decrease_and_conquer for node 7
+
+Task with matrix 7 with size (55,140) and density 0.7763636363636364 and number of ones 5978  and number of zeros 1722 has been added to the queue.
+
+return in decrease_and_conquer from 7 with winning node = 7
+
+return in decrease_and_conquer from 3 with winning node = 7
+
+return in decrease_and_conquer from 3 with winning node = 7
+
+return in decrease_and_conquer from 1 with winning node = 5
+
+----------------------------------------------------------------------
+
+End of tasks generation stage. Last generated task from matrix 1 with winning node 5
+Tasks_generation time: 25.5303 sec
+----------------------------------------------------------------------
+ Size of the queue: 4
+ Matrix: 5, Size: 9987, Number Rows: 41,  Number Cols: 272,  Number Edges: 9987, obj -inf
+ Matrix: 7, Size: 5978, Number Rows: 55,  Number Cols: 140,  Number Edges: 5978, obj -inf
+ Matrix: 6, Size: 3228, Number Rows: 29,  Number Cols: 142,  Number Edges: 3228, obj -inf
+ Matrix: 4, Size: 908, Number Rows: 4,  Number Cols: 274,  Number Edges: 908, obj -inf
+
+----------------------------------------------------------------------
+
+
+***QUEUE We currently process task number 5 with (edges 9987) selected_model max_e_c dec_conq 0 delta 0.1 threshold 0.03 rho 0.1 QBC_time 0.0 ***
+
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 5 in  data/data4.csv at level 0 and with model:  max_e_c***
+Size of current matrix :  41 * 272 = 11152 ; dec_conq: 0
+Prev_lower_bound :  -inf number input zeros :  1165 ; number input ones :  9987
+rho =  0.1 ; delta :  0.1
+Input density : 0.896 ; density_threshold: 0.03000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.1
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+----------------------------------------------------------------------
+Model status: Optimal
+----------------------------------------------------------------------
+Computed by max_e_h Objective Value : 16889.0
+Model status: Optimal
+Solution saved to Experiments/data4/results_h_0_M_5.csv
+
+----------------------------------------------------------------------
+Stats
+ Model solved : max_e_h  Local Time:  - (real) 0.22176 - (Local CPU) 0.22176 - (Global CPU) 0.22176
+
+ Solve status: Optimal Objective value: 16889.0 nb_rows 40 nb_cols 181
+----------------------------------------
+
+----------------------------------------
+Results from updating data after solving model = max_e_h  delta =   0.1
+Number of Remaining number  Rows  : 40
+Number of Remaining number Columns : 181
+Remaining  number Edges_0 P: 279 Remaining  number Edges_1 : 6961 Density : 0.9614640883977901 current obj value 16889.0
+----------------------------------------
+
+----------------------------------------
+
+Exit from the heuristic (or exact  approach)  max_e_c  with delta= 0.1 Found matrix with rows_res of lenght = 40  and cols_res of lenght = 181
+ A lower_bound = 6961 has been found by max_e_h 
+ Start computing max_er with lower_bound =  6961. 
+ !!!!!!!!!!!!!!!!!! I got a lower bound  6961
+----------------------------------------------------------------------
+Model status: Not Solved
+----------------------------------------------------------------------
+Model status: Not Solved
+
+----------------------------------------------------------------------
+Stats
+ Model solved : max_e_wr  Local Time:  - (real) 6.63435 - (Local CPU) 6.63428 - (Global CPU) 6.85604
+
+ Solve status: Not Solved Objective value: 9987.0 nb_rows 40 nb_cols 181
+----------------------------------------
+*****Model in warm start is infeasible.!!! The given lower bound cannot be improved. Return the below data*** 
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 5
+        with delta =  0.1
+        Found matrix of size : (40, 181)
+        and density : 0.9614640883977901
+        and # of ones : 6961
+        and Heuristic QBC time   : 0.22176
+        and Global QBC  time  : 6.85604
+        
+ Remaining Rows  : [(2, 172), (3, 177), (4, 176), (5, 177), (6, 178), (7, 175), (8, 176), (9, 179), (10, 170), (11, 174), (12, 178), (17, 166), (18, 175), (19, 177), (20, 176), (21, 179), (22, 177), (23, 173), (24, 172), (25, 176), (26, 178), (27, 170), (28, 175), (29, 174), (30, 169), (31, 177), (32, 174), (33, 171), (35, 168), (36, 171), (39, 170), (42, 175), (43, 175), (44, 176), (45, 176), (46, 168), (48, 175), (49, 174), (51, 179), (54, 163)]
+ Remaining  Cols  : [(3, 40), (4, 40), (5, 38), (6, 38), (8, 39), (9, 39), (10, 40), (11, 40), (12, 39), (15, 39), (16, 37), (19, 40), (20, 40), (21, 40), (22, 38), (24, 40), (25, 38), (27, 40), (28, 36), (29, 39), (31, 36), (32, 39), (33, 37), (34, 39), (35, 38), (36, 39), (37, 40), (38, 40), (41, 40), (42, 37), (44, 39), (45, 40), (46, 38), (47, 38), (48, 38), (49, 38), (51, 39), (52, 39), (53, 37), (55, 39), (56, 36), (57, 40), (58, 40), (59, 38), (60, 38), (62, 36), (65, 39), (66, 38), (69, 37), (70, 36), (72, 36), (74, 36), (75, 38), (77, 36), (79, 37), (82, 38), (84, 40), (87, 39), (88, 40), (89, 36), (90, 39), (91, 39), (92, 39), (93, 40), (94, 36), (95, 38), (97, 40), (98, 39), (100, 36), (101, 37), (102, 37), (104, 37), (106, 40), (108, 36), (110, 39), (111, 39), (112, 36), (114, 38), (116, 36), (117, 40), (118, 39), (120, 38), (122, 38), (123, 38), (124, 38), (125, 38), (130, 38), (131, 38), (132, 40), (133, 39), (135, 37), (136, 36), (137, 40), (139, 38), (140, 39), (141, 40), (142, 38), (143, 39), (144, 37), (145, 38), (146, 40), (147, 40), (149, 39), (150, 40), (151, 38), (154, 40), (157, 38), (161, 39), (163, 38), (164, 38), (165, 40), (166, 40), (167, 40), (168, 39), (170, 39), (172, 39), (174, 36), (175, 38), (177, 39), (178, 38), (179, 37), (181, 37), (182, 39), (184, 40), (185, 37), (186, 39), (187, 36), (188, 40), (191, 37), (192, 37), (194, 36), (207, 39), (208, 39), (211, 37), (212, 40), (214, 39), (215, 37), (216, 40), (217, 39), (218, 37), (219, 39), (220, 39), (221, 38), (222, 38), (223, 39), (224, 38), (226, 39), (227, 37), (230, 39), (232, 36), (234, 40), (235, 40), (236, 39), (237, 39), (240, 37), (241, 39), (242, 39), (244, 40), (245, 40), (246, 39), (247, 39), (248, 39), (249, 39), (252, 38), (253, 39), (254, 40), (255, 39), (256, 40), (257, 40), (258, 39), (259, 40), (260, 39), (261, 40), (263, 39), (264, 40), (266, 39), (268, 38), (269, 36), (270, 39), (272, 38), (273, 36)]
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 5 in  data/data4.csv at level 0 and debug  2
+    With  model: max_e_c and quasi-biclique error: 0.1 
+    Size of Remaining matrix : (40,181), with  density : 0.9614640883977901 and number of ones: 6961
+    Global Time (in sec): 6.856
+    Total Time in QBC approaches: 6.856
+    Time in greedy approach: 0.000,  size of matrix found by greedy : (0,0) 
+    With density : 0.000 and # ones : 0 
+    Time in heuristic only : 0.222 
+    Time in warm start only : 6.634
+    Number of iterations in greedy approach: 0
+    Percentage of greedy approach run time in global run time : 0.00% 
+    Percentage of heuristic run time in QBC run time : 3.23%
+    With zero deletion rate (rho): 0.1 and threshold: 0.03
+    
+----------------------------------------------------------------------
+
+I solved TASK NUMBER 5 with (edges: 9987) and obj: 7240  with solving TIME : 8.2663 sec
+Task 5 with obj 7240) is the current record.
+Task 7 with edges count 5978) has been skipped by the best task  5 with obj  : 7240.
+All other tasks are also skipped because the queue is sorted
+
+Evaluated Queue:
+----------------------------------------------------------------------
+ Size of the evaluated  queue: 1
+ Matrix: 5, # Rows: 41,  # Cols: 272,  # Edges: 9987, size max clique  7240, # rows: 40 # columns: 181
+
+----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+Size of the COPY_QUEUE: 4
+Matrix: 5, Size: 9987, Number Rows: 41, Number Cols: 272, Number Edges: 9987
+Matrix: 7, Size: 5978, Number Rows: 55, Number Cols: 140, Number Edges: 5978
+Matrix: 6, Size: 3228, Number Rows: 29, Number Cols: 142, Number Edges: 3228
+Matrix: 4, Size: 908, Number Rows: 4, Number Cols: 274, Number Edges: 908
+
+----------------------------------------------------------------------
+
+Best task: 5, Best objective: 7240 with # rows 40 and # cols 181
+Number of solved tasks: 1, Number of fathomed tasks: 0, Number of skipped tasks: 3
+
+----------------------------------------------------------------------
+***End of computations !!!
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+ 
+    End of computations for matrix  data/data4.csv with rows: 55 and columns 274
+    with  input density : 0.738 and number of ones: 11122
+    time limit has been set to 3600
+    using  model: max_e_c  with quasi-biclique error: 0.1 
+    nd density_threshold: 0.030 and zero deletion rate (rho): 0.1 and debug: 2
+    Decrease and conquer levels:  2, # ext task: 4, int task : 3 
+    The solution has been found in matrix : 5  with 
+    size max clique  7240, # rows: 40 # columns: 181,
+    # solved  tasks : 1,  # fathomed tasks : 0 # skipped tasks : 3
+    
+----------------------------------------------------------------------
+
+Best task: 5, Best objective: 7240 with # rows 40 and # cols 181
+
+----------------------------------------------------------------------
+ Model building and solving global time: 35.1916 sec
+ Tasks_generation time: 25.5303 sec
+ Tasks_pure_solving time: 8.2664 sec
+
+size edges_1: 11122
+
+row_set: {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 35, 36, 39, 42, 43, 44, 45, 46, 48, 49, 51, 54}
+col_set: {3, 4, 5, 6, 8, 9, 10, 11, 12, 15, 16, 19, 20, 21, 22, 24, 25, 27, 28, 29, 31, 32, 33, 34, 35, 36, 37, 38, 41, 42, 44, 45, 46, 47, 48, 49, 51, 52, 53, 55, 56, 57, 58, 59, 60, 62, 65, 66, 69, 70, 72, 74, 75, 77, 79, 82, 84, 87, 88, 89, 90, 91, 92, 93, 94, 95, 97, 98, 100, 101, 102, 104, 106, 108, 110, 111, 112, 114, 116, 117, 118, 120, 122, 123, 124, 125, 130, 131, 132, 133, 135, 136, 137, 139, 140, 141, 142, 143, 144, 145, 146, 147, 149, 150, 151, 154, 157, 161, 163, 164, 165, 166, 167, 168, 170, 172, 174, 175, 177, 178, 179, 181, 182, 184, 185, 186, 187, 188, 191, 192, 194, 207, 208, 211, 212, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 226, 227, 230, 232, 234, 235, 236, 237, 240, 241, 242, 244, 245, 246, 247, 248, 249, 252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 263, 264, 266, 268, 269, 270, 272, 273}
+Number of ones in the best submatrix : 6961

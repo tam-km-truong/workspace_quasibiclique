@@ -1,0 +1,1670 @@
+----------------------------------------
+ Input Data in csv files : data/data3.csv
+Number Rows Data : 50
+Number Cols Data : 50
+Number Edges_1 : 892
+Number Edges_0 : 1608
+----------------------------------------
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 1 in  data/data3.csv at level 1 and with model:  max_e_c***
+Size of current matrix :  50 * 50 = 2500 ; dec_conq: 1
+Prev_lower_bound :  None number input zeros :  892 ; number input ones :  1608
+rho =  0.1 ; delta :  0.0
+Input density : 0.643 ; density_threshold: 0.90000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.643 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 1 density= 0.6432 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 66.847
+I solved model name = row_knapsack_problem for iteration i =  1 with obj value: 66.84705882352941 KP time = 0.0 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.02157 - (Local CPU) 0.02157 - (Global CPU) 0.02157
+
+ Solve status: Optimal Objective value: 66.84706 nb_rows 45 nb_cols 50
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 1 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (45, 50) and density : 0.682 and number of remaining ones : 1534
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(0, 45), (1, 43), (2, 45), (3, 24), (4, 25), (5, 43), (6, 22), (7, 24), (8, 24), (9, 43), (10, 25), (11, 23), (12, 26), (13, 25), (14, 24), (15, 24), (16, 43), (17, 25), (18, 22), (19, 23), (20, 25), (21, 23), (22, 22), (23, 43), (24, 26), (25, 24), (26, 28), (27, 44), (28, 40), (29, 40), (30, 25), (31, 27), (32, 26), (33, 26), (34, 42), (35, 24), (36, 24), (37, 45), (38, 42), (39, 24), (40, 42), (41, 26), (42, 44), (43, 24), (44, 40), (45, 41), (46, 25), (47, 23), (48, 27), (49, 24)]
+nb_edges_0 = 716 rho= 0.1 # of rows = 45 # of columns= 50 total_degree_0= 716 RHS= 71.60000000000001
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  1 with obj value: 66.84705882352941 KP time = 0.02156983397435397 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01445 - (Local CPU) 0.01445 - (Global CPU) 0.03602
+
+ Solve status: Optimal Objective value: 68.71818 nb_rows 45 nb_cols 46
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 1 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (45, 46) and density : 0.698 and number of remaining ones : 1534
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.698 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 2 density= 0.6980676328502415 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 33.466
+I solved model name = row_knapsack_problem for iteration i =  2 with obj value: 33.46551724137931 KP time = 0.03602308395784348 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01427 - (Local CPU) 0.01427 - (Global CPU) 0.05029
+
+ Solve status: Optimal Objective value: 33.46552 nb_rows 42 nb_cols 46
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 2 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (42, 46) and density : 0.723 and number of remaining ones : 1396
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(0, 42), (1, 41), (2, 42), (3, 24), (4, 25), (5, 40), (7, 23), (8, 23), (9, 41), (10, 25), (12, 26), (13, 25), (14, 24), (15, 23), (16, 40), (17, 25), (19, 23), (20, 25), (21, 23), (23, 41), (24, 25), (25, 24), (26, 28), (27, 41), (28, 37), (29, 38), (30, 25), (31, 27), (32, 26), (33, 26), (34, 39), (35, 24), (36, 24), (37, 42), (38, 40), (39, 24), (40, 39), (41, 26), (42, 41), (43, 24), (44, 38), (45, 38), (46, 25), (47, 23), (48, 27), (49, 24)]
+nb_edges_0 = 536 rho= 0.1 # of rows = 42 # of columns= 46 total_degree_0= 536 RHS= 53.6
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  2 with obj value: 33.46551724137931 KP time = 0.05029425001703203 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01411 - (Local CPU) 0.01411 - (Global CPU) 0.06440
+
+ Solve status: Optimal Objective value: 64.88421 nb_rows 42 nb_cols 43
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 2 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (42, 43) and density : 0.735 and number of remaining ones : 1396
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.735 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 3 density= 0.7347729789590255 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 31.319
+I solved model name = row_knapsack_problem for iteration i =  3 with obj value: 31.319230769230767 KP time = 0.06440387503243983 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01396 - (Local CPU) 0.01396 - (Global CPU) 0.07836
+
+ Solve status: Optimal Objective value: 31.31923 nb_rows 40 nb_cols 43
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 3 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (40, 43) and density : 0.752 and number of remaining ones : 1293
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(0, 40), (1, 39), (2, 40), (3, 24), (4, 25), (5, 38), (7, 23), (8, 23), (9, 39), (10, 25), (12, 26), (13, 25), (14, 24), (16, 38), (17, 25), (19, 23), (20, 25), (23, 39), (24, 25), (25, 24), (26, 28), (27, 39), (28, 35), (29, 36), (30, 25), (31, 27), (32, 26), (33, 26), (34, 37), (35, 24), (36, 24), (37, 40), (38, 38), (39, 24), (40, 37), (41, 26), (42, 39), (43, 24), (44, 36), (45, 36), (46, 25), (48, 27), (49, 24)]
+nb_edges_0 = 427 rho= 0.1 # of rows = 40 # of columns= 43 total_degree_0= 427 RHS= 42.7
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  3 with obj value: 31.319230769230767 KP time = 0.07835983403492719 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01405 - (Local CPU) 0.01405 - (Global CPU) 0.09241
+
+ Solve status: Optimal Objective value: 57.77059 nb_rows 40 nb_cols 40
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 3 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (40, 40) and density : 0.765 and number of remaining ones : 1293
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.765 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 4 density= 0.765 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 27.791
+I solved model name = row_knapsack_problem for iteration i =  4 with obj value: 27.791304347826088 KP time = 0.09241029294207692 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01563 - (Local CPU) 0.01563 - (Global CPU) 0.10804
+
+ Solve status: Optimal Objective value: 27.79130 nb_rows 38 nb_cols 40
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 4 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (38, 40) and density : 0.783 and number of remaining ones : 1190
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(0, 38), (1, 37), (2, 38), (3, 24), (4, 25), (5, 36), (9, 37), (10, 25), (12, 26), (13, 25), (14, 24), (16, 36), (17, 25), (20, 25), (23, 37), (24, 25), (25, 24), (26, 28), (27, 37), (28, 34), (29, 34), (30, 25), (31, 26), (32, 26), (33, 26), (34, 36), (35, 24), (36, 24), (37, 38), (38, 36), (39, 24), (40, 36), (41, 25), (42, 37), (43, 24), (44, 34), (45, 34), (46, 25), (48, 26), (49, 24)]
+nb_edges_0 = 330 rho= 0.1 # of rows = 38 # of columns= 40 total_degree_0= 330 RHS= 33.0
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  4 with obj value: 27.791304347826088 KP time = 0.10804166784510016 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01487 - (Local CPU) 0.01487 - (Global CPU) 0.12291
+
+ Solve status: Optimal Objective value: 56.57143 nb_rows 38 nb_cols 37
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 4 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (38, 37) and density : 0.795 and number of remaining ones : 1190
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.795 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 5 density= 0.7951635846372689 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 24.480
+I solved model name = row_knapsack_problem for iteration i =  5 with obj value: 24.48 KP time = 0.1229100008495152 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01434 - (Local CPU) 0.01434 - (Global CPU) 0.13725
+
+ Solve status: Optimal Objective value: 24.48000 nb_rows 36 nb_cols 37
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 5 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (36, 37) and density : 0.814 and number of remaining ones : 1084
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(0, 36), (1, 35), (2, 36), (3, 24), (4, 25), (5, 34), (9, 35), (10, 25), (12, 26), (13, 25), (16, 34), (17, 25), (20, 25), (23, 35), (24, 25), (25, 24), (26, 28), (27, 35), (28, 32), (29, 32), (30, 25), (31, 26), (32, 26), (33, 26), (34, 34), (37, 36), (38, 34), (39, 24), (40, 34), (41, 25), (42, 35), (43, 24), (44, 32), (45, 32), (46, 25), (48, 26), (49, 24)]
+nb_edges_0 = 248 rho= 0.1 # of rows = 36 # of columns= 37 total_degree_0= 248 RHS= 24.8
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  5 with obj value: 24.48 KP time = 0.13725020887795836 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01434 - (Local CPU) 0.01434 - (Global CPU) 0.15159
+
+ Solve status: Optimal Objective value: 49.60000 nb_rows 36 nb_cols 34
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 5 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (36, 34) and density : 0.827 and number of remaining ones : 1084
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.827 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 6 density= 0.826797385620915 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 19.200
+I solved model name = row_knapsack_problem for iteration i =  6 with obj value: 19.2 KP time = 0.15159145882353187 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01549 - (Local CPU) 0.01549 - (Global CPU) 0.16708
+
+ Solve status: Optimal Objective value: 19.20000 nb_rows 34 nb_cols 34
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 6 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (34, 34) and density : 0.847 and number of remaining ones : 979
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(0, 34), (1, 33), (2, 34), (4, 25), (5, 33), (9, 33), (10, 25), (12, 26), (13, 25), (16, 32), (17, 25), (20, 25), (23, 33), (24, 25), (26, 28), (27, 33), (28, 30), (29, 30), (30, 25), (31, 26), (32, 26), (33, 26), (34, 32), (37, 34), (38, 32), (40, 32), (41, 25), (42, 33), (43, 24), (44, 30), (45, 30), (46, 25), (48, 26), (49, 24)]
+nb_edges_0 = 177 rho= 0.1 # of rows = 34 # of columns= 34 total_degree_0= 177 RHS= 17.7
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  6 with obj value: 19.2 KP time = 0.16707875079009682 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01482 - (Local CPU) 0.01482 - (Global CPU) 0.18190
+
+ Solve status: Optimal Objective value: 42.48000 nb_rows 34 nb_cols 32
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 6 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (34, 32) and density : 0.856 and number of remaining ones : 979
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.856 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 7 density= 0.8556985294117647 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 17.793
+I solved model name = row_knapsack_problem for iteration i =  7 with obj value: 17.793333333333333 KP time = 0.1819003337295726 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01463 - (Local CPU) 0.01463 - (Global CPU) 0.19653
+
+ Solve status: Optimal Objective value: 17.79333 nb_rows 32 nb_cols 32
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 7 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (32, 32) and density : 0.876 and number of remaining ones : 897
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(0, 32), (1, 31), (2, 32), (4, 25), (5, 31), (9, 31), (10, 25), (12, 26), (13, 25), (16, 30), (17, 24), (20, 24), (23, 31), (24, 25), (26, 28), (27, 31), (28, 29), (29, 28), (30, 25), (31, 26), (32, 26), (33, 26), (34, 30), (37, 32), (38, 30), (40, 30), (41, 25), (42, 31), (44, 28), (45, 29), (46, 25), (48, 26)]
+nb_edges_0 = 127 rho= 0.1 # of rows = 32 # of columns= 32 total_degree_0= 127 RHS= 12.700000000000001
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  7 with obj value: 17.793333333333333 KP time = 0.1965303746983409 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01514 - (Local CPU) 0.01515 - (Global CPU) 0.21168
+
+ Solve status: Optimal Objective value: 38.10000 nb_rows 32 nb_cols 30
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 7 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (32, 30) and density : 0.884 and number of remaining ones : 897
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.884 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 8 density= 0.884375 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 14.515
+I solved model name = row_knapsack_problem for iteration i =  8 with obj value: 14.515384615384615 KP time = 0.21167695778422058 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.02156 - (Local CPU) 0.02156 - (Global CPU) 0.23324
+
+ Solve status: Optimal Objective value: 14.51538 nb_rows 31 nb_cols 30
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 8 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (31, 30) and density : 0.895 and number of remaining ones : 832
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(0, 31), (1, 30), (2, 31), (4, 25), (5, 30), (9, 30), (10, 25), (12, 26), (13, 25), (16, 30), (23, 30), (24, 25), (26, 27), (27, 30), (28, 29), (29, 27), (30, 25), (31, 26), (32, 26), (33, 25), (34, 29), (37, 31), (38, 29), (40, 29), (41, 25), (42, 30), (44, 27), (45, 28), (46, 25), (48, 26)]
+nb_edges_0 = 98 rho= 0.1 # of rows = 31 # of columns= 30 total_degree_0= 98 RHS= 9.8
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  8 with obj value: 14.515384615384615 KP time = 0.23323737480677664 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01427 - (Local CPU) 0.01427 - (Global CPU) 0.24750
+
+ Solve status: Optimal Objective value: 40.83333 nb_rows 31 nb_cols 28
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 8 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (31, 28) and density : 0.901 and number of remaining ones : 832
+        
+
+----------------------------------------
+----------------------------------------
+
+----------------------------------------
+
+            End of greedy approaches. Exit while loop. I did: 8 iterations
+            Density : 0.901 > 0.900
+            It took me : 0.248 time
+            Found matrix of size : (31, 28) and density : 0.901
+            
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+----------------------------------------------------------------------
+Model status: Optimal
+----------------------------------------------------------------------
+Computed by max_e_h Objective Value : 1032.000 
+Model status: Optimal
+Solution saved to Experiments/data3/results_h_1_M_1.csv
+
+----------------------------------------------------------------------
+Stats
+ Model solved : max_e_h  Local Time:  - (real) 0.08527 - (Local CPU) 0.08528 - (Global CPU) 0.08528
+
+ Solve status: Optimal Objective value: 1032.00000 nb_rows 12 nb_cols 25
+----------------------------------------
+
+----------------------------------------
+Results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining number  Rows  : 12
+Number of Remaining number Columns : 25
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 300 Density : 1.0 current obj value 1032.0
+----------------------------------------
+
+----------------------------------------
+
+Exit from the heuristic (or exact  approach)  max_e_c  with delta= 0.0 Found matrix with rows_res of lenght = 12  and cols_res of lenght = 25
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 1
+        with delta =  0.0
+        Found matrix of size : (12, 25)
+        and density : 1.000
+        and # of ones : 300
+        and Heuristic QBC time   : 0.08528
+        and Global QBC  time  : 0.08528
+        
+ Remaining Rows  : [0, 1, 11, 13, 15, 2, 21, 26, 28, 36, 45, 7]
+ Remaining  Cols  : [0, 1, 12, 13, 16, 2, 23, 24, 26, 27, 28, 29, 30, 31, 32, 34, 37, 38, 40, 41, 42, 46, 48, 5, 9]
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 1 in  data/data3.csv at level 1 and debug  2
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (12,25), with  density : 1.0 and number of ones: 300
+    Global Time (in sec): 0.333
+    Total Time in QBC approaches: 0.085
+    Time in greedy approach: 0.248,  size of matrix found by greedy : (31,28) 
+    With density : 0.901 and # ones : 782 
+    Time in heuristic only : 0.085 
+    Time in warm start only : 0.000
+    Number of iterations in greedy approach: 8
+    Percentage of greedy approach run time in global run time : 74.37% 
+    Percentage of heuristic run time in QBC run time : 100.00%
+    With zero deletion rate (rho): 0.1 and threshold: 0.9
+    
+----------------------------------------------------------------------
+
+dec_conq= 1
+
+ Level 0, Matrix 2:
+Size Rows: 38
+Size Cols: 50
+
+ Level 0 Matrix  3:
+Size Rows: 50
+Size Cols: 25
+
+Task with matrix 2 with size (38,50) and density 0.45526315789473687 and number of ones 865  and number of zeros 1035 has been added to the queue.
+
+ Return from 2 with winning node = 2
+
+calling decrease_and_conquer for node 3
+
+Task with matrix 3 with size (50,25) and density 0.4896 and number of ones 612  and number of zeros 638 has been added to the queue.
+
+return in decrease_and_conquer from 3 with winning node = 3
+
+return in decrease_and_conquer from 1 with winning node = 2
+
+----------------------------------------------------------------------
+
+End of tasks generation stage. Last generated task from matrix 1 with winning node 2
+Tasks_generation time: 0.3899 sec
+----------------------------------------------------------------------
+ Size of the queue: 2
+ Matrix: 2, Size: 865, Number Rows: 38,  Number Cols: 50,  Number Edges: 865, obj -inf
+ Matrix: 3, Size: 612, Number Rows: 50,  Number Cols: 25,  Number Edges: 612, obj -inf
+
+----------------------------------------------------------------------
+
+
+***QUEUE We currently process task number 2 with (edges 865) selected_model max_e_c dec_conq 0 delta 0.0 threshold 0.9 rho 0.1 QBC_time 0.0 ***
+
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 2 in  data/data3.csv at level 0 and with model:  max_e_c***
+Size of current matrix :  38 * 50 = 1900 ; dec_conq: 0
+Prev_lower_bound :  -inf number input zeros :  1035 ; number input ones :  865
+rho =  0.1 ; delta :  0.0
+Input density : 0.455 ; density_threshold: 0.90000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.455 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 1 density= 0.45526315789473687 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 6.700
+I solved model name = row_knapsack_problem for iteration i =  1 with obj value: 6.7 KP time = 0 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01620 - (Local CPU) 0.01621 - (Global CPU) 0.01621
+
+ Solve status: Optimal Objective value: 6.70000 nb_rows 34 nb_cols 50
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 1 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (34, 47) and density : 0.536 and number of remaining ones : 857
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(1, 5), (3, 25), (4, 24), (5, 2), (6, 25), (7, 25), (8, 25), (9, 2), (10, 25), (11, 26), (12, 23), (13, 25), (14, 25), (15, 25), (16, 2), (17, 24), (18, 26), (19, 26), (20, 25), (21, 24), (22, 26), (23, 4), (24, 24), (25, 25), (26, 22), (27, 1), (28, 5), (29, 5), (30, 25), (31, 23), (32, 24), (33, 24), (34, 4), (35, 26), (36, 26), (38, 3), (39, 25), (40, 2), (41, 24), (42, 2), (43, 25), (44, 2), (45, 3), (46, 25), (47, 25), (48, 23), (49, 25)]
+nb_edges_0 = 741 rho= 0.1 # of rows = 34 # of columns= 47 total_degree_0= 741 RHS= 74.10000000000001
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  1 with obj value: 6.7 KP time = 0.01620708394329995 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01466 - (Local CPU) 0.01467 - (Global CPU) 0.03087
+
+ Solve status: Optimal Objective value: 3.56875 nb_rows 34 nb_cols 44
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 1 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (34, 44) and density : 0.570 and number of remaining ones : 857
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.570 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 2 density= 0.56951871657754 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 3.067
+I solved model name = row_knapsack_problem for iteration i =  2 with obj value: 3.066666666666667 KP time = 0.03087295894511044 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.02067 - (Local CPU) 0.02067 - (Global CPU) 0.05154
+
+ Solve status: Optimal Objective value: 3.06667 nb_rows 32 nb_cols 44
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 2 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (32, 44) and density : 0.602 and number of remaining ones : 848
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(1, 5), (3, 25), (4, 24), (5, 2), (6, 24), (7, 25), (8, 25), (9, 1), (10, 25), (11, 26), (12, 23), (13, 25), (14, 25), (15, 25), (16, 2), (17, 24), (18, 25), (19, 26), (20, 25), (21, 24), (22, 26), (23, 4), (24, 24), (25, 25), (26, 22), (28, 4), (29, 5), (30, 25), (31, 23), (32, 24), (33, 24), (34, 4), (35, 26), (36, 26), (38, 3), (39, 25), (41, 24), (42, 2), (43, 25), (45, 3), (46, 25), (47, 25), (48, 23), (49, 25)]
+nb_edges_0 = 560 rho= 0.1 # of rows = 32 # of columns= 44 total_degree_0= 560 RHS= 56.0
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  2 with obj value: 3.066666666666667 KP time = 0.0515407919883728 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01543 - (Local CPU) 0.01543 - (Global CPU) 0.06698
+
+ Solve status: Optimal Objective value: 2.66667 nb_rows 32 nb_cols 42
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 2 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (32, 42) and density : 0.629 and number of remaining ones : 848
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.629 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 3 density= 0.6287202380952381 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 3.838
+I solved model name = row_knapsack_problem for iteration i =  3 with obj value: 3.838461538461538 KP time = 0.06697550101671368 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01533 - (Local CPU) 0.01533 - (Global CPU) 0.08230
+
+ Solve status: Optimal Objective value: 3.83846 nb_rows 30 nb_cols 42
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 3 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (30, 42) and density : 0.666 and number of remaining ones : 839
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(1, 4), (3, 25), (4, 24), (6, 24), (7, 25), (8, 25), (10, 25), (11, 26), (12, 23), (13, 25), (14, 25), (15, 25), (16, 2), (17, 24), (18, 25), (19, 25), (20, 25), (21, 24), (22, 26), (23, 4), (24, 24), (25, 25), (26, 22), (28, 4), (29, 5), (30, 25), (31, 23), (32, 23), (33, 24), (34, 3), (35, 26), (36, 25), (38, 3), (39, 25), (41, 24), (42, 2), (43, 25), (45, 2), (46, 25), (47, 25), (48, 23), (49, 25)]
+nb_edges_0 = 421 rho= 0.1 # of rows = 30 # of columns= 42 total_degree_0= 421 RHS= 42.1
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  3 with obj value: 3.838461538461538 KP time = 0.0823037929367274 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01523 - (Local CPU) 0.01523 - (Global CPU) 0.09754
+
+ Solve status: Optimal Objective value: 3.00714 nb_rows 30 nb_cols 40
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 3 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (30, 40) and density : 0.696 and number of remaining ones : 839
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.696 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 4 density= 0.6958333333333333 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 2.959
+I solved model name = row_knapsack_problem for iteration i =  4 with obj value: 2.9594594594594597 KP time = 0.09753546002320945 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01409 - (Local CPU) 0.01410 - (Global CPU) 0.11163
+
+ Solve status: Optimal Objective value: 2.95946 nb_rows 29 nb_cols 40
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 4 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (29, 40) and density : 0.717 and number of remaining ones : 832
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(1, 4), (3, 25), (4, 24), (6, 24), (7, 25), (8, 25), (10, 25), (11, 25), (12, 23), (13, 25), (14, 25), (15, 25), (17, 24), (18, 25), (19, 24), (20, 25), (21, 24), (22, 26), (23, 4), (24, 24), (25, 25), (26, 22), (28, 4), (29, 5), (30, 25), (31, 23), (32, 23), (33, 24), (34, 3), (35, 26), (36, 25), (38, 2), (39, 25), (41, 24), (42, 2), (43, 25), (46, 25), (47, 25), (48, 23), (49, 25)]
+nb_edges_0 = 328 rho= 0.1 # of rows = 29 # of columns= 40 total_degree_0= 328 RHS= 32.800000000000004
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  4 with obj value: 2.9594594594594597 KP time = 0.11163100111298263 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01563 - (Local CPU) 0.01564 - (Global CPU) 0.12727
+
+ Solve status: Optimal Objective value: 2.42963 nb_rows 29 nb_cols 38
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 4 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (29, 38) and density : 0.751 and number of remaining ones : 832
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.751 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 5 density= 0.7513611615245009 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 3.224
+I solved model name = row_knapsack_problem for iteration i =  5 with obj value: 3.2235294117647055 KP time = 0.1272665011929348 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01542 - (Local CPU) 0.01543 - (Global CPU) 0.14269
+
+ Solve status: Optimal Objective value: 3.22353 nb_rows 28 nb_cols 38
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 5 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (28, 38) and density : 0.774 and number of remaining ones : 824
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(1, 4), (3, 25), (4, 24), (6, 24), (7, 25), (8, 25), (10, 25), (11, 25), (12, 22), (13, 25), (14, 25), (15, 25), (17, 24), (18, 25), (19, 24), (20, 24), (21, 24), (22, 26), (23, 4), (24, 24), (25, 25), (26, 22), (28, 4), (29, 4), (30, 25), (31, 23), (32, 23), (33, 24), (34, 3), (35, 26), (36, 24), (39, 25), (41, 24), (43, 25), (46, 25), (47, 25), (48, 23), (49, 25)]
+nb_edges_0 = 240 rho= 0.1 # of rows = 28 # of columns= 38 total_degree_0= 240 RHS= 24.0
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  5 with obj value: 3.2235294117647055 KP time = 0.1426921261008829 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01563 - (Local CPU) 0.01563 - (Global CPU) 0.15832
+
+ Solve status: Optimal Objective value: 2.88000 nb_rows 28 nb_cols 37
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 5 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (28, 37) and density : 0.792 and number of remaining ones : 824
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.792 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 6 density= 0.7924710424710425 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 1.897
+I solved model name = row_knapsack_problem for iteration i =  6 with obj value: 1.8970588235294117 KP time = 0.15832325106021017 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01534 - (Local CPU) 0.01534 - (Global CPU) 0.17366
+
+ Solve status: Optimal Objective value: 1.89706 nb_rows 27 nb_cols 37
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 6 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (27, 37) and density : 0.819 and number of remaining ones : 818
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(1, 4), (3, 25), (4, 24), (6, 24), (7, 24), (8, 25), (10, 25), (11, 25), (12, 22), (13, 25), (14, 25), (15, 24), (17, 24), (18, 25), (19, 24), (20, 24), (21, 24), (22, 26), (23, 4), (24, 24), (25, 25), (26, 22), (28, 4), (29, 3), (30, 25), (31, 23), (32, 23), (33, 24), (35, 26), (36, 24), (39, 25), (41, 24), (43, 25), (46, 25), (47, 25), (48, 23), (49, 25)]
+nb_edges_0 = 181 rho= 0.1 # of rows = 27 # of columns= 37 total_degree_0= 181 RHS= 18.1
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  6 with obj value: 1.8970588235294117 KP time = 0.17366412607952952 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01525 - (Local CPU) 0.01525 - (Global CPU) 0.18891
+
+ Solve status: Optimal Objective value: 2.26250 nb_rows 27 nb_cols 36
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 6 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (27, 36) and density : 0.838 and number of remaining ones : 818
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.838 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 7 density= 0.838477366255144 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 1.962
+I solved model name = row_knapsack_problem for iteration i =  7 with obj value: 1.9625 KP time = 0.18891458411235362 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01522 - (Local CPU) 0.01522 - (Global CPU) 0.20414
+
+ Solve status: Optimal Objective value: 1.96250 nb_rows 26 nb_cols 36
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 7 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (26, 36) and density : 0.866 and number of remaining ones : 811
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(1, 4), (3, 25), (4, 24), (6, 24), (7, 24), (8, 25), (10, 25), (11, 25), (12, 22), (13, 24), (14, 25), (15, 24), (17, 24), (18, 25), (19, 24), (20, 24), (21, 24), (22, 25), (23, 4), (24, 24), (25, 25), (26, 22), (28, 3), (30, 25), (31, 23), (32, 23), (33, 24), (35, 26), (36, 24), (39, 24), (41, 24), (43, 25), (46, 25), (47, 25), (48, 23), (49, 25)]
+nb_edges_0 = 125 rho= 0.1 # of rows = 26 # of columns= 36 total_degree_0= 125 RHS= 12.5
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  7 with obj value: 1.9625 KP time = 0.2041353752138093 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01460 - (Local CPU) 0.01461 - (Global CPU) 0.21874
+
+ Solve status: Optimal Objective value: 1.63043 nb_rows 26 nb_cols 35
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 7 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (26, 35) and density : 0.888 and number of remaining ones : 811
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.888 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 8 density= 0.8879120879120879 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 1.700
+I solved model name = row_knapsack_problem for iteration i =  8 with obj value: 1.6999999999999997 KP time = 0.218741417163983 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.02028 - (Local CPU) 0.02029 - (Global CPU) 0.23903
+
+ Solve status: Optimal Objective value: 1.70000 nb_rows 25 nb_cols 35
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 8 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (25, 35) and density : 0.918 and number of remaining ones : 803
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(1, 4), (3, 25), (4, 24), (6, 24), (7, 24), (8, 24), (10, 25), (11, 25), (12, 22), (13, 24), (14, 25), (15, 24), (17, 24), (18, 24), (19, 24), (20, 24), (21, 24), (22, 25), (23, 3), (24, 24), (25, 24), (26, 22), (30, 25), (31, 23), (32, 23), (33, 24), (35, 25), (36, 24), (39, 24), (41, 24), (43, 25), (46, 25), (47, 25), (48, 23), (49, 25)]
+nb_edges_0 = 72 rho= 0.1 # of rows = 25 # of columns= 35 total_degree_0= 72 RHS= 7.2
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  8 with obj value: 1.6999999999999997 KP time = 0.23902691714465618 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01747 - (Local CPU) 0.01747 - (Global CPU) 0.25650
+
+ Solve status: Optimal Objective value: 0.98182 nb_rows 25 nb_cols 34
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 8 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (25, 34) and density : 0.941 and number of remaining ones : 803
+        
+
+----------------------------------------
+----------------------------------------
+
+----------------------------------------
+
+            End of greedy approaches. Exit while loop. I did: 8 iterations
+            Density : 0.941 > 0.900
+            It took me : 0.256 time
+            Found matrix of size : (25, 34) and density : 0.941
+            
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+----------------------------------------------------------------------
+Model status: Optimal
+----------------------------------------------------------------------
+Computed by max_e_h Objective Value : 1159.000 
+Model status: Optimal
+Solution saved to Experiments/data3/results_h_0_M_2.csv
+
+----------------------------------------------------------------------
+Stats
+ Model solved : max_e_h  Local Time:  - (real) 0.04509 - (Local CPU) 0.04510 - (Global CPU) 0.04510
+
+ Solve status: Optimal Objective value: 1159.00002 nb_rows 20 nb_cols 21
+----------------------------------------
+
+----------------------------------------
+Results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining number  Rows  : 20
+Number of Remaining number Columns : 21
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 420 Density : 1.0 current obj value 1159.0000160908105
+----------------------------------------
+
+----------------------------------------
+
+Exit from the heuristic (or exact  approach)  max_e_c  with delta= 0.0 Found matrix with rows_res of lenght = 20  and cols_res of lenght = 21
+ A lower_bound = 420 has been found by max_e_h 
+ Start computing max_er with lower_bound =  420. 
+ !!!!!!!!!!!!!!!!!! I got a lower bound  420
+----------------------------------------------------------------------
+Model status: Not Solved
+----------------------------------------------------------------------
+Model status: Not Solved
+
+----------------------------------------------------------------------
+Stats
+ Model solved : max_e_wr  Local Time:  - (real) 0.08047 - (Local CPU) 0.08048 - (Global CPU) 0.12558
+
+ Solve status: Not Solved Objective value: 800.00000 nb_rows 20 nb_cols 21
+----------------------------------------
+*****Model in warm start is infeasible.!!! The given lower bound cannot be improved. Return the below data*** 
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 2
+        with delta =  0.0
+        Found matrix of size : (20, 21)
+        and density : 1.000
+        and # of ones : 420
+        and Heuristic QBC time   : 0.04510
+        and Global QBC  time  : 0.12558
+        
+ Remaining Rows  : [(3, 21), (6, 21), (12, 21), (14, 21), (16, 21), (17, 21), (18, 21), (22, 21), (25, 21), (29, 21), (30, 21), (32, 21), (34, 21), (35, 21), (37, 21), (39, 21), (41, 21), (42, 21), (44, 21), (47, 21)]
+ Remaining  Cols  : [(3, 20), (4, 20), (8, 20), (10, 20), (11, 20), (14, 20), (15, 20), (17, 20), (18, 20), (19, 20), (20, 20), (22, 20), (24, 20), (30, 20), (35, 20), (41, 20), (43, 20), (46, 20), (47, 20), (48, 20), (49, 20)]
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 2 in  data/data3.csv at level 0 and debug  2
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (20,21), with  density : 1.0 and number of ones: 420
+    Global Time (in sec): 0.382
+    Total Time in QBC approaches: 0.126
+    Time in greedy approach: 0.256,  size of matrix found by greedy : (25,34) 
+    With density : 0.941 and # ones : 800 
+    Time in heuristic only : 0.045 
+    Time in warm start only : 0.080
+    Number of iterations in greedy approach: 8
+    Percentage of greedy approach run time in global run time : 67.13% 
+    Percentage of heuristic run time in QBC run time : 35.91%
+    With zero deletion rate (rho): 0.1 and threshold: 0.9
+    
+----------------------------------------------------------------------
+
+I solved TASK NUMBER 2 with (edges: 865) and obj: 420  with solving TIME : 0.4382 sec
+Task 2 with obj 420) is the current record.
+
+***QUEUE We currently process task number 3 with (edges 612) selected_model max_e_c dec_conq 0 delta 0.0 threshold 0.9 rho 0.1 QBC_time 0.0 ***
+
+
+----------------------------------------------------------------------
+***Stats Current Input for matrix 3 in  data/data3.csv at level 0 and with model:  max_e_c***
+Size of current matrix :  50 * 25 = 1250 ; dec_conq: 0
+Prev_lower_bound :  420 number input zeros :  638 ; number input ones :  612
+rho =  0.1 ; delta :  0.0
+Input density : 0.490 ; density_threshold: 0.90000
+----------------------------------------------------------------------
+End Current  Stats
+----------------------------------------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.490 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 1 density= 0.4896 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 3.575
+I solved model name = row_knapsack_problem for iteration i =  1 with obj value: 3.5750000000000006 KP time = 0.2564985421486199 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01539 - (Local CPU) 0.01539 - (Global CPU) 0.27189
+
+ Solve status: Optimal Objective value: 3.57500 nb_rows 43 nb_cols 25
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 1 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (43, 25) and density : 0.566 and number of remaining ones : 608
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(3, 26), (4, 25), (6, 27), (7, 26), (8, 26), (10, 25), (11, 27), (14, 26), (15, 26), (17, 25), (18, 27), (19, 26), (20, 25), (21, 26), (22, 28), (25, 26), (33, 24), (35, 26), (36, 26), (39, 26), (43, 26), (44, 5), (45, 5), (47, 27), (49, 26)]
+nb_edges_0 = 467 rho= 0.1 # of rows = 43 # of columns= 25 total_degree_0= 467 RHS= 46.7
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  1 with obj value: 3.5750000000000006 KP time = 0.27189279219601303 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01444 - (Local CPU) 0.01444 - (Global CPU) 0.28634
+
+ Solve status: Optimal Objective value: 6.14474 nb_rows 43 nb_cols 23
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 1 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (42, 23) and density : 0.619 and number of remaining ones : 608
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.619 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 2 density= 0.6190476190476191 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 1.673
+I solved model name = row_knapsack_problem for iteration i =  2 with obj value: 1.6727272727272726 KP time = 0.2863351672422141 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01521 - (Local CPU) 0.01521 - (Global CPU) 0.30155
+
+ Solve status: Optimal Objective value: 1.67273 nb_rows 40 nb_cols 23
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 2 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (40, 23) and density : 0.648 and number of remaining ones : 596
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(3, 26), (4, 25), (6, 27), (7, 26), (8, 25), (10, 25), (11, 26), (14, 26), (15, 26), (17, 25), (18, 27), (19, 26), (20, 25), (21, 26), (22, 28), (25, 26), (33, 24), (35, 26), (36, 26), (39, 26), (43, 26), (47, 27), (49, 26)]
+nb_edges_0 = 324 rho= 0.1 # of rows = 40 # of columns= 23 total_degree_0= 324 RHS= 32.4
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  2 with obj value: 1.6727272727272726 KP time = 0.3015457922592759 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01658 - (Local CPU) 0.01658 - (Global CPU) 0.31813
+
+ Solve status: Optimal Objective value: 51.33333 nb_rows 40 nb_cols 20
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 2 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (40, 20) and density : 0.652 and number of remaining ones : 596
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.652 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 3 density= 0.6525 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 1.463
+I solved model name = row_knapsack_problem for iteration i =  3 with obj value: 1.4631578947368422 KP time = 0.31813045928720385 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01557 - (Local CPU) 0.01557 - (Global CPU) 0.33370
+
+ Solve status: Optimal Objective value: 1.46316 nb_rows 38 nb_cols 20
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 3 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (38, 20) and density : 0.684 and number of remaining ones : 520
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(3, 26), (4, 25), (6, 27), (7, 26), (8, 25), (11, 26), (14, 26), (15, 26), (17, 25), (18, 27), (19, 26), (21, 25), (22, 28), (25, 26), (35, 26), (36, 25), (39, 26), (43, 26), (47, 27), (49, 26)]
+nb_edges_0 = 240 rho= 0.1 # of rows = 38 # of columns= 20 total_degree_0= 240 RHS= 24.0
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  3 with obj value: 1.4631578947368422 KP time = 0.33370370930060744 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01511 - (Local CPU) 0.01511 - (Global CPU) 0.34882
+
+ Solve status: Optimal Objective value: 46.15385 nb_rows 38 nb_cols 18
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 3 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (37, 18) and density : 0.706 and number of remaining ones : 520
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.706 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 4 density= 0.7057057057057057 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 1.325
+I solved model name = row_knapsack_problem for iteration i =  4 with obj value: 1.3250000000000002 KP time = 0.3488166673341766 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01495 - (Local CPU) 0.01495 - (Global CPU) 0.36377
+
+ Solve status: Optimal Objective value: 1.32500 nb_rows 35 nb_cols 18
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 4 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (35, 18) and density : 0.741 and number of remaining ones : 467
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(3, 26), (4, 25), (6, 27), (7, 26), (8, 25), (11, 26), (14, 26), (15, 25), (18, 27), (19, 25), (21, 25), (22, 28), (25, 26), (35, 26), (39, 26), (43, 25), (47, 27), (49, 26)]
+nb_edges_0 = 163 rho= 0.1 # of rows = 35 # of columns= 18 total_degree_0= 163 RHS= 16.3
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  4 with obj value: 1.3250000000000002 KP time = 0.363766917376779 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01549 - (Local CPU) 0.01549 - (Global CPU) 0.37925
+
+ Solve status: Optimal Objective value: 40.75000 nb_rows 35 nb_cols 16
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 4 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (35, 16) and density : 0.745 and number of remaining ones : 467
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.745 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 5 density= 0.7446428571428572 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 0.953
+I solved model name = row_knapsack_problem for iteration i =  5 with obj value: 0.9533333333333334 KP time = 0.3792543333256617 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01546 - (Local CPU) 0.01546 - (Global CPU) 0.39472
+
+ Solve status: Optimal Objective value: 0.95333 nb_rows 34 nb_cols 16
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 5 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (34, 16) and density : 0.765 and number of remaining ones : 416
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(3, 26), (4, 25), (6, 27), (7, 25), (8, 25), (11, 26), (14, 26), (18, 27), (21, 25), (22, 28), (25, 26), (35, 26), (39, 26), (43, 25), (47, 27), (49, 26)]
+nb_edges_0 = 128 rho= 0.1 # of rows = 34 # of columns= 16 total_degree_0= 128 RHS= 12.8
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  5 with obj value: 0.9533333333333334 KP time = 0.39471804129425436 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01491 - (Local CPU) 0.01491 - (Global CPU) 0.40963
+
+ Solve status: Optimal Objective value: 35.55556 nb_rows 34 nb_cols 14
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 5 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (34, 14) and density : 0.769 and number of remaining ones : 416
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.769 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 6 density= 0.7689075630252101 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 0.846
+I solved model name = row_knapsack_problem for iteration i =  6 with obj value: 0.8461538461538461 KP time = 0.409631458343938 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01495 - (Local CPU) 0.01495 - (Global CPU) 0.42459
+
+ Solve status: Optimal Objective value: 0.84615 nb_rows 33 nb_cols 14
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 6 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (33, 14) and density : 0.790 and number of remaining ones : 365
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(3, 26), (6, 27), (7, 25), (8, 25), (11, 25), (14, 26), (18, 27), (22, 28), (25, 26), (35, 26), (39, 26), (43, 25), (47, 27), (49, 26)]
+nb_edges_0 = 97 rho= 0.1 # of rows = 33 # of columns= 14 total_degree_0= 97 RHS= 9.700000000000001
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  6 with obj value: 0.8461538461538461 KP time = 0.42458533332683146 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01519 - (Local CPU) 0.01520 - (Global CPU) 0.43978
+
+ Solve status: Optimal Objective value: 30.31250 nb_rows 33 nb_cols 12
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 6 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (33, 12) and density : 0.795 and number of remaining ones : 365
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.795 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 7 density= 0.7954545454545454 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 1.620
+I solved model name = row_knapsack_problem for iteration i =  7 with obj value: 1.6199999999999999 KP time = 0.4397809993242845 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01650 - (Local CPU) 0.01650 - (Global CPU) 0.45628
+
+ Solve status: Optimal Objective value: 1.62000 nb_rows 32 nb_cols 12
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 7 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (32, 12) and density : 0.815 and number of remaining ones : 313
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(3, 25), (6, 27), (7, 25), (8, 25), (14, 26), (18, 27), (22, 27), (25, 26), (35, 26), (39, 26), (47, 27), (49, 26)]
+nb_edges_0 = 71 rho= 0.1 # of rows = 32 # of columns= 12 total_degree_0= 71 RHS= 7.1000000000000005
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  7 with obj value: 1.6199999999999999 KP time = 0.4562795403180644 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01485 - (Local CPU) 0.01485 - (Global CPU) 0.47113
+
+ Solve status: Optimal Objective value: 25.35714 nb_rows 32 nb_cols 10
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 7 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (32, 10) and density : 0.822 and number of remaining ones : 313
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.822 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 8 density= 0.821875 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 1.425
+I solved model name = row_knapsack_problem for iteration i =  8 with obj value: 1.425 KP time = 0.47113379021175206 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01444 - (Local CPU) 0.01444 - (Global CPU) 0.48557
+
+ Solve status: Optimal Objective value: 1.42500 nb_rows 31 nb_cols 10
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 8 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (31, 10) and density : 0.842 and number of remaining ones : 261
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(6, 26), (8, 25), (14, 25), (18, 27), (22, 27), (25, 26), (35, 26), (39, 26), (47, 27), (49, 26)]
+nb_edges_0 = 49 rho= 0.1 # of rows = 31 # of columns= 10 total_degree_0= 49 RHS= 4.9
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  8 with obj value: 1.425 KP time = 0.4855714571895078 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01561 - (Local CPU) 0.01561 - (Global CPU) 0.50118
+
+ Solve status: Optimal Objective value: 20.41667 nb_rows 31 nb_cols 9
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 8 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (31, 9) and density : 0.846 and number of remaining ones : 261
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.846 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 9 density= 0.8458781362007168 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 1.229
+I solved model name = row_knapsack_problem for iteration i =  9 with obj value: 1.2285714285714284 KP time = 0.5011800401844084 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01562 - (Local CPU) 0.01562 - (Global CPU) 0.51680
+
+ Solve status: Optimal Objective value: 1.22857 nb_rows 30 nb_cols 9
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 9 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (30, 9) and density : 0.867 and number of remaining ones : 234
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(6, 25), (8, 25), (18, 27), (22, 27), (25, 25), (35, 26), (39, 26), (47, 27), (49, 26)]
+nb_edges_0 = 36 rho= 0.1 # of rows = 30 # of columns= 9 total_degree_0= 36 RHS= 3.6
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  9 with obj value: 1.2285714285714284 KP time = 0.5167990401387215 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01502 - (Local CPU) 0.01502 - (Global CPU) 0.53182
+
+ Solve status: Optimal Objective value: 18.00000 nb_rows 30 nb_cols 8
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 9 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (30, 8) and density : 0.871 and number of remaining ones : 234
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.871 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 10 density= 0.8708333333333333 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 1.033
+I solved model name = row_knapsack_problem for iteration i =  10 with obj value: 1.0333333333333334 KP time = 0.5318158731097355 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01526 - (Local CPU) 0.01526 - (Global CPU) 0.54708
+
+ Solve status: Optimal Objective value: 1.03333 nb_rows 29 nb_cols 8
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 10 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (29, 8) and density : 0.892 and number of remaining ones : 207
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(6, 25), (8, 25), (18, 26), (22, 27), (35, 26), (39, 26), (47, 27), (49, 25)]
+nb_edges_0 = 25 rho= 0.1 # of rows = 29 # of columns= 8 total_degree_0= 25 RHS= 2.5
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  10 with obj value: 1.0333333333333334 KP time = 0.5470792901469395 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01588 - (Local CPU) 0.01588 - (Global CPU) 0.56296
+
+ Solve status: Optimal Objective value: 15.62500 nb_rows 29 nb_cols 7
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 10 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (29, 7) and density : 0.897 and number of remaining ones : 207
+        
+
+----------------------------------------
+----------------------------------------
+
+
+calling greedy approaches for zero deletion, density= 0.897 density  and density_threshold= 0.900
+
+
+I am in the while loop with i= 11 density= 0.896551724137931 and fixed_threshold= 0.9
+
+Model status: Optimal
+Solver Status after model with status :row_knapsack_problem, 1
+Computed Objective Value : 0.840
+I solved model name = row_knapsack_problem for iteration i =  11 with obj value: 0.8400000000000001 KP time = 0.5629578732186928 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : row_knapsack_problem  Local Time:  - (real) 0.01543 - (Local CPU) 0.01543 - (Global CPU) 0.57839
+
+ Solve status: Optimal Objective value: 0.84000 nb_rows 28 nb_cols 7
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 11 . We solved KP model :  row_knapsack_problem with delta =  0.0 
+        Found matrix of size : (28, 7) and density : 0.918 and number of remaining ones : 180
+        
+----------------------------------------
+
+----------------------------------------
+I will solve column KP_QBc with Input data : ***************
+
+ input cols_data = [(6, 25), (8, 25), (18, 26), (22, 26), (35, 26), (39, 26), (47, 26)]
+nb_edges_0 = 16 rho= 0.1 # of rows = 28 # of columns= 7 total_degree_0= 16 RHS= 1.6
+----------------------------------------
+Model status: Optimal
+I solved model name = column_knapsack_problem for iteration i =  11 with obj value: 0.8400000000000001 KP time = 0.578392373281531 debug : 2
+
+----------------------------------------------------------------------
+Stats
+ Model solved : column_knapsack_problem  Local Time:  - (real) 0.01505 - (Local CPU) 0.01505 - (Global CPU) 0.59345
+
+ Solve status: Optimal Objective value: 13.33333 nb_rows 28 nb_cols 6
+----------------------------------------
+----------------------------------------
+
+        Updated data after iteration: 11 . We solved KP model :  column_knapsack_problem with delta =  0.0 
+        Found matrix of size : (28, 6) and density : 0.923 and number of remaining ones : 180
+        
+
+----------------------------------------
+----------------------------------------
+
+----------------------------------------
+
+            End of greedy approaches. Exit while loop. I did: 11 iterations
+            Density : 0.923 > 0.900
+            It took me : 0.593 time
+            Found matrix of size : (28, 6) and density : 0.923
+            
+----------------------------------------
+
+ Calling exact approaches for QB clique discovery with delta = 0.0
+----------------------------------------
+
+----------------------------------------
+
+I am in warm_exact before calling max_e_h $$$$$$$$$$$$$$$$$$
+
+----------------------------------------------------------------------
+Model status: Optimal
+----------------------------------------------------------------------
+Computed by max_e_h Objective Value : 293.000 
+Model status: Optimal
+Solution saved to Experiments/data3/results_h_0_M_3.csv
+
+----------------------------------------------------------------------
+Stats
+ Model solved : max_e_h  Local Time:  - (real) 0.01986 - (Local CPU) 0.01986 - (Global CPU) 0.01986
+
+ Solve status: Optimal Objective value: 293.00000 nb_rows 23 nb_cols 6
+----------------------------------------
+
+----------------------------------------
+Results from updating data after solving model = max_e_h  delta =   0.0
+Number of Remaining number  Rows  : 23
+Number of Remaining number Columns : 6
+Remaining  number Edges_0 P: 0 Remaining  number Edges_1 : 138 Density : 1.0 current obj value 293.0
+----------------------------------------
+
+----------------------------------------
+
+Exit from the heuristic (or exact  approach)  max_e_c  with delta= 0.0 Found matrix with rows_res of lenght = 23  and cols_res of lenght = 6
+ A lower_bound = 420 has been previously found and given as input. 
+ Start computing max_er with lower_bound =  420. 
+ !!!!!!!!!!!!!!!!!! I got a lower bound  420
+----------------------------------------------------------------------
+Model status: Not Solved
+----------------------------------------------------------------------
+Model status: Not Solved
+
+----------------------------------------------------------------------
+Stats
+ Model solved : max_e_wr  Local Time:  - (real) 0.01746 - (Local CPU) 0.01746 - (Global CPU) 0.03732
+
+ Solve status: Not Solved Objective value: 155.00000 nb_rows 23 nb_cols 6
+----------------------------------------
+*****Model in warm start is infeasible.!!! The given lower bound cannot be improved. Return the below data*** 
+----------------------------------------
+
+        Exit from the exact approach: max_e_c for matrix 3
+        with delta =  0.0
+        Found matrix of size : (23, 6)
+        and density : 1.000
+        and # of ones : 420
+        and Heuristic QBC time   : 0.01986
+        and Global QBC  time  : 0.03732
+        
+ Remaining Rows  : [(3, 6), (6, 6), (10, 6), (12, 6), (14, 6), (16, 6), (17, 6), (18, 6), (22, 6), (24, 6), (25, 6), (27, 6), (29, 6), (30, 6), (32, 6), (34, 6), (35, 6), (37, 6), (39, 6), (40, 6), (41, 6), (44, 6), (47, 6)]
+ Remaining  Cols  : [(8, 23), (18, 23), (22, 23), (35, 23), (39, 23), (47, 23)]
+
+----------------------------------------------------------------------
+ 
+    End of computations for matrix 3 in  data/data3.csv at level 0 and debug  2
+    With  model: max_e_c and quasi-biclique error: 0.0 
+    Size of Remaining matrix : (23,6), with  density : 1.0 and number of ones: 420
+    Global Time (in sec): 0.631
+    Total Time in QBC approaches: 0.037
+    Time in greedy approach: 0.593,  size of matrix found by greedy : (28,6) 
+    With density : 0.923 and # ones : 155 
+    Time in heuristic only : 0.020 
+    Time in warm start only : 0.017
+    Number of iterations in greedy approach: 11
+    Percentage of greedy approach run time in global run time : 94.08% 
+    Percentage of heuristic run time in QBC run time : 53.21%
+    With zero deletion rate (rho): 0.1 and threshold: 0.9
+    
+----------------------------------------------------------------------
+
+I solved TASK NUMBER 3 with (edges: 612) and obj: 138  with solving TIME : 0.4053 sec
+Task 3 with obj  138 has been fathomed by the best task 2 with obj  : 420.
+
+Evaluated Queue:
+----------------------------------------------------------------------
+ Size of the evaluated  queue: 1
+ Matrix: 2, # Rows: 38,  # Cols: 50,  # Edges: 865, size max clique  420, # rows: 20 # columns: 21
+
+----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+Size of the COPY_QUEUE: 2
+Matrix: 2, Size: 865, Number Rows: 38, Number Cols: 50, Number Edges: 865
+Matrix: 3, Size: 612, Number Rows: 50, Number Cols: 25, Number Edges: 612
+
+----------------------------------------------------------------------
+
+Best task: 2, Best objective: 420 with # rows 20 and # cols 21
+Number of solved tasks: 2, Number of fathomed tasks: 1, Number of skipped tasks: 0
+
+----------------------------------------------------------------------
+***End of computations !!!
+
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+ 
+    End of computations for matrix  data/data3.csv with rows: 50 and columns 50
+    with  input density : 0.357 and number of ones: 892
+    time limit has been set to 200
+    using  model: max_e_c  with quasi-biclique error: 0.0 
+    nd density_threshold: 0.900 and zero deletion rate (rho): 0.1 and debug: 2
+    Decrease and conquer levels:  1, # ext task: 2, int task : 1 
+    The solution has been found in matrix : 2  with 
+    size max clique  420, # rows: 20 # columns: 21,
+    # solved  tasks : 2,  # fathomed tasks : 1 # skipped tasks : 0
+    
+----------------------------------------------------------------------
+
+Best task: 2, Best objective: 420 with # rows 20 and # cols 21
+
+----------------------------------------------------------------------
+ Model building and solving global time: 1.2725 sec
+ Tasks_generation time: 0.3899 sec
+ Tasks_pure_solving time: 0.8435 sec
+
+size edges_1: 892
+
+row_set: {3, 6, 12, 14, 16, 17, 18, 22, 25, 29, 30, 32, 34, 35, 37, 39, 41, 42, 44, 47}
+col_set: {3, 4, 8, 10, 11, 14, 15, 17, 18, 19, 20, 22, 24, 30, 35, 41, 43, 46, 47, 48, 49}
+Number of ones in the best submatrix : 420
