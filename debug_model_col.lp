@@ -1,32 +1,31 @@
 \* column_knapsack_problem *\
 Minimize
-knapsack: 9 col_10 + 9 col_11 + 9 col_12 + 9 col_14 + 8 col_15 + 9 col_18
- + 9 col_19 + 9 col_20 + 9 col_21 + 3 col_23 + 8 col_24 + 9 col_25 + 2 col_29
- + 9 col_3 + 9 col_30 + 9 col_33 + 9 col_35 + 9 col_36 + 9 col_41 + 9 col_7
- + 9 col_8 + col_9
+knapsack: 25 col_11 + 25 col_14 + 24 col_15 + 24 col_18 + 24 col_19
+ + 24 col_21 + 25 col_22 + 24 col_25 + 25 col_3 + 25 col_35 + 24 col_36
+ + 24 col_39 + 25 col_43 + col_44 + 2 col_45 + 25 col_47 + 25 col_49
+ + 24 col_6 + 24 col_7 + 24 col_8
 Subject To
-sensitivity: col_15 + 6 col_23 + col_24 + 7 col_29 + 8 col_9 >= 2.3
+sensitivity: col_15 + col_18 + col_19 + col_21 + col_25 + col_36 + col_39
+ + 24 col_44 + 23 col_45 + col_6 + col_7 + col_8 >= 5.7
 Bounds
- col_10 <= 1
  col_11 <= 1
- col_12 <= 1
  col_14 <= 1
  col_15 <= 1
  col_18 <= 1
  col_19 <= 1
- col_20 <= 1
  col_21 <= 1
- col_23 <= 1
- col_24 <= 1
+ col_22 <= 1
  col_25 <= 1
- col_29 <= 1
  col_3 <= 1
- col_30 <= 1
- col_33 <= 1
  col_35 <= 1
  col_36 <= 1
- col_41 <= 1
+ col_39 <= 1
+ col_43 <= 1
+ col_44 <= 1
+ col_45 <= 1
+ col_47 <= 1
+ col_49 <= 1
+ col_6 <= 1
  col_7 <= 1
  col_8 <= 1
- col_9 <= 1
 End

@@ -3134,7 +3134,7 @@ if __name__ == '__main__':
     # Define a priority queue (max-heap using negative size)
     QUEUE = []
     COPY_QUEUE = []
-    PROCESSED_OBJS = []  # Store processed obj values
+    #PROCESSED_OBJS = []  # Store processed obj values
     # List to store evaluated tasks
     EVALUATED_QUEUE = []
     import heapq
