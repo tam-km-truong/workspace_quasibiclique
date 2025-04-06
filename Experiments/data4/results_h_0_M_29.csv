@@ -1,25 +1,21 @@
-Obj value,1258
-# of rows,37
-# of columns,34
+Obj value,1131
+# of rows,39
+# of columns,29
 Variable,Value
 col_106,1.0
 col_11,1.0
-col_117,1.0
 col_12,1.0
 col_132,1.0
 col_141,1.0
 col_147,1.0
 col_15,1.0
-col_150,1.0
 col_154,1.0
 col_166,1.0
 col_184,1.0
-col_188,1.0
 col_20,1.0
 col_212,1.0
 col_216,1.0
 col_219,1.0
-col_230,1.0
 col_235,1.0
 col_24,1.0
 col_245,1.0
@@ -31,7 +27,6 @@ col_263,1.0
 col_3,1.0
 col_37,1.0
 col_4,1.0
-col_44,1.0
 col_84,1.0
 col_88,1.0
 col_93,1.0
@@ -56,6 +51,7 @@ row_3,1.0
 row_30,1.0
 row_31,1.0
 row_32,1.0
+row_33,1.0
 row_35,1.0
 row_36,1.0
 row_39,1.0
@@ -69,6 +65,7 @@ row_48,1.0
 row_49,1.0
 row_5,1.0
 row_51,1.0
+row_54,1.0
 row_6,1.0
 row_7,1.0
 row_8,1.0

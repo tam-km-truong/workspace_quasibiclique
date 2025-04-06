@@ -2852,7 +2852,7 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         if len(rows_res) <=  min_number_rows or len(cols_res) <=  min_number_cols:
             if debug >= 1:
                 print()
-                print(f"Zero clique too small. Task with matrix {matrix_name} with size ({len(rows)},{len(cols)}) has been added to the queue.") 
+                print(f"Zero clique of size ({len(rows_res)},{len(cols_res)}) has been found. Too small!! Task with matrix {matrix_name} with size ({len(rows)},{len(cols)}) has been added to the queue.") 
             temp_obj =  float('-inf') 
             add_task(matrix_name, rows, cols, edges_1, temp_obj)  # Add the task to the priority queue
             # Compute the density and  number of ones in the matrix
