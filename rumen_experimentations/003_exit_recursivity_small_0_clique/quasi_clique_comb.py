@@ -2539,13 +2539,13 @@ def get_complement_edges(rows, cols, edges):
 
 
 # Function to add tasks to the priority queue
-def add_task(matrix_name, rows, cols, edges,  nb_zeros, nb_ones, density, obj):
+def add_task(KU, matrix_name, rows, cols, edges,  nb_zeros, nb_ones, density, obj):
     edge_count = len(edges)  # Use number of edges instead of size
-    heapq.heappush(QUEUE, (-edge_count, edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj)))  # Negative for max-heap
+    heapq.heappush(KU, (-edge_count, edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj)))  # Negative for max-heap
 # Function to add tasks to the priority queue
 
 def process_tasks(selected_model, global_time):
-    global QUEUE, EVALUATED_QUEUE
+    global QUEUE, EVALUATED_QUEUE, Small_matricies_QUEUE 
 
     best_matrix = None  # Track the best task number
     best_obj = float('-inf')  # Track the highest objective value
@@ -2563,7 +2563,8 @@ def process_tasks(selected_model, global_time):
         if best_obj >= edge_count :
             print(f"Task {matrix_name} with edges count {edge_count} has been skipped by the best task  {best_matrix} with obj  : {best_obj}.")
             print(f"All other tasks are also skipped because the queue is sorted")
-            return best_matrix, best_obj, best_rows, best_cols, best_density, EVALUATED_QUEUE, fathomed_count, solved_count
+            return best_matrix, best_obj, best_rows, best_cols, best_density,
+            fathomed_count, solved_count
         # Solve the problem
         start_solving_task_count = time.time()
         #prev_lower_bound = obj_val 
@@ -2602,7 +2603,8 @@ def process_tasks(selected_model, global_time):
         # Store the evaluated task
         EVALUATED_QUEUE.append((matrix_name, rows, cols, edge_count, obj, len(rows_res), len(cols_res)))
     # Return the best task, best objective, evaluated queue, fathomed count, solved count, and skipped count
-    return best_matrix, best_obj, best_rows, best_cols, best_density, EVALUATED_QUEUE, fathomed_count, solved_count 
+    return best_matrix, best_obj, best_rows, best_cols, best_density, fathomed_count, solved_count 
+    #end of process_tasks
 
 
 def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QBC_time):
@@ -2629,7 +2631,7 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         # Compute the density and  number of ones in the matrix
         nb_zeros, nb_ones, sparsity, density = density_calcul(rows, cols)
         # Add the task to the priority queue
-        add_task(matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj)  
+        add_task(QUEUE, matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj)  
         if debug >= 1:
             print() 
             print(f"Task with matrix {matrix_name} with size ({len(rows)},{len(cols)}) and density {density:.3f} and number of ones {nb_ones}  and number of zeros {nb_zeros} has been added to the queue.")
@@ -2651,7 +2653,7 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
                 print()
                 print(f"Zero clique of size ({len(rows_res)},{len(cols_res)}) has been found. Too small!! Task with matrix {matrix_name} with size ({len(rows)},{len(cols)}) has been added to the queue.") 
             temp_obj =  float('-inf') 
-            add_task(matrix_name, rows, cols, edges_1, temp_obj)  # Add the task to the priority queue
+            add_task(QUEUE, matrix_name, rows, cols, edges_1, None, nb_ones, density, temp_obj)  # Add the task to the priority queue
             # Compute the density and  number of ones in the matrix
             #nb_zeros, nb_ones, sparsity, density = density_calcul(rows, cols)
             nb_ones = 0
@@ -2699,11 +2701,12 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         rows_ind_left = None 
         cols_ind_left = None
         density_left = None
+        Small_matricies_QUEUE.append((node, ML[0], ML[1], ML[2]))
         if debug >= 1:
             print() 
             print(f" Node {node} has been fathomed because of min number rows = {min_number_rows} or min number columns = {min_number_cols} "  )
             #sys.exit("Terminating program for cheking . EXIT 111.")
-            print() 
+            print()
         #sys.exit("Terminating program for cheking . EXIT 111.")
     else:
         result_left = decrease_and_conquer(dec_conq-1, node, ML[0], ML[1], ML[2], KP_time, QBC_time)
@@ -2718,11 +2721,12 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         rows_ind_right = None
         cols_ind_right = None
         density_right = None
+        Small_matricies_QUEUE.append(node, ML[0], ML[1], ML[2])
         if debug >= 1:
             print() 
             print(f" Node {node1} has been fathomed because of min number rows = {min_number_rows} or min number columns = {min_number_cols} "  )
             #sys.exit("Terminating program for cheking . EXIT 111.")
-            print() 
+        print() 
     else:
         if debug >= 2:
             print() 
@@ -2751,113 +2755,6 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
 
     return winning_node, rows_ind, cols_ind, density, nb_ones, global_time
 
-
-#def decrease_and_conquer_BIS(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QBC_time):
-    """
-    Implements a decrease-and-conquer approach to solve the problem.
-
-    Args:
-        matrix_name (int): Name of the matrix, e.i. nulber of the corresponding node. 
-        dec_conq : level of the decrease and conquer approach. If dec_conq = 0, the decrease and conquer approach is not applied and the original matrix is used directly for computatiion. When dec_conq >= 1, the decrease and conquer approach is utilized and the matrix is reduced and divided into two smaller submatrices. One of them contains the maximun size clique. The process is repeated recursively until dec_conq = 0.
-        rows (list of tuples): List of (row_index, degree) for rows.
-        cols (list of tuples): List of (col_index, degree) for columns.
-        edges_1 (list of tuples): List of existing edges (row_index, col_index).
-        KP_time (float): Time taken for the greedy approach.
-        QBC_time (float): Time taken for the quasi-biclique approach.
-
-    Returns:
-        M1, M2: Two submatrices.
-        KP_time: Updated KP_time.
-        QBC_time_g: Updated QBC_time_g.
-    """
-    # Compute complementary row and column indices
-    if dec_conq == 0: # No decrease-and-conquer
-        # add_task(matrix_name, rows, cols, edges_1)  # Add the task to the priority queue
-        # nb_ones = len(rows) * len(cols)  # Compute the number of ones in the matrix
-        # density = nb_ones / (len(rows) * len(cols))  # Compute the density
-        # return  matrix_name, rows, cols, density, nb_ones, QBC_time
-        # Solve the problem
-        results = solve(dec_conq, matrix_name, rows, cols, edges_1, selected_model, KP_time, QBC_time, rho, delta, threshold)
-        # Unpack results
-        (rows_res, cols_res, density, nb_ones, iter, KP_time, 
-        kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 
-        QBC_time_h, QBC_time_g) = results
-        # Display results
-        view = affichage(dec_conq, matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
-        (matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g) = view 
-        return matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g
-        #sys.exit(" Terminating program because dec_conq == 0. End of computations!  EXIT 0")
-    if dec_conq >= 1:
-        # Compute complementary row and column indices
-        rows_compl, cols_compl, edges_compl = get_complement_rowcols(rows, cols, edges_1)
-        # Solve the problem
-        results = solve(dec_conq, matrix_name, rows_compl, cols_compl, edges_compl, selected_model, KP_time, QBC_time, rho, delta, threshold)
-        # Unpack results
-        (rows_res, cols_res, density, nb_ones, iter, KP_time, 
-        kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 
-        QBC_time_h, QBC_time_g) = results
-        # Display results
-        view = affichage(dec_conq, matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
-        ( matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g) = view 
-        # Compute submatrices M1 and M2
-        ML, MR = get_submatrices(rows, cols, edges_1, rows_res, cols_res)
-    else:
-        print("dec_conq=", dec_conq)
-        sys.exit("Terminating program due to invalid value for dec_conq. EXIT 1.")
-    # Debugging output
-    node = 2*matrix_name
-    node1= node + 1
-    if debug >= 1:
-        print(f"\n Level {dec_conq-1}, Matrix {node}:")
-        print("Size Rows:", len(ML[0]))
-        print("Size Cols:", len(ML[1]))
-        print(f"\n Level {dec_conq-1} Matrix  {node1}:")
-        print("Size Rows:", len(MR[0]))
-        print("Size Cols:", len(MR[1]))
-    if debug >= 2:
-        print(f"\n Level {dec_conq-1}  Matrix {node} Rows:", ML[0])
-        print(f"Level  {dec_conq-1}  Matrix {node} Cols:", ML[1])
-        print(f"\n Level  {dec_conq-1}  Matrix {node1} Rows:", MR[0])
-        print(f"Level {dec_conq-1}  Matrix {node1} Cols:", MR[1])
-    if len(ML[0]) <=  min_number_rows or len(ML[1]) <=  min_number_cols:
-        nb_ones_left = 0
-        global_time_left = 0
-        node_left = None
-        rows_ind_left = None 
-        cols_ind_left = None
-        density_left = None
-        print(f" Node {node} has been fathomed because of min number rows = {min_number_rows} or min number columns = {min_number_cols} "  )
-    else:
-        result_left = decrease_and_conquer(dec_conq-1, node, ML[0], ML[1], ML[2], KP_time, QBC_time)
-        node_left, rows_ind_left, cols_ind_left, density_left, nb_ones_left, global_time_left  = result_left 
-        print(f" Return from {node} with winning node = {node_left}" )
-    if len(MR[0]) <=  min_number_rows or len(MR[1]) <=  min_number_cols:
-        nb_ones_right = 0
-        global_time_right = 0
-        node_right = None
-        rows_ind_right = None
-        cols_ind_right = None
-        density_right = None
-        print(f" Node {node1} has been fathomed because of min number rows = { min_number_rows} or min number columns = {min_number_cols} "  )
-    else:
-        result_right = decrease_and_conquer(dec_conq-1, node+1, MR[0], MR[1], MR[2], KP_time, QBC_time)
-        node_right, rows_ind_right, cols_ind_right, density_right, nb_ones_right, global_time_right = result_right
-        print(f"return from {node+1} with winning node = {node_right}" )
-    if nb_ones_left > nb_ones_right:
-        rows_ind = rows_ind_left
-        cols_ind = cols_ind_left
-        density = density_left
-        nb_ones = nb_ones_left
-        winning_node = node_left
-    if nb_ones_left <= nb_ones_right:
-        rows_ind = rows_ind_right
-        cols_ind = cols_ind_right
-        density = density_right
-        nb_ones = nb_ones_right
-        winning_node = node_right
-    global_time = global_time_left + global_time_right
-    print(f"return from {matrix_name} with winning node = {winning_node}" )
-    return winning_node, rows_ind, cols_ind, density, nb_ones, global_time
 
 def write_matrix(rows_data, cols_data, edges):
     """
@@ -2947,6 +2844,7 @@ if __name__ == '__main__':
     PROCESSED_OBJS = []  # Store processed obj values
     # List to store evaluated tasks
     EVALUATED_QUEUE = []
+    Small_matricies_QUEUE = []
     import heapq
 
     start_model_building_and_solving = time.time()
@@ -3024,7 +2922,7 @@ if __name__ == '__main__':
     heapq.heapify(COPY_QUEUE)  # Ensure it maintains heap properties
     #sys.exit("Terminating program when all tasks have been generated . EXIT 333.")
     start_tasks_solving = time.time()
-    best_task, best_obj, best_rows, best_cols, best_density, EVALUATED_QUEUE, fathomed_count, solved_count = process_tasks(selected_model, global_time)
+    best_task, best_obj, best_rows, best_cols, best_density, fathomed_count, solved_count = process_tasks(selected_model, global_time)
     end_tasks_solving = time.time()
     nb_skipped = len(COPY_QUEUE)- solved_count
         # Print evaluated queue
@@ -3046,6 +2944,11 @@ if __name__ == '__main__':
     for _, size, (matrix_name, task_rows, task_cols, edges, nb_zeros, nb_ones, density, obj) in sorted_copy_queue:
         print(f"Matrix: {matrix_name}, Size: {size}, #Rows: {len(task_rows)}, #Cols: {len(task_cols)}, #Edges: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: {density:.3f}") #, obj {obj}")
     print()
+    print('-' * 70)
+    print(f"Size of Small_matricies_QUEUE: {len(Small_matricies_QUEUE)}")
+    for matrix_name, rows, cols, edge_count in Small_matricies_QUEUE:
+        #size = len(rows)*len(cols)
+        print(f" Matrix: {matrix_name}, # Rows: {len(rows)},  # Cols: {len(cols)},  # Edges: {edge_count}")
     print('-' * 70)
     print()
     print(f"Best task: {best_task}, Best objective: {best_obj} with # rows {len(best_rows)} and # cols {len(best_cols)}")
