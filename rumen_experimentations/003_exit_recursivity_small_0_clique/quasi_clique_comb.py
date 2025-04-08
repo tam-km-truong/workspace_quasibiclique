@@ -2441,7 +2441,7 @@ def affichage(dec_conq,matrix_name, rows_res, cols_res, density, nb_ones, iter, 
     print(f""" 
     End of computations for matrix {matrix_name} in  {file_path} at level {dec_conq} and debug  {debug}
     With  model: {selected_model} and quasi-biclique error: {delta} 
-    Size of Remaining matrix : ({ len(rows_res)},{len(cols_res)}), with  density : {density} and number of ones: {nb_ones}
+    Size of REMAINING MATRIX : ({ len(rows_res)},{len(cols_res)}), with  density : {density} and number of ones: {nb_ones} 
     Global Time (in sec): {global_time:.3f}
     Total Time in QBC approaches: {global_time_c:.3f}
     Time in greedy approach: {KP_time:.3f},  size of matrix found by greedy : ({nb_kp_rows},{nb_kp_cols}) 
@@ -2599,7 +2599,7 @@ def process_tasks(selected_model, global_time):
             best_rows = rows_res
             best_cols = cols_res
             best_density = density
-            print(f"Task {best_matrix} with obj {best_obj}) is the current record.")
+            print(f"***Task {best_matrix} with obj {best_obj} is the current record!!!***")
         # Store the evaluated task
         EVALUATED_QUEUE.append((matrix_name, rows, cols, edge_count, obj, len(rows_res), len(cols_res)))
     # Return the best task, best objective, evaluated queue, fathomed count, solved count, and skipped count
@@ -2634,7 +2634,7 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         add_task(QUEUE, matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj)  
         if debug >= 1:
             print() 
-            print(f"Task with matrix {matrix_name} with size ({len(rows)},{len(cols)}) and density {density:.3f} and number of ones {nb_ones}  and number of zeros {nb_zeros} has been added to the queue.")
+            print(f"Task with matrix {matrix_name} with size ({len(rows)},{len(cols)}) and density {density:.3f} and number of ones {nb_ones}  and number of zeros {nb_zeros} has been added to the QUEUE!!!.")
         return  matrix_name, rows, cols, density, nb_ones, QBC_time
     if dec_conq >= 1:
         # Compute complementary row and column indices
@@ -2648,14 +2648,22 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         # Display results
         view = affichage(dec_conq, matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
         ( matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g) = view 
-        if len(rows_res) <=  min_number_rows or len(cols_res) <=  min_number_cols:
-            if debug >= 1:
-                print()
-                print(f"Zero clique of size ({len(rows_res)},{len(cols_res)}) has been found. Too small!! Task with matrix {matrix_name} with size ({len(rows)},{len(cols)}) has been added to the queue.") 
-            temp_obj =  float('-inf') 
-            add_task(QUEUE, matrix_name, rows, cols, edges_1, None, nb_ones, density, temp_obj)  # Add the task to the priority queue
+        #if len(rows_res) <=  min_number_rows or len(cols_res) <=  min_number_cols:
+        if len(rows_res)*len(cols_res) <= min_portion_zero_clique * len(rows)*len(cols):
+            temp_obj =  float('-inf')
+            nb_zeros, nb_ones, sparsity, density = density_calcul(rows, cols) 
+            add_task(QUEUE, matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj)
+            # Add the task to the priority queue
             # Compute the density and  number of ones in the matrix
             #nb_zeros, nb_ones, sparsity, density = density_calcul(rows, cols)
+            if debug >= 1:
+                portion= len(rows_res)*len(cols_res) / (len(rows)*len(cols))
+                print(f"""
+                      Zero clique of size ({len(rows_res)},{len(cols_res)}) belonging to  matrix {matrix_name} has been found. 
+                      It represents {portion:.3f} portion from the matrix size: ({len(rows)},{len(cols)}). 
+                      Too SMALL in regard to the value of the given min_portion_zero_clique: {min_portion_zero_clique}!!
+                      Task with matrix {matrix_name} with size ({len(rows)},{len(cols)}) and density: {density:.3f} has been added to the queue.
+                      """) 
             nb_ones = 0
             QBC_time = 0
             density = 0
@@ -2704,7 +2712,7 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         Small_matricies_QUEUE.append((node, ML[0], ML[1], ML[2]))
         if debug >= 1:
             print() 
-            print(f" Node {node} has been fathomed because of min number rows = {min_number_rows} or min number columns = {min_number_cols} "  )
+            print(f" Node {node} with size : ({len(ML[0])},{len(ML[1])}) has been added to Small_matricies_QUEUE because of min number rows = {min_number_rows} or min number columns = {min_number_cols} "  )
             #sys.exit("Terminating program for cheking . EXIT 111.")
             print()
         #sys.exit("Terminating program for cheking . EXIT 111.")
@@ -2721,10 +2729,10 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         rows_ind_right = None
         cols_ind_right = None
         density_right = None
-        Small_matricies_QUEUE.append(node, ML[0], ML[1], ML[2])
+        Small_matricies_QUEUE.append((node1, MR[0], MR[1], MR[2]))
         if debug >= 1:
             print() 
-            print(f" Node {node1} has been fathomed because of min number rows = {min_number_rows} or min number columns = {min_number_cols} "  )
+            print(f" Node {node1}  with size : ({len(MR[0])},{len(MR[1])}) has been added to Small_matricies_QUEUE because of min number rows = {min_number_rows} or min number columns = {min_number_cols} "  )
             #sys.exit("Terminating program for cheking . EXIT 111.")
         print() 
     else:
@@ -2838,6 +2846,7 @@ if __name__ == '__main__':
     import time
     min_number_rows = 3
     min_number_cols = 3
+    min_portion_zero_clique = 0.1
     # Define a priority queue (max-heap using negative size)
     QUEUE = []
     COPY_QUEUE = []
@@ -2948,7 +2957,7 @@ if __name__ == '__main__':
     print(f"Size of Small_matricies_QUEUE: {len(Small_matricies_QUEUE)}")
     for matrix_name, rows, cols, edge_count in Small_matricies_QUEUE:
         #size = len(rows)*len(cols)
-        print(f" Matrix: {matrix_name}, # Rows: {len(rows)},  # Cols: {len(cols)},  # Edges: {edge_count}")
+        print(f" Matrix: {matrix_name}, # Rows: {len(rows)},  # Cols: {len(cols)},  # Edges: {len(edge_count)}")
     print('-' * 70)
     print()
     print(f"Best task: {best_task}, Best objective: {best_obj} with # rows {len(best_rows)} and # cols {len(best_cols)}")
