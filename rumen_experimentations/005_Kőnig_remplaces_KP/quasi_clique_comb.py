@@ -572,80 +572,6 @@ def max_e_h_slack(rows_data, cols_data, edges, delta):
 
     return model
 
-# def max_e_c(rows_data, cols_data, edges, delta):
-#     """
-#     Arguments:
-#     ----------
-#     rows_data: list of tuples (row, degree) of rows in the matrix.
-#     cols_data: list of tuples (col, degree) of columns in the matrix.
-#     edges: list of tuples (row, col) corresponding to the ones of the matrix.
-#     delta: float, error tolerance for density constraints.
-
-#     Returns:
-#     --------
-#     LpProblem:
-#         The ILP model.
-    
-#     This is an improved model from Chnag et al. 
-#     """
-#     model = LpProblem(name="max_e_c", sense=LpMaximize)
-
-#     # Variables for rows and columns
-
-#     lpRows = {row: (LpVariable(f'row_{row}', cat='Integer',
-#                     lowBound=0, upBound=1), degree) for row, degree in rows_data}
-#     lpCols = {col: (LpVariable(f'col_{col}', cat='Integer',
-#                                lowBound=0, upBound=1), degree) for col, degree in cols_data}
-#     lpCells = {(row, col): LpVariable(
-#                     #f'cell_{row}_{col}', cat="Binary")
-#                     f'cell_{row}_{col}', cat='Continuous', lowBound=0, upBound=1) 
-#                     for (row, col) in edges
-#     }
-
-#     #
-#     model += lpSum(lpCells), 'maximize_sum'
-#     # Constraints for row and column thresholds
-#     row_threshold = 2
-#     col_threshold = 2
-#     if debug >= 3:
-#         print()
-#         print('-' * 40) 
-#         print(f"******** Solving model  ********", model.name, " with delta = ", delta)
-#         print(' # rows_data =', len(rows_data),' # cols_data =', len(cols_data), ' # edges =', len(edges)) 
-#         print('row_threshold=', row_threshold )
-#         print('col_threshold=', col_threshold )
-#         print()
-#         print('-' * 40)
-#     model += lpSum(lpvar for lpvar, _ in lpRows.values()) >= row_threshold, "row_threshold"
-#     model += lpSum(lpvar for lpvar, _ in lpCols.values()) >= col_threshold, "col_threshold"
-#     for row, col in edges:
-#     #for row, col in lpCells:
-#         model += (lpRows[row][0] >= lpCells[(row, col)]), f'cell_{row}_{col}_1'
-#         model += (lpCols[col][0] >= lpCells[(row, col)]), f'ce ll_{row}_{col}_2'
-
-#         #########################################
-#         #compacting  with degree 
-#         #########################################
-      
-#     # for col, _ in cols_data:
-#     #     col_edges = [u for u, v in edges if v == col]           
-#     #     model += (
-#     #         lpSum(lpCells[(row, col)][0] for row in col_edges) <= lpCols[col][1]*lpCols[col][0]
-#     #     ), f"col_degre_{col}"
-#     # for row, _ in rows_data:
-#     #     row_edges = [v for u, v in edges if u == row]           
-#     #     model += (
-#     #         lpSum(lpCells[(row, col)][0] for col in row_edges) <= lpRows[row][1]*lpRows[row][0]
-#     #     ), f"row_degre_{row}"
-        
-#          #########################################
-
-
-#     # Add row density constraints
-#     __row_density(rows_data, cols_data, edges, model, lpRows, lpCols, delta)
-#     __col_density(rows_data, cols_data, edges, model, lpRows, lpCols, delta)
-
-#     return model 
 
 def __col_density_h(rows_data, cols_data, edges, model, lpRows, lpCols, lpSum_col, delta):
     """
@@ -1106,6 +1032,7 @@ def KP_QBc(cols_data, row_length, nb_edges_0, debug, rho=0.1):
 
     return model
 
+
 def König_E(rows_data, cols_data, edges):
     """
     ARGUMENTS:
@@ -1148,11 +1075,169 @@ def König_E(rows_data, cols_data, edges):
     #model += (lpSum([lpvar for lpvar, _ in lpCols.values()])  >= 2,'col_limits_bis',    )
     
     return model
-# end Köning_
+# end Köning_E
 
 #============================================================================
 #  greedy approaches
 #============================================================================
+
+
+def König_zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, rho, debug, KP_time): 
+    # here we use König theorem to delete some rows and columns
+    rows_res = []
+    cols_res = []
+    rows_res_name = []
+    cols_res_name = []
+    rows_del = []
+    rows_del_name = []
+    cols_del = []
+    cols_del_name = []
+    col_length = len(cols)
+    model =  König_E(rows, cols, edges)
+    model.solve(GUROBI_CMD(msg=False, timeLimit= timelimit)#, options=[("Heuristics", 0.0), ("NoRelHeurTime", 0)] )#,gapRel=0.3)
+    )
+    #model.solve(GUROBI_CMD(msg=True, timeLimit= 60, MIPGap = 0.03),)
+    # Check status
+    if model.status == 9:  # GRB.TIME_LIMIT:
+        print("Gurobi stopped due to time limit!")
+        print("Model is . Exporting LP file for debugging...")
+    model.writeLP("debug_model_row.lp")
+    obj_value =  value(model.objective)
+    if debug >=2:
+        print(f"Model status: {LpStatus[model.status]}")
+        print(f"Solver Status after model with status :{model.name}, {model.status}")  
+        print(f"Computed Objective Value : {obj_value}")
+    if model.status == -1:
+         print("Model is infeasible. Exporting LP file for debugging...")
+         model.writeLP("debug_model.lp")
+         sys.exit("Terminating program due to infeasibility. EXIT 1")
+    if debug >=3:
+        print(f' solved model name =', model.name, f'with obj value:', obj_value,  f'Local Time:  - (real): {model.solutionTime:.5f}', f'- (Local CPU) {model.solutionCpuTime:.5f}' )
+    #if model.name == "row_knapsack_problem":
+    for var in model.variables():
+        if debug >= 3:
+            print('König var name =', var.name,'var value =', var.varValue)
+        if var.varValue == 0:
+                    if var.name[:3] == "row":
+                        rows_res = rows_res + [var.name[4:]]
+                    elif var.name[:3] == "col":
+                        print('Something wrong. var name =', var.name,'var value =', var.varValue)
+                        sys.exit("Terminating program. EXIT 7 ")
+        else: # i.e. var.varValue == 1:
+                    if var.name[:3] == "row":
+                        rows_del = rows_del + [var.name[4:]]
+                    elif var.name[:3] == "col":
+                        print('Something wrong. var name =', var.name,'var value =', var.varValue)
+                        sys.exit("Terminating program. EXIT 7 ")
+    if model.name == "column_knapsack_problem":
+            sys.exit("Terminating program. Non expected case column_knapsack_problem instead of row_knapsack_problem. Exit 10")  
+    if model.name == "row_knapsack_problem":
+         cols_res = [str(c) for c, _ in cols]
+         cols_res = [int(c) for c in cols_res]
+         cols_res_name = [col_names[c] for c in cols_res]
+    if model.name == "column_knapsack_problem":
+         sys.exit("Terminating program. Non expected case column_knapsack_problem instead of row_knapsack_problem. Exit 10")  
+        #  rows_res = [str(c) for c, _ in rows]
+        #  rows_res = [int(r) for r in rows_res]
+        #  rows_res_name = [row_names[r] for r in rows_res]
+    #rows_res = [str(c) for c, _ in rows_res]
+    rows_res = [int(r) for r in rows_res]
+    if len(rows_res) == 0: 
+         #sys.exit("Terminating program due to matrix degeneration. All rows deleted. Decrease the value of rho. EXIT 101")
+         if debug >= 1:
+            print(f"Matrix degeneration. All rows deleted. Continue with previous rows")
+         rows_res = [str(c) for c, _ in rows]
+         rows_res = [int(r) for r in rows_res]            
+    rows_res_name = [row_names[r] for r in rows_res]
+    #cols_res = [str(c) for c, _ in cols]
+    #cols_res = [int(c) for c in cols_res]
+    #cols_res_name = [col_names[c] for c in cols_res]
+    König_in_time=0
+    König_E_time =  print_log_output(model,König_in_time, obj_value, len(rows_res), len(cols_res))
+    #KP_time =  print_log_output(model, KP_time, obj_value, len(rows_res), len(cols_res))
+    rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density  = update_data(rows, cols, edges_1, rows_res, cols_res, debug)
+    nb_edges_1_rem = len(edges_1_rem)
+    if debug >=2:
+        print('-' * 40)
+        print(f"""
+        Updated data after iteration: {iter} . We solved KP model :  {model.name} with delta =  {delta} 
+        Found matrix of size : ({len(rows_rem)}, {len(cols_rem)}) and density : {density:.3f} and number of remaining ones : {nb_edges_1_rem}
+        """)
+        if debug >= 3:
+            print("Remaining  Rows before colling KP col :", rows_rem)
+            print("Remaining Columns  before colling KP col :", cols_rem)
+        print('-' * 40)
+        print()
+    nb_rows_rem = len(rows_rem)
+       
+    model = KP_QBc(cols_rem, nb_rows_rem, nb_edges_0_rem, debug, rho) 
+
+    model.solve(GUROBI_CMD(msg=False, timeLimit= 600))
+    # Check status
+    if model.status == 9 : #GRB.TIME_LIMIT:
+        print("Gurobi stopped due to time limit!")
+    #print("Gurobi Model Status:", model.status, "-", gp.GRB.Status.__dict__.get(model.status, "Unknown"))
+    model.writeLP("debug_model_col.lp")
+    if debug >= 2:
+            print(f"Model status: {LpStatus[model.status]}")
+    if model.status == -1:
+         print("Model is infeasible. Exporting LP file for debugging...")
+         model.writeLP("debug_model.lp")
+         sys.exit("Terminating program due to infeasibility. EXIT 7")
+    #read the result from the solver
+    if debug >=3:
+        print('I solved model name =', model.name, "for iteration i = ", iter, "with obj value:", obj_value, "KP time =", KP_time, 'debug :',  debug)
+    cols_res=[]
+    cols_del=[]
+    if model.name == "row_knapsack_problem":
+            sys.exit("Terminating program. Non expected case row_knapsack_problem instead of column_knapsack_problem Exit 11")  
+    if model.name == "column_knapsack_problem":
+            for var in model.variables():
+                if debug >= 3:
+                    print('column_knapsack var name =', var.name,'var value =', var.varValue)
+                if var.varValue == 0:
+                    if var.name[:3] == "col":
+                        cols_res = cols_res + [var.name[4:]]
+                    elif var.name[:3] == "row":
+                #    cols_res = cols_res + [var.name[4:]]
+                        print('Something wrong. var name =', var.name,'var value =', var.varValue)
+                        return model 
+                else: # i.e. var.varValue == 1:
+                    if var.name[:3] == "col":
+                        cols_del = cols_del + [var.name[4:]]
+                    elif var.name[:3] == "row":
+                        #cols_del = cols_del + [var.name[4:]]
+                        print('Something wrong. var name =', var.name,'var value =', var.varValue)
+                        return model 
+    # update  edges      
+    KP_time =  print_log_output(model, KP_time, obj_value, len(rows_res), len(cols_res)) 
+    if len(cols_res) == 0 : 
+         sys.exit("Terminating program due to matrix degeneration. All columns deleted.")               
+    rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density = update_data(rows_rem, cols_rem, edges_1_rem, rows_res, cols_res, debug)
+    if debug >=2:
+        print('-' * 40)
+        print(f"""
+        Updated data after iteration: {iter} . We solved KP model :  {model.name} with delta =  {delta} 
+        Found matrix of size : ({len(rows_rem)}, {len(cols_rem)}) and density : {density:.3f} and number of remaining ones : {nb_edges_1_rem}
+        """)
+    if debug >=2:
+        print()
+        print('-' * 40)
+        # print(f"Updated data after solving model = {model.name}", " Density :", density , " delta =  ", delta, "iteration:", iter)
+        # nb_edges_1_rem = len(edges_1_rem)
+        # print("Number of Remaining  Rows  :", len(rows_rem), "Number of Remaining Columns :", len(cols_rem))
+        # print("Number of Remaining Edges_0 : ", nb_edges_0_rem, "Number of Remaining Edges_1 : ", nb_edges_1_rem)
+        if debug >= 3:
+            print("Remaining  Rows after solving KP col :", rows_rem)
+            print("Remaining Columns after solving KP col :", cols_rem)
+        print('-' * 40)
+        print()
+    #sys.exit("Terminating program after KP col") 
+    # end of zero_cleaner  
+    return rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density, KP_time 
+#end of Köning_zero_cleaner
+#============================================================================ #
+
 
 
 def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, rho, debug, KP_time): 
@@ -1180,7 +1265,7 @@ def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, rh
     if debug >=2:
         print(f"Model status: {LpStatus[model.status]}")
         print(f"Solver Status after model with status :{model.name}, {model.status}")  
-        print(f"Computed Objective Value : {obj_value:.3f}")
+        print(f"Computed Objective Value : {obj_value}")
     if model.status == -1:
          print("Model is infeasible. Exporting LP file for debugging...")
          model.writeLP("debug_model.lp")
@@ -1191,7 +1276,7 @@ def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, rh
             for var in model.variables():
                 if debug >= 3:
                     print('row_knapsack var name =', var.name,'var value =', var.varValue)
-                if var.varValue == 0:
+                if var.varValue == 0 : # 
                     if var.name[:3] == "row":
                         rows_res = rows_res + [var.name[4:]]
                     elif var.name[:3] == "col":
@@ -1307,7 +1392,8 @@ def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, rh
     #sys.exit("Terminating program after KP col") 
     # end of zero_cleaner  
     return rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density, KP_time 
-    # end of zero_cleaner  
+# end of zero_cleaner
+
 
 # ============================================================================ #
 #                                    SOLVING                                   #
@@ -1390,7 +1476,7 @@ def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, K
         cols_res_in = [str(c) for c, _ in cols_in]
         cols_res_in = [int(r) for r in cols_res_in]
         col_names_in = [col_names[r] for r in cols_res_in]
-    else:
+    else: #i.e. density >= density_threshold or len(rows_in) <= matrix_limit or len(cols_in) <= matrix_limit:
         if iter > 0:
             kp_density = density 
             nb_kp_rows = len(rows_res)
@@ -1429,12 +1515,16 @@ def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, K
             print("row_names_in =", row_names_in)
             print("col_names_in =", col_names_in)
             print("edges_1_in =", edges_1_in)
-    if debug >= 4: 
+    if debug == 4: 
             print("edges_1_in =", edges_1_in)
     #sys.exit("Terminating program before calling exact exit 10 !!!!")
-    if model == "max_e_c" or dec_conq >= 1: 
-        rows_res, cols_res, density, nb_edges_1, QBC_time_h, QBC_time_g = warm_exact(prev_lower_bound,dec_conq, matrix_name,model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
-        #sys.exit("Terminating program before calling exact exit 10 !!!!")  
+    if dec_conq >= 1:
+        if model == "max_e_c" : 
+            rows_res, cols_res, density, nb_edges_1, QBC_time_h, QBC_time_g = warm_exact(prev_lower_bound,dec_conq, matrix_name,model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
+        #sys.exit("Terminating program before calling exact exit 10 !!!!") 
+        if model_name == 'König_E': 
+             rows_res, cols_res, density, nb_edges_1, QBC_time_g = exact(dec_conq, matrix_name, model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
+             QBC_time_h = 0.0 
     else:
         rows_res, cols_res, density, nb_edges_1, QBC_time_g = exact(dec_conq, matrix_name, model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
         QBC_time_h = 0.0 
@@ -1497,12 +1587,23 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
         model = max_e_r(rows, cols, edges_1, delta)
     elif model_name == 'max_v':
         model = max_v(rows, cols, edges_1, delta)
-    
+    elif model_name == 'König_E':
+        rows_compl, cols_compl, edges_compl = get_complement_rowcols(rows, cols, edges_1)
+        if dec_conq == 0:
+            print(f' dec_conq ==', dec_conq, '#rows =', len(rows)) 
+            print(f'#cols =', len(cols))
+            print(f'#edges_compl =', len(edges_compl))
+            model = König_E(rows, cols, edges_compl)
+        elif dec_conq >= 1:
+            print(f' dec_conq ==', dec_conq, 'rows_compl =', rows_compl)
+            print(f'cols_compl =', cols_compl)
+            print(f'edges_1 =', edges_1)
+            model = König_E(rows_compl, cols_compl, edges_1)  
     try:
         # Solve the model with Gurobi
         model.solve(GUROBI_CMD(msg=False, timeLimit=timelimit))
 
-        if debug >= 2:
+        if debug >= 1:
             print('-' * 70)
             print(f"Model status: {LpStatus[model.status]}")    
         # Check if the model has an optimal/feasible solution
@@ -1510,14 +1611,24 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
             obj_value = value(model.objective)  # ✅ Extract objective value           
             if debug >= 2:
                 print('-' * 70)
-                print(f"Computed Objective Value: {obj_value:.3f}")          
+                print(f"Computed Objective Value: {obj_value:.3f}")   
+                #for var in model.variables():
+                    # print(f"{var.name} = {var.varValue}")       
             # Extract solution values (only nonzero rows and columns)
-            solution = {
-                var.name: var.varValue
-                for var in model.variables()
-                if var.varValue >= 0.5
-            }
-
+            if model_name != 'König_E':
+                solution = {
+                    var.name: var.varValue
+                    for var in model.variables()
+                    if var.varValue is not None and var.varValue >= 0.5
+                }
+            else:
+                solution = {
+                    var.name: var.varValue
+                    for var in model.variables()
+                    if var.varValue is not None and var.varValue < 0.5
+                }
+            for var_name, var_value in solution.items():
+                    print(f"{var_name} = {var_value}")
             # Convert extracted indices back to tuples (index, degree)
             row_indices = [int(var_name[4:]) for var_name in solution if var_name.startswith("row")]
             col_indices = [int(var_name[4:]) for var_name in solution if var_name.startswith("col")]
@@ -1532,7 +1643,7 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
     
     # Print model status
     if debug >= 1:
-        print(f"Model status: {LpStatus.[model.status]}")
+        print(f"Model status: {LpStatus.get(model.status, 'Unknown Status')}")
         print('-' * 40)
         print("Exporting LP file for debugging...")
         model.writeLP("debug_model_when_feasible.lp")
@@ -1602,6 +1713,7 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
     row_names_res = [row_names[r] for r in rows_res if 0 <= r < len(row_names)]
     col_names_res = [col_names[c] for c in cols_res if 0 <= c < len(col_names)]
     row_names_res = [int(r) if isinstance(r, (np.int64, np.int32)) else r for r in row_names_res]
+    #nbi_0, nbi_1, sparsity, density = density_calcul(rows_res, cols_res)
     if debug >= 3: 
         print("\n-- Debugging Step: checking extracted solution after solving model **** --", model.name )
         print('len_rows_res=', len(rows_res))
@@ -1609,20 +1721,26 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
         #print('len_rows_del=', len(rows_del))
         #print('rows_del=',len(rows_del))
         print('len_cols_res=', len(cols_res))
-        print('cols_res=', cols_res)
+        #print('cols_res=', cols_res)
+        #print('density=', density, 'sparsity=', sparsity)
+        #print('nbi_1=', nbi_1, 'nbi_0=', nbi_0)
         #print('len_cols_del=', len(cols_del))
         #print('cols_del=', len(cols_del))
-        print("nb row_names, =", len(row_names))
+        print("nb row_names_res, =", len(row_names_res))
         print("row_names_res =", row_names_res)
         print("col_names_res =", col_names_res)
-        print(" nb col_names, =", len(col_names)) 
+        print(" nb col_names_res, =", len(col_names_res)) 
         print()
-        print('-' * 40)
     # cols_res_set = set(map(int, cols_res))
     # rows_res_set = set(map(int, rows_res))
     QBC_time = print_log_output(model, QBC_time, obj_value, len(rows_res), len(cols_res))
-    rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density  = update_data(rows, cols, edges_1, rows_res, cols_res, debug)
+    if model_name == 'König_E':
+        #nb_edges_1 = len(edges_1)
+        density= 0
+        nb_edges_1 = 0
+        return rows_res, cols_res, density,  nb_edges_1, QBC_time 
     # rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density  = update_data(rows, cols, edges_1, row_indices, col_indices, debug) 
+    rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density  = update_data(rows, cols, edges_1, rows_res, cols_res, debug)
     nb_edges_1 = len(edges_1_rem)
     if debug >=1:
         print()
@@ -1641,10 +1759,10 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                     #print(" Density of the found matrix =  :", density )
                     print(" Original Rows  :", rows )
                     print(" Original Cold  :", cols )
-                    print(" Remaining Rows  :", rows_res )
-                    print(" Remaining  Cols  :", cols_res )
-                    print(" Remaining Rows with degree :", rows_rem )
-                    print(" Remaining  Cols with degree :", cols_rem )
+                    print(" Rows res :", rows_res )
+                    print(" Cols res :", cols_res )
+                    print(" Remaining Rows :", rows_rem )
+                    print(" Remaining  Cols  :", cols_rem )
     
     return rows_rem, cols_rem, density,  nb_edges_1, QBC_time 
 ###############################################################################
@@ -2303,7 +2421,7 @@ def print_log_output(prob, in_run_time, obj, nb_rows, nb_cols):
     #print(f'- (real) {prob.solutionTime}')
     #print(f'- (CPU) {prob.solutionCpuTime}')
         print()
-        print(f' Solve status: {LpStatus[prob.status]}', f'Objective value: {prob.objective.value():.5f}', "nb_rows", nb_rows, "nb_cols", nb_cols )
+        print(f' Solve status: {LpStatus[prob.status]}', f'Objective value: {prob.objective.value()}', "nb_rows", nb_rows, "nb_cols", nb_cols )
         print('-' * 40)
 
     # print()
@@ -2372,7 +2490,7 @@ def parse_arguments():
     debug = arg.debug
     timelimit = arg.timelimit
 
-    if arg.model not in ['max_e', 'max_e_h', 'max_e_r','max_e_c','max_v', 'KP_QBr', 'KP_QBc']:
+    if arg.model not in ['max_e', 'max_e_h', 'max_e_r','max_e_c','max_v', 'KP_QBr', 'KP_QBc', 'König_E']:
         argparser.print_help()
         sys.exit(1)
 
@@ -2448,8 +2566,14 @@ def density_calcul(rows, cols):
         return 0, 0, None, None  # None indicates sparsity and density are undefined
     
     # Count ones
-    nbi_1 = sum(degree for _, degree in rows)
-
+    nbi_1_r = sum(degree for _, degree in rows)
+    nbi_1_c = sum(degree for _, degree in cols)
+    if nbi_1_r != nbi_1_c:
+        print("Warning: Mismatch in number of edges counted in rows and columns.")
+        print(f"nbi_1_r: {nbi_1_r}, nbi_1_c: {nbi_1_c}")
+        # Handle the mismatch as needed, e.g., raise an error or log a warning
+        sys.exit("Terminating program because of mismatch in number of edges counted in rows and columns. EXIT 222.")
+    nbi_1 = nbi_1_r  # or nbi_1_c, since they should be equal
     # Total number of elements
     total_elements = len(rows) * len(cols)
 
@@ -2588,7 +2712,8 @@ def get_complement_edges(rows, cols, edges):
 # Function to add tasks to the priority queue
 def add_task(KU, matrix_name, rows, cols, edges,  nb_zeros, nb_ones, density, obj):
     edge_count = len(edges)  # Use number of edges instead of size
-    heapq.heappush(KU, (-edge_count, edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj)))  # Negative for max-heap
+    #heapq.heappush(KU, (-edge_count, edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj)))  # Negative for max-heap
+    heapq.heappush(KU, (edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj)))  # Negative for max-heap
 # Function to add tasks to the priority queue
 
 def process_tasks(selected_model, global_time):
@@ -2606,12 +2731,11 @@ def process_tasks(selected_model, global_time):
     KP_time = 0
     all_checked = False
     while QUEUE: 
-        _, edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj_val) = heapq.heappop(QUEUE)  # Extract highest priority task
+        edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj_val) = heapq.heappop(QUEUE)  # Extract highest priority task
         if best_obj >= edge_count :
             print(f"Task {matrix_name} with edges count {edge_count} has been skipped by the best task  {best_matrix} with obj  : {best_obj}.")
             print(f"All other tasks are also skipped because the queue is sorted")
-            return best_matrix, best_obj, best_rows, best_cols, best_density,
-            fathomed_count, solved_count
+            return best_matrix, best_obj, best_rows, best_cols, best_density, fathomed_count, solved_count
         # Solve the problem
         start_solving_task_count = time.time()
         #prev_lower_bound = obj_val 
@@ -2651,6 +2775,7 @@ def process_tasks(selected_model, global_time):
         EVALUATED_QUEUE.append((matrix_name, rows, cols, edge_count, obj, len(rows_res), len(cols_res)))
     # Return the best task, best objective, evaluated queue, fathomed count, solved count, and skipped count
     return best_matrix, best_obj, best_rows, best_cols, best_density, fathomed_count, solved_count 
+    #return fathomed_count, solved_count 
     #end of process_tasks
 
 
@@ -2673,17 +2798,40 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         QBC_time_g: Updated QBC_time_g.
     """
     # Compute complementary row and column indices
+    # Compute the density and  number of ones in the matrix
+    nb_zeros, nb_ones, sparsity, density = density_calcul(rows, cols)
     if dec_conq == 0: # No decrease-and-conquer
-        temp_obj =  float('-inf') 
-        # Compute the density and  number of ones in the matrix
-        nb_zeros, nb_ones, sparsity, density = density_calcul(rows, cols)
-        # Add the task to the priority queue
-        add_task(QUEUE, matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj)  
         if debug >= 1:
-            print() 
-            print(f"Task with matrix {matrix_name} with size ({len(rows)},{len(cols)}) and density {density:.3f} and number of ones {nb_ones}  and number of zeros {nb_zeros} has been added to the QUEUE!!!.")
-        return  matrix_name, rows, cols, density, nb_ones, QBC_time
+            print(f"Task: matrix {matrix_name}, size ({len(rows)},{len(cols)}), #edges {len(edges_1)}, density: {density:.3f}, sparsity: {sparsity:.3f} # nb_ones: { nb_ones}, #nb_zeros: {nb_zeros} is has arrived at level dec_conq : {dec_conq} !!!.")
+            print(f" density {density:.3f} and threshold {threshold} ")
+        #sys.exit("Terminating program when all tasks have been generated . EXIT 2.")
+        if density <= threshold:
+            #winning_node, rows, cols, density, nb_ones, global_time = decrease_and_conquer(1, matrix_name, rows, cols, edges_1, 0, 0)
+            if debug >= 1:
+                print() 
+                nbi_0, nbi_1, sparsity, density = density_calcul(rows, cols)
+                print(f"Task with matrix {matrix_name} with size: ({len(rows)},{len(cols)}), and density {density:.3f}  is returned to decrease and conquer with dec_conq = 1 !!!.")
+                #sys.exit("Terminating program for checking before calling decrease_and_conquer. EXIT the densit_resy issue.")
+            decrease_and_conquer(1, matrix_name, rows, cols, edges_1, 0, 0)
+            return
+        #sys.exit("Terminating program after decrease and conquer. EXIT 5.")
+        if debug >= 1:
+            nbi_0, nbi_1, sparsity, density = density_calcul(rows, cols)
+            print(f"Task {matrix_name} with size ({len(rows)},{len(cols)}) and density {density:.3f} and number of ones {nb_ones} and nb_zeros: {nb_zeros} is added to the QUEUE !!!.")
+            print(f" density {density:.3f} and threshold {threshold} ")
+        # Add the task to the priority queue
+        temp_obj =  float('-inf') 
+        add_task(QUEUE, matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj) 
+        return  #matrix_name, rows, cols, density, nb_ones, QBC_time
     if dec_conq >= 1:
+        if density > threshold:
+            nbi_0, nbi_1, sparsity, density = density_calcul(rows, cols)
+            # Add the task to the priority queue
+            temp_obj =  float('-inf') 
+            add_task(QUEUE, matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj)
+            if debug >= 1:
+                print(f"Task {matrix_name} with size ({len(rows)},{len(cols)}) and density {density:.3f}  is addeded to the QUEUE. Exit from recursivity !!!.")
+            return
         # Compute complementary row and column indices
         rows_compl, cols_compl, edges_compl = get_complement_rowcols(rows, cols, edges_1)
         # Solve the problem
@@ -2695,14 +2843,13 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         # Display results
         view = affichage(dec_conq, matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
         ( matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g) = view 
-        #if len(rows_res) <=  min_number_rows or len(cols_res) <=  min_number_cols:
+        #if len(rows_res) <=  min_number_rows or len(cols_res) <=  min_number_cols:been added to the QUEUE!!!.")
         if len(rows_res)*len(cols_res) <= min_portion_zero_clique * len(rows)*len(cols):
-            temp_obj =  float('-inf')
-            nb_zeros, nb_ones, sparsity, density = density_calcul(rows, cols) 
-            add_task(QUEUE, matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj)
+            nb_zeros, nb_ones, sparsity, density = density_calcul(rows, cols)
             # Add the task to the priority queue
-            # Compute the density and  number of ones in the matrix
-            #nb_zeros, nb_ones, sparsity, density = density_calcul(rows, cols)
+            temp_obj =  float('-inf')
+            #nb_zeros, nb_ones, sparsity, density = density_calcul(rows, cols) 
+            add_task(QUEUE, matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj)
             if debug >= 1:
                 portion= len(rows_res)*len(cols_res) / (len(rows)*len(cols))
                 print(f"""
@@ -2711,11 +2858,11 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
                       Too SMALL in regard to the value of the given min_portion_zero_clique: {min_portion_zero_clique}!!
                       Task with matrix {matrix_name} with size ({len(rows)},{len(cols)}) and density: {density:.3f} has been added to the queue.
                       """) 
-            nb_ones = 0
-            QBC_time = 0
-            density = 0
+            # nb_ones = 0
+            # QBC_time = 0
+            # density = 0
             #return  matrix_name, rows, cols, density, nb_ones, QBC_time    
-            return  matrix_name, None, None, density, nb_ones, QBC_time
+            return  #matrix_name, QBC_time
         # print("rows =", rows)
         # print("cols =", cols)
         # print("edges_1 =", edges_1)
@@ -2750,65 +2897,68 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         print(f"Level {dec_conq-1}  Matrix {node1} Edges :", MR[2])
     #sys.exit("Terminating program for cheking . EXIT 108.")
     if len(ML[0]) <=  min_number_rows or len(ML[1]) <=  min_number_cols:
-        nb_ones_left = 0
-        global_time_left = 0
-        node_left = None
-        rows_ind_left = None 
-        cols_ind_left = None
-        density_left = None
-        Small_matricies_QUEUE.append((node, ML[0], ML[1], ML[2]))
+        # nb_ones_left = 0
+        # global_time_left = 0
+        # node_left = None
+        # rows_ind_left = None 
+        # cols_ind_left = None
+        # density_left = None
         if debug >= 1:
             print() 
             print(f" Node {node} with size : ({len(ML[0])},{len(ML[1])}) has been added to Small_matricies_QUEUE because of min number rows = {min_number_rows} or min number columns = {min_number_cols} "  )
             #sys.exit("Terminating program for cheking . EXIT 111.")
             print()
+        Small_matricies_QUEUE.append((node, ML[0], ML[1], ML[2]))
+        #return 
         #sys.exit("Terminating program for cheking . EXIT 111.")
     else:
-        result_left = decrease_and_conquer(dec_conq-1, node, ML[0], ML[1], ML[2], KP_time, QBC_time)
-        node_left, rows_ind_left, cols_ind_left, density_left, nb_ones_left, global_time_left  = result_left
+        decrease_and_conquer(dec_conq-1, node, ML[0], ML[1], ML[2], KP_time, QBC_time)
+        #node_left, rows_ind_left, cols_ind_left, density_left, nb_ones_left, global_time_left  = result_left
         if debug >= 2:
             print()  
-            print(f" Return from {node} with winning node = {node_left}" )
+            print(f" Return from {node}" )
     if len(MR[0]) <=  min_number_rows or len(MR[1]) <=  min_number_cols:
-        nb_ones_right = 0
-        global_time_right = 0
-        node_right = None
-        rows_ind_right = None
-        cols_ind_right = None
-        density_right = None
-        Small_matricies_QUEUE.append((node1, MR[0], MR[1], MR[2]))
+        # nb_ones_right = 0
+        # global_time_right = 0
+        # node_right = None
+        # rows_ind_right = None
+        # cols_ind_right = None
+        # density_right = None
         if debug >= 1:
             print() 
             print(f" Node {node1}  with size : ({len(MR[0])},{len(MR[1])}) has been added to Small_matricies_QUEUE because of min number rows = {min_number_rows} or min number columns = {min_number_cols} "  )
             #sys.exit("Terminating program for cheking . EXIT 111.")
-        print() 
+        print()
+        Small_matricies_QUEUE.append((node1, MR[0], MR[1], MR[2]))
+        return  #global_time_right  
     else:
-        if debug >= 2:
+        if debug >= 1:
             print() 
             print(f"calling decrease_and_conquer for node {node+1}" )
-        result_right = decrease_and_conquer(dec_conq-1, node+1, MR[0], MR[1], MR[2], KP_time, QBC_time)
-        node_right, rows_ind_right, cols_ind_right, density_right, nb_ones_right, global_time_right = result_right
-        if debug >= 2:
+        decrease_and_conquer(dec_conq-1, node+1, MR[0], MR[1], MR[2], KP_time, QBC_time)
+        #node_right, rows_ind_right, cols_ind_right, density_right, nb_ones_right, global_time_right = result_right
+        if debug >= 1:
             print() 
-            print(f"return in decrease_and_conquer from {node+1} with winning node = {node_right}" )
-    if nb_ones_left > nb_ones_right:
-        rows_ind = rows_ind_left
-        cols_ind = cols_ind_left
-        density = density_left
-        nb_ones = nb_ones_left
-        winning_node = node_left
-    if nb_ones_left <= nb_ones_right:
-        rows_ind = rows_ind_right
-        cols_ind = cols_ind_right
-        density = density_right
-        nb_ones = nb_ones_right
-        winning_node = node_right
-    global_time = global_time_left + global_time_right
-    if debug >= 2:
+            print(f"return in decrease_and_conquer from {node+1}   " )
+    # if nb_ones_left > nb_ones_right:
+    #     rows_ind = rows_ind_left
+    #     cols_ind = cols_ind_left
+    #     density = density_left
+    #     nb_ones = nb_ones_left
+    #     winning_node = node_left
+    # if nb_ones_left <= nb_ones_right:
+    #     rows_ind = rows_ind_right
+    #     cols_ind = cols_ind_right
+    #     density = density_right
+    #     nb_ones = nb_ones_right
+    #     winning_node = node_right
+    #global_time = global_time_left + global_time_right
+    if debug >= 1:
             print() 
-            print(f"return in decrease_and_conquer from {matrix_name} with winning node = {winning_node}" )
+            print(f"return in decrease_and_conquer from {matrix_name} " )
 
-    return winning_node, rows_ind, cols_ind, density, nb_ones, global_time
+    return #global_time #winning_node, rows_ind, cols_ind, density, nb_ones, global_time
+
 
 
 def write_matrix(rows_data, cols_data, edges):
@@ -2893,7 +3043,8 @@ if __name__ == '__main__':
     import time
     min_number_rows = 3
     min_number_cols = 3
-    min_portion_zero_clique = 0.1
+    min_portion_zero_clique = 0.01
+    only_task  = False
     # Define a priority queue (max-heap using negative size)
     QUEUE = []
     COPY_QUEUE = []
@@ -2959,26 +3110,39 @@ if __name__ == '__main__':
     QBC_time = 0.0 
     #dec_conq = 2
     node = 1
-    winning_node, rows, cols, density, nb_ones, global_time = decrease_and_conquer(dec_conq, node , rows, cols, edges_1, KP_time, QBC_time)
+    #winning_node, rows, cols, density, nb_ones, global_time = decrease_and_conquer(dec_conq, node, rows, cols, edges_1, KP_time, QBC_time)
+    decrease_and_conquer(dec_conq, node, rows, cols, edges_1, KP_time, QBC_time)
     end_tasks_generation = time.time()
     print()
     print('-' * 70)
     print() 
-    print(f"End of tasks generation stage. Last generated task from matrix {node} with winning node {winning_node}")
+    print(f"End of tasks generation stage.")
     print(f"Tasks_generation time: {end_tasks_generation  - start_tasks_generation :.4f} sec")     
     print('-' * 70)
     print(f" Size of the queue: {len(QUEUE)}")
-    for _, size, (matrix_name, rows, cols, edges,nb_zeros, nb_ones, density, obj) in QUEUE:
+    for size, (matrix_name, rows, cols, edges,nb_zeros, nb_ones, density, obj) in QUEUE:
         print(f" Matrix: {matrix_name}, Size: {len(rows)*len(cols)}, #Rows: {len(rows)}, #Cols: {len(cols)}, #Edges: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: {density :.3f}") #, obj {obj}")
     print()
     print('-' * 70)
-    print()
+    print(f"Size of Small_matricies_QUEUE: {len(Small_matricies_QUEUE)}")
+    for matrix_name, rows, cols, edge_count in Small_matricies_QUEUE:
+        #size = len(rows)*len(cols)
+        print(f" Matrix: {matrix_name}, # Rows: {len(rows)},  # Cols: {len(cols)},  # Edges: {len(edge_count)}")
+    print('-' * 70)
     import heapq
     COPY_QUEUE = list(QUEUE)  # Copy the heap
     heapq.heapify(COPY_QUEUE)  # Ensure it maintains heap properties
-    #sys.exit("Terminating program when all tasks have been generated . EXIT 333.")
+    print('-' * 70)
+    print()
+    print('-' * 70)
+    sorted_copy_queue = sorted(COPY_QUEUE, key=lambda x: x[1], reverse=True)
+    print(f"Size of the COPY_QUEUE: {len(sorted_copy_queue)}")
+    for size, (matrix_name, task_rows, task_cols, edges, nb_zeros, nb_ones, density, obj) in sorted_copy_queue:
+        print(f"Matrix: {matrix_name}, #Edges: {size}, #Rows: {len(task_rows)}, #Cols: {len(task_cols)}, #Edges: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: {density:.3f}") #, obj {obj}")
+    if only_task:
+        sys.exit("Terminating program when all tasks have been generated . only_task =, {only_task}, EXIT 333.")
     start_tasks_solving = time.time()
-    best_task, best_obj, best_rows, best_cols, best_density, fathomed_count, solved_count = process_tasks(selected_model, global_time)
+    best_task, best_obj, best_rows, best_cols, best_density, fathomed_count, solved_count = process_tasks(selected_model, 0)
     end_tasks_solving = time.time()
     nb_skipped = len(COPY_QUEUE)- solved_count
         # Print evaluated queue
@@ -2997,7 +3161,7 @@ if __name__ == '__main__':
     print('-' * 70)
     sorted_copy_queue = sorted(COPY_QUEUE, key=lambda x: x[1], reverse=True)
     print(f"Size of the COPY_QUEUE: {len(sorted_copy_queue)}")
-    for _, size, (matrix_name, task_rows, task_cols, edges, nb_zeros, nb_ones, density, obj) in sorted_copy_queue:
+    for size, (matrix_name, task_rows, task_cols, edges, nb_zeros, nb_ones, density, obj) in sorted_copy_queue:
         print(f"Matrix: {matrix_name}, Size: {size}, #Rows: {len(task_rows)}, #Cols: {len(task_cols)}, #Edges: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: {density:.3f}") #, obj {obj}")
     print()
     print('-' * 70)
@@ -3036,9 +3200,14 @@ if __name__ == '__main__':
     print(f"size edges_1: {len(in_edges_1)}")
     print()
     #print(f"egdes_1: {in_edges_1}")
-
-    row_indices = [row for row, _ in best_rows]
-    col_indices = [col for col, _ in best_cols]
+    if selected_model == 'König_E':
+        print(f"König_E model finished with {nb_rows_res} and {nb_cols_res} rows and columns")
+        row_indices = [row for row in best_rows]
+        col_indices = [col for col  in best_cols]
+        #sys.exit("***Computation done EXIT 109 !!!")
+    else: 
+        row_indices = [row for row, _ in best_rows]
+        col_indices = [col for col, _ in best_cols]
 
     row_set = set(row_indices)
     col_set = set(col_indices)
