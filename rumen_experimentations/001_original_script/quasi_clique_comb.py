@@ -2549,6 +2549,9 @@ def process_tasks(selected_model, global_time):
 
     best_matrix = None  # Track the best task number
     best_obj = float('-inf')  # Track the highest objective value
+    best_rows =None  # Track the best rows
+    best_cols = None  # Track the best columns
+    best_density = None  # Track the best density
     #best_obj = given_lower_bound  # Track the highest objective value
     #prev_lower_bound  = float('-inf') 
     #prev_lower_bound  = given_lower_bound 
@@ -2568,7 +2571,7 @@ def process_tasks(selected_model, global_time):
         start_solving_task_count = time.time()
         #prev_lower_bound = obj_val 
         print() 
-        print(f"***QUEUE We currently process task number {matrix_name} with (edges {len(edges)}) selected_model {selected_model} dec_conq {dec_conq} delta {delta} threshold {threshold} rho {rho} QBC_time {QBC_time} ***")
+        print(f"***QUEUE We currently process task number {matrix_name} with  #rows: {len(rows)} , #cols {len(cols)}  and #edges {len(edges)})  ***")
         print() 
         results = solve(best_obj,dec_conq, matrix_name, rows, cols, edges, selected_model, KP_time, QBC_time, rho, delta, threshold)   
         # Unpack results

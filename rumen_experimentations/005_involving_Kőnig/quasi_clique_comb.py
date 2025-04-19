@@ -8,7 +8,7 @@ Install Gurobi Solver with free academic licence using your University account a
 Install Pandas, using PyPI or Conda. A detailed installation tutorial can be find at: https://pandas.pydata.org/docs/getting_started/install.html
 
 an instance 
- python3 quasi_clique_comb.py --filepath data/data3.csv   --model  max_e_c  --rho 0.1  --delta 0.1 --debug 0  --threshold 0.83 --dec_conq 0 --timelimit 100 
+ python3 quasi_clique_comb.py --filepath data/data3.csv   --model  max_e_c  --rho 0.1  --delta 0.1 --debug 0  --KP_threshold  0.83 --dec_conq 0 --timelimit 100 
 
 
 """
@@ -1423,7 +1423,7 @@ def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, K
         print("Prev_lower_bound : ",prev_lower_bound,"number input zeros : ",nbi_0, "; number input ones : ",nbi_1)            
         print("rho = ",rho, "; delta : ", delta)
         # Safe printing: Convert None to "N/A" or provide a default value
-        print(f"Input density : {density:.3f}" if density is not None else "Input density: N/A",  f"; density_threshold: {density_threshold:.5f}")
+        print(f"Input density : {density:.3f}" if density is not None else "Input density: N/A",  f"; KP_threshold: {KP_threshold:.5f}")
         #print(f"Input density : {density:.3f}, ; density_threshold: {density_threshold}")
         if debug >= 3 : 
             print("rows =", rows)
@@ -1451,16 +1451,16 @@ def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, K
     kp_density = 0
     if density == None:
                 sys.exit("Terminating program due to density == None")
-    while density < density_threshold and len(rows_in) > matrix_limit and len(cols_in) > matrix_limit:
+    while density < KP_threshold and len(rows_in) > matrix_limit and len(cols_in) > matrix_limit:
         iter+=1
         if debug >= 2:
             print()
-            print(f"calling greedy approaches for zero deletion, density= {density:.3f} density  and density_threshold= {density_threshold:.3f}")
+            print(f"calling knapsack approaches for zero deletion; density= {density:.3f} and KP_threshold= {KP_threshold:.3f}")
             print()
         #sys.exit("Terminating program because not done EXIT 0")
         if debug >= 3:
             print()
-            print("I am in the while loop with i=", iter , "density=", density, "and fixed_threshold=", density_threshold)
+            print("I am in the while loop with i=", iter , "density=", density, "and KP_threshold=", KP_threshold)
             print()
         rows_res, cols_res, edges_1_res, nb_edges_0_res, density, KP_time  = zero_cleaner(rows_in, cols_in, row_names, col_names, edges_1_in, nb_edges_0_in, iter, rho, debug, KP_time)
         rows_in = rows_res
@@ -1484,7 +1484,7 @@ def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, K
             #print()
             print(f"""
             End of greedy approaches. Exit while loop. I did: {iter} iterations
-            Density : {density:.3f} > {density_threshold:.3f}
+            Density : {density:.3f} > {KP_threshold:.3f}
             It took me : {KP_time:.3f} time
             Found matrix of size : ({len(rows_res)}, {len(cols_res)}) and density : {density:.3f}
             """)
@@ -1592,17 +1592,22 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
         if dec_conq == 0:
             if debug >= 2:
                 print('-' * 70)
-                print(f' dec_conq ==', dec_conq, '#rows =', len(rows)) 
+                print(f' dec_conq = ', dec_conq, '#rows =', len(rows)) 
                 print(f'#cols =', len(cols))
                 print(f' nb edges_compl =', len(edges_compl))
             model = König_E(rows, cols, edges_compl)
             #model = König_E(rows, cols, edges_1)
         elif dec_conq >= 1:
             if debug >= 2:
-                print(f' dec_conq ==', dec_conq, 'rows_compl =', rows_compl)
-                print(f'cols_compl =', cols_compl)
-                print(f'nb edges_1 =', len(edges_1)) 
-            model = König_E(rows_compl, cols_compl, edges_1)  
+                # print(f' dec_conq = ', dec_conq, 'rows_compl =', rows_compl)
+                # print(f'cols_compl =', cols_compl)
+                # print(f' edges_1 =', edges_1) 
+                print('-' * 70)
+                print(f' dec_conq = ', dec_conq, 'rows =', rows) 
+                print(f' cols =', cols)
+                print(f' edges_compl =', edges_compl)
+            #model = König_E(rows_compl, cols_compl, edges_1) 
+            model = König_E(rows, cols, edges_compl) 
     try:
         # Solve the model with Gurobi
         model.solve(GUROBI_CMD(msg=False, timeLimit=timelimit))
@@ -2467,8 +2472,13 @@ def parse_arguments():
     )
 
     argparser.add_argument(
-        '--threshold', dest='threshold', required=False, default=0.87, type=float,
-        help='Above this value greedy approaches are used; below, exact methods',
+        '--KP_threshold', dest='KP_threshold', required=False, default=0.87, type=float,
+        help='Below this value greedy approaches are used; above, exact methods',
+    )
+    
+    argparser.add_argument(
+        '--QUEUE_threshold', dest='QUEUE_threshold', required=False, default=0.87, type=float,
+        help='Required threshold for a task to be added to the queue',
     )
 
     argparser.add_argument(
@@ -2497,7 +2507,7 @@ def parse_arguments():
         argparser.print_help()
         sys.exit(1)
 
-    return (arg.filepath, arg.model, arg.rho, arg.delta,  arg.threshold, arg.dec_conq)
+    return (arg.filepath, arg.model, arg.rho, arg.delta,  arg.KP_threshold, arg.QUEUE_threshold, arg.dec_conq)
     
 def get_submatrices(rows_data, cols_data, edges, rows_res, cols_res):       
     """
@@ -2625,7 +2635,7 @@ def affichage(dec_conq,matrix_name, rows_res, cols_res, density, nb_ones, iter, 
     Number of iterations in greedy approach: {iter}
     Percentage of greedy approach run time in global run time : {percentage_greedy:.2f}% 
     Percentage of heuristic run time in QBC run time : {percentage_c:.2f}%
-    With zero deletion rate (rho): {rho} and threshold: {threshold} and debug  {debug}
+    With zero deletion rate (rho): {rho} and KP_threshold: {KP_threshold} and debug  {debug}
     """)
     print('-' * 70)
     print()
@@ -2652,7 +2662,7 @@ def final_print(dec_conq, rows, cols, edges, model,solved_count, fathomed_count,
     with  input density : {density:.3f} and number of ones: {len(edges)}
     time limit has been set to {timelimit}
     using  model: {selected_model}  with quasi-biclique error: {delta} 
-    nd density_threshold: {threshold:.3f} and zero deletion rate (rho): {rho} and debug: {debug}
+    and KP_threshold: {KP_threshold:.3f} and zero deletion rate (rho): {rho} and debug: {debug}
     Decrease and conquer levels:  {dec_conq}, # ext task: {nb_ext}, int task : {nb_int} 
     The solution has been found in matrix : {best_task}  with 
     size max clique  {best_obj}, # rows: {len(best_rows)} # columns: {len(best_cols)},
@@ -2677,7 +2687,7 @@ def last_affichage(winning_matrix, matrix_name, rows_res, cols_res, density, nb_
     Global Time (in sec): {global_time:.3f}
     With  model: {selected_model} and quasi-biclique error: {delta} 
     Size of Remaining matrix : ({ len(rows_res)},{len(cols_res)}), with  density : {density} and number of ones: {nb_ones}
-    With zero deletion rate (rho): {rho} and threshold: {threshold}
+    With zero deletion rate (rho): {rho} and KP threshold: {KP_threshold}
     """)
     print('-' * 70)
     print()
@@ -2715,9 +2725,8 @@ def get_complement_edges(rows, cols, edges):
 # Function to add tasks to the priority queue
 def add_task(KU, matrix_name, rows, cols, edges,  nb_zeros, nb_ones, density, obj):
     edge_count = len(edges)  # Use number of edges instead of size
-    #heapq.heappush(KU, (-edge_count, edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj)))  # Negative for max-heap
-    heapq.heappush(KU, (edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj)))  # Negative for max-heap
-# Function to add tasks to the priority queue
+    heapq.heappush(KU, (-edge_count, edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj)))  # Negative for max-heap
+    #heapq.heappush(KU, (edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj)))  # Negative for max-heap
 
 def process_tasks(selected_model, global_time):
     global QUEUE, EVALUATED_QUEUE, Small_matricies_QUEUE 
@@ -2734,8 +2743,8 @@ def process_tasks(selected_model, global_time):
     KP_time = 0
     all_checked = False
     while QUEUE: 
-        edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj_val) = heapq.heappop(QUEUE)  # Extract highest priority task
-        if best_obj >= edge_count :
+        _, edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj_val) = heapq.heappop(QUEUE)  # Extract highest priority task
+        if best_obj >= edge_count:
             print(f"Task {matrix_name} with edges count {edge_count} has been skipped by the best task  {best_matrix} with obj  : {best_obj}.")
             print(f"All other tasks are also skipped because the queue is sorted")
             return best_matrix, best_obj, best_rows, best_cols, best_density, fathomed_count, solved_count
@@ -2746,10 +2755,10 @@ def process_tasks(selected_model, global_time):
         print(f"""
         ***QUEUE: Currently is processed task number {matrix_name} with size {len(rows)} * {len(cols)} and density {density:.3f} 
         and #ones {nb_ones}  and #zeros {nb_zeros} and edges: {len(edges)} 
-        selected_model {selected_model} dec_conq {dec_conq} delta {delta} threshold {threshold} rho {rho} ***
+        selected_model {selected_model} dec_conq {dec_conq} delta {delta} QUEUE threshold {QUEUE_threshold} rho {rho} ***
         """)
         print() 
-        results = solve(best_obj,dec_conq, matrix_name, rows, cols, edges, selected_model, KP_time, QBC_time, rho, delta, threshold)   
+        results = solve(best_obj,dec_conq, matrix_name, rows, cols, edges, selected_model, KP_time, QBC_time, rho, delta, KP_threshold)   
         # Unpack results
         (rows_res, cols_res, density, nb_ones, iter, KP_time, 
         kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 
@@ -2806,28 +2815,28 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
     if dec_conq == 0: # No decrease-and-conquer
         if debug >= 1:
             print(f"Task: matrix {matrix_name}, size ({len(rows)},{len(cols)}), #edges {len(edges_1)}, density: {density:.3f}, sparsity: {sparsity:.3f} # nb_ones: { nb_ones}, #nb_zeros: {nb_zeros} is has arrived at level dec_conq : {dec_conq} !!!.")
-            print(f" density {density:.3f} and threshold {threshold} ")
+            print(f" density {density:.3f} and KP_threshold {KP_threshold} and QUEUE_threshold {QUEUE_threshold}")
         #sys.exit("Terminating program when all tasks have been generated . EXIT 2.")
-        if density <= threshold:
+        if density <= QUEUE_threshold:
             #winning_node, rows, cols, density, nb_ones, global_time = decrease_and_conquer(1, matrix_name, rows, cols, edges_1, 0, 0)
             if debug >= 1:
                 print() 
                 #nbi_0, nbi_1, sparsity, density = density_calcul(rows, cols)
-                print(f"Task with matrix {matrix_name} with size: ({len(rows)},{len(cols)}), and density {density:.3f}  is returned to decrease and conquer with dec_conq = 1 !!!.")
+                print(f"Task with matrix {matrix_name} with size: ({len(rows)},{len(cols)}), and density {density:.3f}  dec_conq = 1 !!!.")
                 #sys.exit("Terminating program for checking before calling decrease_and_conquer. EXIT the densit_resy issue.")
             decrease_and_conquer(1, matrix_name, rows, cols, edges_1, 0, 0)
             return
-        #sys.exit("Terminating program after decrease and conquer. EXIT 5.")
+        #sys.exit("Terminating programis returned to decrease and conquer with d after decrease and conquer. EXIT 5.")
         if debug >= 1:
             nbi_0, nbi_1, sparsity, density = density_calcul(rows, cols)
             print(f"Task {matrix_name} with size ({len(rows)},{len(cols)}) and density {density:.3f} and number of ones {nb_ones} and nb_zeros: {nb_zeros} is added to the QUEUE !!!.")
-            print(f" density {density:.3f} and threshold {threshold} ")
+            print(f" density {density:.3f} and QUEUE threshold {QUEUE_threshold} ")
         # Add the task to the priority queue
         temp_obj =  float('-inf') 
         add_task(QUEUE, matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj) 
         return  #matrix_name, rows, cols, density, nb_ones, QBC_time
     if dec_conq >= 1:
-        if density > threshold:
+        if density > QUEUE_threshold:
             nbi_0, nbi_1, sparsity, density = density_calcul(rows, cols)
             # Add the task to the priority queue
             temp_obj =  float('-inf') 
@@ -2838,7 +2847,7 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         # Compute complementary row and column indices
         rows_compl, cols_compl, edges_compl = get_complement_rowcols(rows, cols, edges_1)
         # Solve the problem
-        results = solve(None,dec_conq, matrix_name, rows_compl, cols_compl, edges_compl, selected_model, KP_time, QBC_time, rho, delta, threshold)
+        results = solve(None,dec_conq, matrix_name, rows_compl, cols_compl, edges_compl, selected_model, KP_time, QBC_time, rho, delta, KP_threshold)
         # Unpack results
         (rows_res, cols_res, density, nb_ones, iter, KP_time, 
         kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 
@@ -3044,8 +3053,8 @@ def count_ones_in_submatrix(edges, row_indices, col_indices):
 
 if __name__ == '__main__':
     import time
-    min_number_rows = 1
-    min_number_cols = 1
+    min_number_rows = 2
+    min_number_cols = 2
     min_portion_zero_clique = 0.01
     only_task  = False
     # Define a priority queue (max-heap using negative size)
@@ -3059,7 +3068,7 @@ if __name__ == '__main__':
 
     start_model_building_and_solving = time.time()
     # Read the arguments
-    file_path, selected_model, rho, delta,  threshold, dec_conq= parse_arguments()
+    file_path, selected_model, rho, delta,  KP_threshold, QUEUE_threshold, dec_conq = parse_arguments()
     p = file_path 
     if p.lower().endswith('.txt'):
         rows, cols, edges_1, row_names, col_names  = get_data_txt_file(file_path)
@@ -3123,7 +3132,8 @@ if __name__ == '__main__':
     print(f"Tasks_generation time: {end_tasks_generation  - start_tasks_generation :.4f} sec")     
     print('-' * 70)
     print(f" Size of the queue: {len(QUEUE)}")
-    for size, (matrix_name, rows, cols, edges,nb_zeros, nb_ones, density, obj) in QUEUE:
+    #for size, (matrix_name, rows, cols, edges,nb_zeros, nb_ones, density, obj) in QUEUE:
+    for _, size,  (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj) in QUEUE:
         print(f" Matrix: {matrix_name}, Size: {len(rows)*len(cols)}, #Rows: {len(rows)}, #Cols: {len(cols)}, #Edges: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: {density :.3f}") #, obj {obj}")
     print()
     print('-' * 70)
@@ -3140,10 +3150,14 @@ if __name__ == '__main__':
     print('-' * 70)
     sorted_copy_queue = sorted(COPY_QUEUE, key=lambda x: x[1], reverse=True)
     print(f"Size of the COPY_QUEUE: {len(sorted_copy_queue)}")
-    for size, (matrix_name, task_rows, task_cols, edges, nb_zeros, nb_ones, density, obj) in sorted_copy_queue:
+    for _, size, (matrix_name, task_rows, task_cols, edges, nb_zeros, nb_ones, density, obj) in sorted_copy_queue:
         print(f"Matrix: {matrix_name}, #Edges: {size}, #Rows: {len(task_rows)}, #Cols: {len(task_cols)}, #Edges: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: {density:.3f}") #, obj {obj}")
     if only_task:
-        sys.exit("Terminating program when all tasks have been generated . only_task =, {only_task}, EXIT 333.")
+        sys.exit(f"Terminating program when all tasks have been generated. Only_task = {only_task} => EXIT 333.")
+    if len(QUEUE) == 0:
+        print("No tasks to process. Exiting.")
+        sys.exit(0)
+    # Solve the tasks
     start_tasks_solving = time.time()
     best_task, best_obj, best_rows, best_cols, best_density, fathomed_count, solved_count = process_tasks(selected_model, 0)
     end_tasks_solving = time.time()
@@ -3164,7 +3178,7 @@ if __name__ == '__main__':
     print('-' * 70)
     sorted_copy_queue = sorted(COPY_QUEUE, key=lambda x: x[1], reverse=True)
     print(f"Size of the COPY_QUEUE: {len(sorted_copy_queue)}")
-    for size, (matrix_name, task_rows, task_cols, edges, nb_zeros, nb_ones, density, obj) in sorted_copy_queue:
+    for _, size,  (matrix_name, task_rows, task_cols, edges, nb_zeros, nb_ones, density, obj) in sorted_copy_queue:
         print(f"Matrix: {matrix_name}, Size: {size}, #Rows: {len(task_rows)}, #Cols: {len(task_cols)}, #Edges: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: {density:.3f}") #, obj {obj}")
     print()
     print('-' * 70)
