@@ -1,30 +1,25 @@
 \* max_e_h *\
 Maximize
-max_sum_rows_columns: sumCol_1 + sumRow_2 + sumRow_3 + sumRow_4
+max_sum_rows_columns: sumCol_34 + sumCol_44 + sumRow_24
 Subject To
-col_slack_1: - 6 col_1 - row_2 - row_3 - row_4 + sumCol_1 >= -6
-col_sum_1: - row_2 - row_3 - row_4 + sumCol_1 = 0
-col_threshold: col_1 >= 2
-row_slack_2: - col_1 - 6 row_2 + sumRow_2 >= -6
-row_slack_3: - col_1 - 6 row_3 + sumRow_3 >= -6
-row_slack_4: - col_1 - 6 row_4 + sumRow_4 >= -6
-row_sum_2: - col_1 + sumRow_2 = 0
-row_sum_3: - col_1 + sumRow_3 = 0
-row_sum_4: - col_1 + sumRow_4 = 0
-row_threshold: row_2 + row_3 + row_4 >= 2
+col_slack_34: - 5 col_34 - row_24 + sumCol_34 >= -5
+col_slack_44: - 5 col_44 - row_24 + sumCol_44 >= -5
+col_sum_34: - row_24 + sumCol_34 = 0
+col_sum_44: - row_24 + sumCol_44 = 0
+col_threshold: col_34 + col_44 >= 2
+row_slack_24: - col_34 - col_44 - 5 row_24 + sumRow_24 >= -5
+row_sum_24: - col_34 - col_44 + sumRow_24 = 0
+row_threshold: row_24 >= 2
 Bounds
- 0 <= sumCol_1 <= 4
- 0 <= sumRow_2 <= 2
- 0 <= sumRow_3 <= 2
- 0 <= sumRow_4 <= 2
+ 0 <= sumCol_34 <= 2
+ 0 <= sumCol_44 <= 2
+ 0 <= sumRow_24 <= 3
 Generals
-sumCol_1
-sumRow_2
-sumRow_3
-sumRow_4
+sumCol_34
+sumCol_44
+sumRow_24
 Binaries
-col_1
-row_2
-row_3
-row_4
+col_34
+col_44
+row_24
 End

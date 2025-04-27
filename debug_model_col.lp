@@ -1,10 +1,12 @@
 \* column_knapsack_problem *\
 Minimize
-knapsack: 2 col_0 + 2 col_1 + 3 col_2
+knapsack: col_10 + col_18 + col_27 + col_42
 Subject To
-sensitivity: 3 col_0 + 3 col_1 + 2 col_2 >= 5.6
+sensitivity: __dummy >= 0
 Bounds
- col_0 <= 1
- col_1 <= 1
- col_2 <= 1
+ __dummy = 0
+ col_10 <= 1
+ col_18 <= 1
+ col_27 <= 1
+ col_42 <= 1
 End

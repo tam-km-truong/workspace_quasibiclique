@@ -22,7 +22,6 @@ parser = argparse.ArgumentParser()
 from argparse import ArgumentParser
 
 import pandas as pd
-import networkx as nx 
 import itertools
 import gurobipy as gp
 import gurobipy as GRB 
@@ -1418,7 +1417,6 @@ def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, K
     * rho: zero deletion value used in all greedy approaches 
     * delta: error tolerance (percentage of accepted zeros) in the final result submatrix
     """ 
-    #matrix_limit = 2 
     nbi_0, nbi_1, sparsity, density = density_calcul(rows, cols)
     if debug >= 1: 
         print()
@@ -1451,11 +1449,12 @@ def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, K
     nb_edges_0_in =  nb_edges_0 
     row_names_in = row_names
     col_names_in = col_names 
+    matrix_limit = 2 
     iter = 0
     kp_density = 0
     if density == None:
                 sys.exit("Terminating program due to density == None")
-    while density < KP_threshold and len(rows_in) > min_number_rows  and len(cols_in) > min_number_cols:
+    while density < KP_threshold and len(rows_in) > matrix_limit and len(cols_in) > matrix_limit:
         iter+=1
         if debug >= 2:
             print()
@@ -1506,11 +1505,7 @@ def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, K
     if debug >= 1: 
         print('-' * 40)
         print()
-        print(f"""
-        Calling exact approaches for QB clique discovery with 
-        matrix of size : ({len(rows_res)}, {len(cols_res)}) and density : {density:.3f}    
-        and delta = {delta} and dec_conq = {dec_conq} 
-        """) 
+        print(' Calling exact approaches for QB clique discovery with delta =', delta, 'and dec_conq =', dec_conq) 
         print('-' * 40)
         print()
     if debug >= 3: 
@@ -1524,38 +1519,25 @@ def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, K
             print("edges_1_in =", edges_1_in)
     #sys.exit("Terminating program before calling exact exit 10 !!!!")
     if dec_conq >= 1:
-        if model == "max_e_c" :
-            if debug >= 1:
-                print('-' * 40)
-                print(f"In solve model_name = {model_name} and dec_conq = {dec_conq} => exact_with_max_e_h")
-            model_name = 'max_e_h'
-            rows_res, cols_res, density, nb_edges_1, QBC_time_g = exact(dec_conq, matrix_name,model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
-            QBC_time_h = 0.0
-        #sys.exit("Terminating program before calling exact exit 10 !!!!")
-        if model_name == 'max_e_K' :
-            if debug >= 1:
-                print('-' * 40)
-                print(f"In solve model_name = {model_name} and dec_conq = {dec_conq} => exact_with_König")
-            model_name = 'König_E' 
-            rows_res, cols_res, density, nb_edges_1, QBC_time_g = exact(dec_conq, matrix_name, model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
-            QBC_time_h = 0.0 
+        if model == "max_e_c" : 
+            rows_res, cols_res, density, nb_edges_1, QBC_time_h, QBC_time_g = warm_exact(prev_lower_bound,dec_conq, matrix_name,model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
+        #sys.exit("Terminating program before calling exact exit 10 !!!!") 
+        if model_name == 'König_E': 
+             rows_res, cols_res, density, nb_edges_1, QBC_time_g = exact(dec_conq, matrix_name, model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
+             QBC_time_h = 0.0 
     elif dec_conq == 0 and  model_name == "max_e_c" :
-            if debug >= 1:
-                print('-' * 40)
-                print(f"In solve model_name = {model_name} and dec_conq = {dec_conq} => warm_exact")
+            print(f"In solve model_name = {model_name} and dec_conq = {dec_conq}") 
             rows_res, cols_res, density, nb_edges_1, QBC_time_h, QBC_time_g = warm_exact(prev_lower_bound,dec_conq, matrix_name,model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
         #sys.exit("Terminating program before calling exact exit 10 !!!!")
-    elif dec_conq == 0 and  model_name == "max_e_K" :
-        if debug >= 1:
-            print('-' * 40)
-            print(f"In solve model_name = {model_name} and dec_conq = {dec_conq} => warm_exact_König")
-        rows_res, cols_res, density, nb_edges_1, QBC_time_h, QBC_time_g = warm_exact_König(prev_lower_bound,dec_conq, matrix_name,model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
+        # elif dec_conq == 0 and  model_name == "König_E" :
+        #     #if model_name == 'König_E':
+        #         print(f"In solve model_name = {model_name} and dec_conq = {dec_conq}") #
+        #         rows_res, cols_res, density, nb_edges_1, QBC_time_h, QBC_time_g = warm_exact_König(prev_lower_bound,dec_conq, matrix_name,model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
         #     #sys.exit("Terminating program before calling exact exit 10 !!!!")
     else: 
-        if debug >= 1:
             print(f" in solve model_name = {model_name}=>exact and dec_conq = {dec_conq}")
-        rows_res, cols_res, density, nb_edges_1, QBC_time_g = exact(dec_conq, matrix_name, model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
-        QBC_time_h = 0.0 
+            rows_res, cols_res, density, nb_edges_1, QBC_time_g = exact(dec_conq, matrix_name, model_name, rows_in, cols_in, row_names, col_names, edges_1_in, delta, debug, QBC_time)
+            QBC_time_h = 0.0 
 
     if debug >=1:
         print('-' * 40)
@@ -1565,6 +1547,7 @@ def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, K
         Found matrix of size : ({len(rows_res)}, {len(cols_res)})
         and density : {density:.3f}
         and # of ones : {nb_edges_1}
+        and Heuristic QBC time   : {QBC_time_h:.5f}
         and Global QBC  time  : {QBC_time_g:.5f}
         """)
     if debug >=2:
@@ -1620,7 +1603,9 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
         if dec_conq == 0:
             if debug >= 2:
                 print('-' * 70)
-                print(f' dec_conq = ', dec_conq, '#rows =', len(rows), '#cols =', len(cols),' nb edges_compl =', len(edges_compl))
+                print(f' dec_conq = ', dec_conq, '#rows =', len(rows)) 
+                print(f'#cols =', len(cols))
+                print(f' nb edges_compl =', len(edges_compl))
             model = König_E(rows, cols, edges_compl)
             #model = König_E(rows, cols, edges_1)
         elif dec_conq >= 1:
@@ -1705,7 +1690,7 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
             writer = csv.writer(file)
 
             # Write the objective value
-            if model_name == 'max_e_h' or model_name == 'König_E':
+            if model_name == 'max_e_h':
                 lower_bound = len(rows_res)*len(cols_res)
                 writer.writerow(["Objective Value", lower_bound])
             else:
@@ -2147,7 +2132,6 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
     obj_value = None  # ✅ Initialize to None
     rows_res = []
     cols_res = []
-    rows_compl, cols_compl, edges_compl = get_complement_rowcols(rows, cols, edges_1)
     # obj_total =  0.0
     #############################
     if debug >= 3:
@@ -2155,8 +2139,7 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
         print()
         print("I am in warm_exact before calling König  $$$$$$$$$$$$$$$$$$")
         print()
-    #model = König_E(rows, cols, edges_1)
-    model = König_E(rows, cols, edges_compl)
+    model = König_E(rows, cols, edges_1)
     try:
         # Solve the model König_E  with Gurobi
         model.solve(GUROBI_CMD(msg=False, timeLimit= timelimit))#, options=[("MIPGap", 0.03)]))
@@ -2859,7 +2842,7 @@ def parse_arguments():
     debug = arg.debug
     timelimit = arg.timelimit
 
-    if arg.model not in ['max_e', 'max_e_h', 'max_e_r','max_e_c','max_e_K','max_v', 'KP_QBr', 'KP_QBc', 'König_E']:
+    if arg.model not in ['max_e', 'max_e_h', 'max_e_r','max_e_c','max_v', 'KP_QBr', 'KP_QBc', 'König_E']:
         argparser.print_help()
         sys.exit(1)
 
@@ -2960,7 +2943,7 @@ def affichage(dec_conq,matrix_name, rows_res, cols_res, density, nb_ones, iter, 
     # pretty print the results
     global_time = KP_time + QBC_time_g  #+ QBC_time_h 
     global_time_c = QBC_time_g #+ QBC_time_h 
-    if selected_model == "max_e_c" or selected_model == "max_e_K":
+    if selected_model == "max_e_c":
         time_e_wr = QBC_time_g - QBC_time_h
     else:
          time_e_wr = 0
@@ -3084,7 +3067,7 @@ def add_task(KU, matrix_name, rows, cols, edges,  nb_zeros, nb_ones, density, ob
     heapq.heappush(KU, (-edge_count, edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj)))  # Negative for max-heap
     #heapq.heappush(KU, (edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj)))  # Negative for max-heap
 
-def process_tasks(selected_model, global_time, tasks_number_to_treat):
+def process_tasks(selected_model, global_time):
     global QUEUE, EVALUATED_QUEUE, Small_matricies_QUEUE 
 
     best_matrix = None  # Track the best task number
@@ -3098,7 +3081,7 @@ def process_tasks(selected_model, global_time, tasks_number_to_treat):
     dec_conq = 0
     KP_time = 0
     all_checked = False
-    while QUEUE and solved_count <  tasks_number_to_treat: 
+    while QUEUE: 
         _, edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj_val) = heapq.heappop(QUEUE)  # Extract highest priority task
         if best_obj >= edge_count:
             print(f"Task {matrix_name} with edges count {edge_count} has been skipped by the best task  {best_matrix} with obj  : {best_obj}.")
@@ -3111,7 +3094,6 @@ def process_tasks(selected_model, global_time, tasks_number_to_treat):
         print(f"""
         ***QUEUE: Currently is processed task number {matrix_name} with size {len(rows)} * {len(cols)} and density {density:.3f} 
         and #ones {nb_ones}  and #zeros {nb_zeros} and edges: {len(edges)} 
-        prev_lower_bound {best_obj} and obj_val {obj_val}
         selected_model {selected_model} dec_conq {dec_conq} delta {delta} QUEUE threshold {QUEUE_threshold} rho {rho} ***
         """)
         print() 
@@ -3127,12 +3109,12 @@ def process_tasks(selected_model, global_time, tasks_number_to_treat):
         obj = len(rows_res) * len(cols_res)  # Replace with actual computation
         end_solving_task_count = time.time()
         solved_count += 1  # Increment solved task count
-        print(f"TASK NUMBER {matrix_name} with (edges: {edge_count}) and obj: {obj} has been solved as number {solved_count} within solving TIME : {end_solving_task_count - start_solving_task_count:.4f} sec" )
+        print(f"TASK NUMBER {matrix_name} with (edges: {edge_count}) and obj: {obj} has been solved within solving TIME : {end_solving_task_count - start_solving_task_count:.4f} sec" )
         # Count fathomed tasks
         if best_obj >= obj:
             print(f"Task {matrix_name} with obj  {obj} has been fathomed by the best task {best_matrix} with obj  : {best_obj}.")
             fathomed_count  += 1 
-            #continue 
+            continue 
         if obj > best_obj: 
             best_obj = obj
             best_matrix = matrix_name
@@ -3140,9 +3122,9 @@ def process_tasks(selected_model, global_time, tasks_number_to_treat):
             best_cols = cols_res
             best_density = density
             print(f"***Task {best_matrix} with obj {best_obj} is the current record!!!***")
-        # if solved_count == 3:
-        #     print(f"Task {matrix_name} with obj {obj} and  solved_count =  {solved_count} has been solved and added to the evaluated queue.")
-        #     sys.exit(f"Terminating program when 3 tasks 3 have been solved  => EXIT 3*333.")
+        if solved_count == 3:
+            print(f"Task {matrix_name} with obj {obj} has been solved and added to the evaluated queue.")
+            sys.exit(f"Terminating program when 3 tasks 3 have been solved  => EXIT 3*333.")
             # Store the evaluated task
         EVALUATED_QUEUE.append((matrix_name, rows, cols, edge_count, obj, len(rows_res), len(cols_res)))
         # Check if the task is small enough to be added to the small matrices queue
@@ -3216,7 +3198,7 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         # Display results
         view = affichage(dec_conq, matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
         ( matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g) = view 
-        #if len(rows_res) <=   min_number_rowsor len(cols_res) <=  min_number_cols:been added to the QUEUE!!!.")
+        #if len(rows_res) <=  min_number_rows or len(cols_res) <=  min_number_cols:been added to the QUEUE!!!.")
         if len(rows_res)*len(cols_res) <= min_portion_zero_clique * len(rows)*len(cols):
             nb_zeros, nb_ones, sparsity, density = density_calcul(rows, cols)
             # Add the task to the priority queue
@@ -3411,67 +3393,13 @@ def count_ones_in_submatrix(edges, row_indices, col_indices):
     # print(f"Number of ones in submatrix B: {num_ones}")
 
 
-def find_min_vertex_cover(rows, cols, edges):
-    # Create bipartite graph
-    B = nx.Graph()
-    left_nodes = [f"r_{r}" for r, _ in rows]
-    right_nodes = [f"c_{c}" for c, _ in cols]
-    
-    B.add_nodes_from(left_nodes, bipartite=0)  # Left
-    B.add_nodes_from(right_nodes, bipartite=1)  # Right
-    for r, c in edges:
-        B.add_edge(f"r_{r}", f"c_{c}")
-
-    # Find maximum matching
-    matching = nx.bipartite.maximum_matching(B, top_nodes=left_nodes)
-    
-    # Recover minimum vertex cover
-    # Using König's theorem
-    # Start from unmatched left nodes
-    matched_right = set()
-    matched_left = set()
-    for u, v in matching.items():
-        if u in left_nodes:
-            matched_left.add(u)
-            matched_right.add(v)
-    
-    unmatched_left = set(left_nodes) - matched_left
-    
-    # BFS from unmatched left nodes
-    visited_left = set()
-    visited_right = set()
-    queue = list(unmatched_left)
-    
-    while queue:
-        u = queue.pop()
-        if u.startswith('r_'):
-            visited_left.add(u)
-            for v in B.neighbors(u):
-                if v not in visited_right and (u, v) not in matching.items():
-                    visited_right.add(v)
-                    queue.append(v)
-        else:
-            visited_right.add(u)
-            for v in B.neighbors(u):
-                if v not in visited_left and (v, u) not in matching.items():
-                    visited_left.add(v)
-                    queue.append(v)
-
-    min_vertex_cover = (set(left_nodes) - visited_left) | visited_right
-    
-    return min_vertex_cover
-
-# Usage after your data loading:
-
-
 
 if __name__ == '__main__':
     import time
     min_number_rows = 2
     min_number_cols = 2
-    min_portion_zero_clique = 0.005
+    min_portion_zero_clique = 0.01
     only_task  = False
-    tasks_number_to_treat = 1
     # Define a priority queue (max-heap using negative size)
     QUEUE = []
     COPY_QUEUE = []
@@ -3504,7 +3432,6 @@ if __name__ == '__main__':
     else:
         raise ValueError('Input need to be a matrix csv file, or a text file with a specific layout')
     ###################################################################
-
     nb_eges_0 = len(edges_compl)
     nb_eges_1 = len(edges_1)
     if debug >= 2:
@@ -3529,13 +3456,6 @@ if __name__ == '__main__':
                     #print("Adjacency Matrix:\n", comp_df)
             print('-' * 40)
     # # end fetching input data
-    #min_vertex_cover = find_min_vertex_cover(rows, cols, edges_compl)   
-
-    # print(f"Minimum Vertex Cover of size: {len(min_vertex_cover)}")
-    # for node in min_vertex_cover:
-    #     print(node)
-    # sys.exit(f"Terminating program when Minimum Vertex Cover has been solved  => EXIT 111.")  
-
     # start tasks_generation  and computations
     in_rows = rows
     in_cols = cols 
@@ -3580,13 +3500,9 @@ if __name__ == '__main__':
     if len(QUEUE) == 0:
         print("No tasks to process. Exiting.")
         sys.exit(0)
-    if len(QUEUE) < tasks_number_to_treat:
-        tasks_number_to_treat = len(QUEUE)
-    else :
-        tasks_number_to_treat = tasks_number_to_treat
     # Solve the tasks
     start_tasks_solving = time.time()
-    best_task, best_obj, best_rows, best_cols, best_density, fathomed_count, solved_count = process_tasks(selected_model, 0, tasks_number_to_treat)
+    best_task, best_obj, best_rows, best_cols, best_density, fathomed_count, solved_count = process_tasks(selected_model, 0)
     end_tasks_solving = time.time()
     nb_skipped = len(COPY_QUEUE)- solved_count
         # Print evaluated queue

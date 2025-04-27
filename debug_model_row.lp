@@ -1,12 +1,12 @@
 \* row_knapsack_problem *\
 Minimize
-knapsack: 2 row_0 + 2 row_1 + row_2 + row_3 + row_4
+knapsack: 4 row_19 + 4 row_23 + 3 row_30 + 4 row_43 + 4 row_49
 Subject To
-sensitivity: row_0 + row_1 + 2 row_2 + 2 row_3 + 2 row_4 >= 11.2
+sensitivity: row_19 + row_23 + 2 row_30 + row_43 + row_49 >= 4.2
 Bounds
- row_0 <= 1
- row_1 <= 1
- row_2 <= 1
- row_3 <= 1
- row_4 <= 1
+ row_19 <= 1
+ row_23 <= 1
+ row_30 <= 1
+ row_43 <= 1
+ row_49 <= 1
 End
