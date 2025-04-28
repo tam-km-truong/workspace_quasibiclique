@@ -1,36 +1,33 @@
-\* max_e_h *\
-Maximize
-max_sum_rows_columns: sumCol_10 + sumCol_18 + sumCol_27 + sumCol_42
- + sumRow_23
+\* König_E *\
+Minimize
+min_degrees: 11 col_115 + 11 col_120 + 11 col_122 + 11 col_144 + 12 col_160
+ + 12 col_33 + 12 col_88 + 12 col_90 + 8 row_10 + 8 row_12 + 8 row_13
+ + 8 row_16 + 4 row_17 + 8 row_19 + 8 row_21 + 8 row_29 + 8 row_30 + 8 row_31
+ + 8 row_42 + 8 row_5
 Subject To
-col_slack_10: - 7 col_10 - row_23 + sumCol_10 >= -7
-col_slack_18: - 7 col_18 - row_23 + sumCol_18 >= -7
-col_slack_27: - 7 col_27 - row_23 + sumCol_27 >= -7
-col_slack_42: - 7 col_42 - row_23 + sumCol_42 >= -7
-col_sum_10: - row_23 + sumCol_10 = 0
-col_sum_18: - row_23 + sumCol_18 = 0
-col_sum_27: - row_23 + sumCol_27 = 0
-col_sum_42: - row_23 + sumCol_42 = 0
-col_threshold: col_10 + col_18 + col_27 + col_42 >= 2
-row_slack_23: - col_10 - col_18 - col_27 - col_42 - 7 row_23 + sumRow_23 >= -7
-row_sum_23: - col_10 - col_18 - col_27 - col_42 + sumRow_23 = 0
-row_threshold: row_23 >= 2
+edge_17_115: col_115 + row_17 >= 1
+edge_17_120: col_120 + row_17 >= 1
+edge_17_122: col_122 + row_17 >= 1
+edge_17_144: col_144 + row_17 >= 1
 Bounds
- 0 <= sumCol_10 <= 2
- 0 <= sumCol_18 <= 2
- 0 <= sumCol_27 <= 2
- 0 <= sumCol_42 <= 2
- 0 <= sumRow_23 <= 5
-Generals
-sumCol_10
-sumCol_18
-sumCol_27
-sumCol_42
-sumRow_23
-Binaries
-col_10
-col_18
-col_27
-col_42
-row_23
+ 0 <= col_115 <= 1
+ 0 <= col_120 <= 1
+ 0 <= col_122 <= 1
+ 0 <= col_144 <= 1
+ 0 <= col_160 <= 1
+ 0 <= col_33 <= 1
+ 0 <= col_88 <= 1
+ 0 <= col_90 <= 1
+ 0 <= row_10 <= 1
+ 0 <= row_12 <= 1
+ 0 <= row_13 <= 1
+ 0 <= row_16 <= 1
+ 0 <= row_17 <= 1
+ 0 <= row_19 <= 1
+ 0 <= row_21 <= 1
+ 0 <= row_29 <= 1
+ 0 <= row_30 <= 1
+ 0 <= row_31 <= 1
+ 0 <= row_42 <= 1
+ 0 <= row_5 <= 1
 End
