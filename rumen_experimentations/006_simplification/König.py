@@ -1640,9 +1640,6 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
             #model = König_E(rows, cols, edges_1)
         elif dec_conq >= 1:
             if debug >= 2:
-                # print(f' dec_conq = ', dec_conq, 'rows_compl =', rows_compl)
-                # print(f'cols_compl =', cols_compl)
-                # print(f' edges_1 =', edges_1) 
                 print('-' * 70)
                 print(f' dec_conq = ', dec_conq, 'rows =', rows) 
                 print(f' cols =', cols)
@@ -3508,7 +3505,7 @@ def modified_fast_constrained_vertex_cover(rows, cols, edges, max_number_rows, m
     col_weights = dict(cols)
 
     row_vars = {r: pulp.LpVariable(f"row_{r}", lowBound=0, upBound=1) for r in row_weights}
-    col_vars = {c: pulp.LpVariable(f"col_{c}", lowBound=0, upBound=1) for c in col_weights}
+    col_vars = {c: pulp.LpVariable(f"col_{c}", lowBound=0, upBound=1)  for c in col_weights}
 
     # Objective function
     model += lpSum(row_weights[r] * row_vars[r] for r in row_weights) + \

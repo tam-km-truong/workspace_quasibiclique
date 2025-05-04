@@ -3455,10 +3455,10 @@ if __name__ == '__main__':
     import time
     min_number_rows = 4
     min_number_cols = 4
-    min_portion_zero_clique = 0.01
-    only_task  = True
-    tasks_number_to_treat = 1
-    largest_matrix_size = 5000 #when a matrix is below this size, we stock it in the Small_matricies_QUEUE
+    min_portion_zero_clique = 0.05
+    only_task  = False
+    tasks_number_to_treat = 2
+    largest_matrix_size = 20 #when a matrix is below this size, we stock it in the Small_matricies_QUEUE
     # Define a priority queue (max-heap using negative size)
     QUEUE = []
     COPY_QUEUE = []
@@ -3599,7 +3599,7 @@ if __name__ == '__main__':
     print()
     print('-' * 70)
     print(f"Size of Small_matricies_QUEUE: {len(Small_matricies_QUEUE)}")
-    for matrix_name, rows, cols, edge_count in Small_matricies_QUEUE:
+     for _, size,  (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj) in Small_matricies_QUEUE:
         #size = len(rows)*len(cols)
         print(f" Matrix: {matrix_name}, # Rows: {len(rows)},  # Cols: {len(cols)},  # Edges: {len(edge_count)}")
     print('-' * 70)
