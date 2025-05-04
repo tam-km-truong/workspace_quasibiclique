@@ -313,7 +313,8 @@ def max_e_wr(rows_data, cols_data, edges, rows_res, cols_res, prev_obj, delta):
     #print("rows_res_set: bis", rows_res_set)
     #print("cols_res_set: bis", cols_res_set )
 
-    print(" !!!!!!!!!!!!!!!!!! I got a lower bound ", prev_obj)
+    if debug >= 2:
+        print(" !!!!!!!!!!!!!!!!!! I got a lower bound ", prev_obj)
     # print(" !!!!!!!!!!!!!!!!!! nb col =", len(cols_data))
 
 # Warm start (PuLP way: use setInitialValue if needed)
@@ -1556,11 +1557,18 @@ def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, m
 
         #sys.exit("Terminating program before calling exact exit 10 !!!!")
         if model_name == 'max_e_K' :
-            if is_eligible_for_further_processings(matrix_name, rows_in, cols_in) == False:
+            if is_small(matrix_name, rows_in, cols_in):
+                nb_zeros, nb_edges_1, sparsity, density = density_calcul(rows_in, cols_in)
                 # add_task(Small_matricies_QUEUE, matrix_name,rows_in, cols_in,edges_1_in, nb_zeros, nb_edges_1, density,0)
                 # if debug >= 1:
                 #     print('-' * 40)
                 #     print(f"In solve model_name = {model_name} and dec_conq = {dec_conq}, matrix: {matrix_name} with size nb_rows_in = {len(rows_in)} and nb_cols_in = {len(cols_in)} and density = {density:.3f} has been added in Small_matricies_QUEUE")
+                kp_density = 0
+                nb_kp_rows = 0
+                nb_kp_cols = 0
+                nb_kp_ones = 0 
+                QBC_time_h = 0.0
+                QBC_time_g = 0.0
                 return rows_in, cols_in, density, nb_edges_1, iter,  KP_time, kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 0, 0  
             else: # the task is eligible to go to exact 
                 if debug >= 1:
@@ -1904,7 +1912,7 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                 for var_name in rem_col_indices:
                      writer.writerow([var_name, 0])
 
-        print(f"Solution saved to {solution_file}")
+        print(f"Solution of matrix {matrix_name} saved to {solution_file}")
         #sys.exit("Terminating program due to checking. EXIT 1")
     #return rows_res, cols_res, obj_value
     else:
@@ -1926,8 +1934,8 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
     col_names_res = [col_names[c] for c in cols_res if 0 <= c < len(col_names)]
     row_names_res = [int(r) if isinstance(r, (np.int64, np.int32)) else r for r in row_names_res]
     #nbi_0, nbi_1, sparsity, density = density_calcul(rows_res, cols_res)
-    if debug >= 3: 
-        print("\n-- Debugging Step: checking extracted solution after solving model **** --", model.name )
+    if debug >= 4: 
+        print("\n-- Debugging Step: debug = ???, debug, checking extracted solution after solving model **** --", model.name )
         print('len_rows_res=', len(rows_res))
         print('row_res=', rows_res)
         #print('len_rows_del=', len(rows_del))
@@ -2071,7 +2079,8 @@ def warm_exact(prev_lower_bound, dec_conq, matrix_name,model_name, rows, cols, r
                  if var_name.startswith("row") or var_name.startswith("col"): 
                     writer.writerow([var_name, var_value])
 
-        print(f"Solution saved to {solution_file}")
+        if debug >=1:
+            print(f"Solution of {matrix_name} saved to {solution_file}")
 
     else:
         print("No feasible solution found.")
@@ -2255,7 +2264,7 @@ def warm_exact(prev_lower_bound, dec_conq, matrix_name,model_name, rows, cols, r
     #rows_res_name = [row_names[r] for r in rows_res]
     #cols_res_name = [col_names[c] for c in cols_res]
     print()
-    if debug >= 2: 
+    if debug >= 3: 
     #print("\n-- Debugging Step: -after row KP solving **** --")
     # print('rows=', rows)
     # print('cols=', cols)
@@ -2586,7 +2595,7 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
     #rows_res_name = [row_names[r] for r in rows_res]
     #cols_res_name = [col_names[c] for c in cols_res]
     print()
-    if debug >= 2: 
+    if debug >= 3: 
     #print("\n-- Debugging Step: -after row KP solving **** --")
     # print('rows=', rows)
     # print('cols=', cols)
@@ -3139,7 +3148,7 @@ def density_calcul(rows, cols):
     return nbi_0, nbi_1, sparsity, density
 
 
-def affichage(dec_conq,matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g):
+def affichage(dec_conq,matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time, kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g):
     # pretty print the results
     global_time = KP_time + QBC_time_g  #+ QBC_time_h 
     global_time_c = QBC_time_g #+ QBC_time_h 
@@ -3150,13 +3159,15 @@ def affichage(dec_conq,matrix_name, rows_res, cols_res, density, nb_ones, iter, 
     if global_time != 0:
         percentage_greedy = (KP_time / global_time) * 100
     else:
-        print("Percentage: Undefined (division by zero). Something wrong. Global time is zero.")
-        sys.exit("Terminating program due to division by zero")
+        print("Percentage: Undefined (division by zero). Global time in affichage function is zero.")
+        percentage_greedy = 0
+        #sys.exit("Terminating program due to division by zero")
     if QBC_time_g != 0:
         percentage_c = (QBC_time_h / QBC_time_g) * 100
     else:
         percentage_c = 0
-        print(" Global QBC time is zero. Only greedy approach has been used. ")
+        if debug >=2:
+            print(" Global QBC time is zero. ")
         #sys.exit("Terminating program due to division by zero")
     # with Size of initial matrix : {len(rows)} * {len(cols)}
     if debug >=1:
@@ -3292,14 +3303,15 @@ def process_tasks(selected_model, global_time, tasks_number_to_treat):
         # Solve the problem
         start_solving_task_count = time.time()
         #prev_lower_bound = obj_val 
-        print() 
-        print(f"""
-        ***QUEUE: Currently is processed task number {matrix_name} with size {len(rows)} * {len(cols)} and density {density:.3f} 
-        and #ones {nb_ones}  and #zeros {nb_zeros} and edges: {len(edges)} 
-        prev_lower_bound {best_obj} and obj_val {obj_val}
-        selected_model {selected_model} dec_conq {dec_conq} delta {delta} QUEUE threshold {QUEUE_threshold} rho {rho} ***
-        """)
-        print() 
+        if debug >=1:
+            print() 
+            print(f"""
+                ***QUEUE: Currently is processed task number {matrix_name} with size {len(rows)} * {len(cols)} and density {density:.3f} 
+                and #ones {nb_ones}  and #zeros {nb_zeros} and edges: {len(edges)} 
+                prev_lower_bound {best_obj} and obj_val {obj_val}
+                selected_model {selected_model} dec_conq {dec_conq} delta {delta} QUEUE threshold {QUEUE_threshold} rho {rho} ***
+                """)
+            print() 
         results = solve(best_obj,dec_conq, matrix_name, rows, cols, edges, selected_model, min_number_rows, min_number_cols, KP_time, QBC_time, rho, delta, KP_threshold)   
         # Unpack results
         (rows_res, cols_res, density, nb_ones, iter, KP_time, 
@@ -3362,13 +3374,16 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
     row_degree_map = {row: degree for row, degree in rows}
     if dec_conq == 0: # Work with the original matrix
         if debug >= 1:
-            print(f"Decrease_and_conquer:  matrix {matrix_name}, size ({len(rows)},{len(cols)}), #edges {len(edges_1)}, density: {density:.3f}, sparsity: {sparsity:.3f} # nb_ones: { nb_ones}, #nb_zeros: {nb_zeros} is at level dec_conq : {dec_conq}  while QUEUE_threshold is {QUEUE_threshold} and KP_threshold is {KP_threshold} !!!")
+            print(f"""
+                  Decrease_and_conquer:  matrix {matrix_name}, of size ({len(rows)},{len(cols)}), #edges {len(edges_1)}, density: {density:.3f}, sparsity: {sparsity:.3f} # nb_ones: { nb_ones}, #nb_zeros: {nb_zeros} 
+                  is at level dec_conq : {dec_conq}  while QUEUE_threshold is {QUEUE_threshold} and KP_threshold is {KP_threshold} !!!""")
         #sys.exit("Terminating program when all tasks have been generated . EXIT 2.")
         if density < QUEUE_threshold: 
             if debug >= 1:
                 print() 
                 #nbi_0, nbi_1, sparsity, density = density_calcul(rows, cols)
-                print(f"Decrease_and_conquer: Task with matrix {matrix_name} with size: ({len(rows)},{len(cols)}), and density= {density:.3f} <= QUEUE_threshold = {QUEUE_threshold}  is re-entered  in decrease_and_conquer i.e. dec_conq => 1 !!!.")
+                print(f"""
+                      Decrease_and_conquer: Task matrix {matrix_name} with size: ({len(rows)},{len(cols)}), and density= {density:.3f} <= QUEUE_threshold = {QUEUE_threshold}  is re-entered  in decrease_and_conquer i.e. dec_conq => 1 !!!.""")
                 #sys.exit("Terminating program for checking before calling decrease_and_conquer. EXIT the densit_resy issue.")
             decrease_and_conquer(1, matrix_name, rows, cols, edges_1, 0, 0)
             # adding new print statement
@@ -3378,7 +3393,10 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         else: #density >= QUEUE_threshold 
             if debug >= 1:
                 #nbi_0, nbi_1, sparsity, density = density_calcul(rows, cols)
-                print(f"Task {matrix_name} with size ({len(rows)},{len(cols)})  and nb_ones {nb_ones} and nb_zeros: {nb_zeros} is added to the QUEUE !!!. since it has a and density {density:.3f} > QUEUE_threshold {QUEUE_threshold} Return  !!!.")
+                print(f"""
+                      Task {matrix_name} with size ({len(rows)},{len(cols)})  and nb_ones {nb_ones} and nb_zeros: {nb_zeros} is added to the QUEUE  
+                      since it has a and density {density:.3f} > QUEUE_threshold {QUEUE_threshold}. Exit from decrease_and_conquer !!!
+                      """)
             # Add the task to the priority queue
             temp_obj =  float('-inf') 
             add_task(QUEUE, matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj) 
@@ -3390,7 +3408,7 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
             temp_obj =  float('-inf') 
             add_task(QUEUE, matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj)
             if debug >= 1:
-                print(f" dec_conq =  {dec_conq}.   Task {matrix_name} with size ({len(rows)},{len(cols)}) and density {density:.3f}  has been addeded to the QUEUE. !!!.")
+                print(f" dec_conq =  {dec_conq}.   Task {matrix_name} with size ({len(rows)},{len(cols)}) and density {density:.3f}  has been addeded to the QUEUE with  QUEUE_threshold =  {QUEUE_threshold}. Return !!!.")
             return
         # Compute complementary row and column indices
         rows_compl, cols_compl, edges_compl = get_complement_rowcols(rows, cols, edges_1)
@@ -3410,20 +3428,21 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
                     current_portion = {current_portion:.3f}; min_portion_zero_clique: {min_portion_zero_clique} 
                     len(rows_res)) = {len(rows_res)};  len(cols_res)= {len(cols_res)}, largest_matrix_size = {largest_matrix_size} 
                     min_number_rows = { min_number_rows}; min_number_cols = {min_number_cols}
-                    is_eligible_for_further_processings(matrix_name, rows_res, cols_res) = {is_eligible_for_further_processings(matrix_name, rows_res, cols_res)} 
+                    is_small(matrix_name, rows_res, cols_res) = {is_small(matrix_name, rows_res, cols_res)} 
                     rows_res = {rows_res}
                     cols_res = {cols_res}
                 """)
-        row_indices = {row for row in rows_res}
-        col_indices = {col for col in cols_res}
-        rows_res = [(index, row_degree_map[index]) for index in row_indices]
-        cols_res = [(index, col_degree_map[index]) for index in col_indices]
-        row_indices_list=list(row_indices)
-        col_indices_list=list(col_indices)
         #rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density  = update_data(rows, cols, edges_1, row_indices_list, col_indices_list, debug)
-        if debug >= 2 and König_test and modified_König:
-            print(f"""
-                    after density_calcul(rows_res, cols_res)
+        if König_test and modified_König:
+            row_indices = {row for row in rows_res}
+            col_indices = {col for col in cols_res}
+            rows_res = [(index, row_degree_map[index]) for index in row_indices]
+            cols_res = [(index, col_degree_map[index]) for index in col_indices]
+            row_indices_list=list(row_indices)
+            col_indices_list=list(col_indices)
+            if debug >= 2:
+                print(f"""
+                    König_test and modified_König are both true
                     row_indices = {row_indices} 
                     col_indices ={col_indices}
                     row_indices_list = {row_indices_list}
@@ -3433,15 +3452,15 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
                 """)
         #sys.exit("Terminating program for cheking . EXIT 110.")   
         #nb_zeros, nb_ones, sparsity, density = density_calcul(rows_res, cols_res)
-        if current_portion <= min_portion_zero_clique or is_eligible_for_further_processings(matrix_name, rows_res, cols_res) == False:
-            if debug >= 2:
-                print(f"""
-                    after is_eligible_for_further_processings(matrix_name, rows_res, cols_res) == False:
-                    row_indices = {row_indices} 
-                    col_indices ={col_indices}
-                    rows_res = {rows_res}
-                    cols_res = {cols_res}
-                """)
+        if current_portion <= min_portion_zero_clique or is_small(matrix_name, rows_res, cols_res):
+            # if debug >= 2:
+            #     print(f"""
+            #         after is_small(matrix_name, rows_res, cols_res)={is_small(matrix_name, rows_res, cols_res)}
+            #         row_indices = {row_indices} 
+            #         col_indices ={col_indices}
+            #         rows_res = {rows_res}
+            #         cols_res = {cols_res}
+            #     """)
                 # Add the task to the priority queue
             temp_obj =  float('-inf')
             nb_zeros, nb_ones, sparsity, density = density_calcul(rows, cols) 
@@ -3449,10 +3468,10 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
             add_task(QUEUE, matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj)
             if debug >= 1:
                 print(f"""
-                      A zero clique of size ({len(rows_res)},{len(cols_res)}) belonging to  matrix {matrix_name} of size ({len(rows)},{len(cols)}) and density: {density:.3f} has been found. The matrix {matrix_name} 
-                      has been added to the queue with QUEUE_threshold: {QUEUE_threshold}.  It represents {current_portion:.3f} portion from the entire matrix size:. !!
-                      Because: either  the portion is too SMALL in regard to the value of the given min_portion_zero_clique: {min_portion_zero_clique} or 
-                      its size make the matrix  not eligible to be further processing since is_eligible_for_further_processings(matrix_name, rows_res, cols_res) =  {is_eligible_for_further_processings(matrix_name, rows_res, cols_res)}. 
+                      A zero clique of size ({len(rows_res)},{len(cols_res)}) belonging to  matrix {matrix_name} of size ({len(rows)},{len(cols)}) and density: {density:.3f} has been found. 
+                      The zero clique represents {current_portion:.3f} portion from the entire matrix size while the value of the given min_portion_zero_clique is {min_portion_zero_clique}. 
+                      Moreover, is_small(matrix_name, rows_res, cols_res) =  {is_small(matrix_name, rows_res, cols_res)} since largest_matrix_size = {largest_matrix_size} and min_number_rows = {min_number_rows} and  min_number_cols =   {min_number_cols}. 
+                      For one of the above two reasons the  matrix {matrix_name} has been added to the queue with QUEUE_threshold: {QUEUE_threshold}. 
                       Exit decrease and conquer!!! .
                       """) 
             # nb_ones = 0
@@ -3461,7 +3480,8 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
             #return  matrix_name, rows, cols, density, nb_ones, QBC_time 
             #sys.exit("Terminating program for cheking . EXIT 109.")   
             return  #matrix_name, QBC_time
-        print(f"dec_conq= {dec_conq}. Solve found sufficiently large zero clique in the complementary matrix {matrix_name} with size ({len(rows_res)},{len(cols_res)}) and current_portion= {current_portion} > min_portion_zero_clique: {min_portion_zero_clique}. In addition, the matrix is eligible to be further procedded => get_submatrices will be called  !!!.")
+        if debug >= 1:
+            print(f"dec_conq= {dec_conq}. Solve found sufficiently large zero clique in the complementary matrix {matrix_name} with size ({len(rows_res)},{len(cols_res)}) and current_portion= {current_portion} > min_portion_zero_clique: {min_portion_zero_clique}. In addition, the matrix is eligible to be further proceedded => get_submatrices will be called  !!!.")
         #sys.exit("Terminating program for cheking . EXIT 108.")
         ML, MR = get_submatrices(rows, cols, edges_1, rows_res, cols_res)
         #ML, MR = get_submatrices(rows_compl, cols_compl, edges_compl, rows_res, cols_res)
@@ -3490,7 +3510,8 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
     #sys.exit("Terminating program for cheking . EXIT 108.")
     ML_size = len(ML[0]) * len(ML[1])
     MR_size = len(MR[0]) * len(MR[1])
-    if len(ML[0]) <=  min_number_rows or len(ML[1]) <=  min_number_cols or ML_size <=largest_matrix_size:
+    if is_small(node, ML[0], ML[1]):
+    #if len(ML[0]) <=  min_number_rows or len(ML[1]) <=  min_number_cols or ML_size <=largest_matrix_size:
         if debug >= 1:
             print() 
             print(f" Left Node {node} with size : ({len(ML[0])},{len(ML[1])}) has been added to Small_matricies_QUEUE because of min required number rows = {min_number_rows} or min required  number columns = {min_number_cols} or  matrix size : {ML_size} <= min  required matrix_size = {largest_matrix_size}. "  )
@@ -3498,7 +3519,7 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
             print()
         temp_obj =  float('-inf')
         add_task(Small_matricies_QUEUE, node, ML[0], ML[1], ML[2], nbL_0, nbL_1, density_L, temp_obj)
-        #Small_matricies_QUEUE.append((node, ML[0], ML[1], ML[2]))
+        #continue processing with MR 
         #return 
         #sys.exit("Terminating program for cheking . EXIT 111.")
     else: #continue recursivity by decrease and conquer approach
@@ -3507,16 +3528,17 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
             print()  
             print(f" Return from {node} and continue with node1 = {node1}" )
     #continue with the right node
-    if len(MR[0]) <=  min_number_rows or len(MR[1]) <=  min_number_cols or MR_size <=largest_matrix_size:
+    if is_small(node1, MR[0], MR[1]):
+    #if len(MR[0]) <=  min_number_rows or len(MR[1]) <=  min_number_cols or MR_size <=largest_matrix_size:
         if debug >= 1:
             print() 
-            print(f" Node {node1} with size : ({len(MR[0])},{len(MR[1])}) has been added to Small_matricies_QUEUE because of min number rows = {min_number_rows} or min number columns = {min_number_cols} or  matrix size : {MR_size} <= largest_matrix_size = {largest_matrix_size}."  )
+            print(f" Right Node {node1} with size : ({len(MR[0])},{len(MR[1])}) has been added to Small_matricies_QUEUE because of min number rows = {min_number_rows} or min number columns = {min_number_cols} or  matrix size : {MR_size} <= largest_matrix_size = {largest_matrix_size}."  )
             #sys.exit("Terminating program for cheking . EXIT 111.")
             print()
         temp_obj =  float('-inf')
-        add_task(Small_matricies_QUEUE, node, MR[0], MR[1], MR[2], nbR_0, nbR_1, density_R, temp_obj)
+        add_task(Small_matricies_QUEUE, node1, MR[0], MR[1], MR[2], nbR_0, nbR_1, density_R, temp_obj)
         #Small_matricies_QUEUE.append((node, ML[0], ML[1], ML[2]))
-        #return 
+        return 
     else:  #continue recursivity by decrease and conquer approach
         if debug >= 1:
             print() 
@@ -3752,9 +3774,9 @@ def visualize_submatrix(rows_data, cols_data, edges, sub_rows: list, sub_cols: l
     print("\nTotal number of 1s in this submatrix:", one_count)
     return one_count
 
-def is_eligible_for_further_processings(matrix, rows, cols):
+def is_small(matrix, rows, cols):
     global min_number_rows, min_number_cols, largest_matrix_size
-    if len(rows) >= min_number_rows and len(cols) >= min_number_cols and len(rows)*len(cols) >=largest_matrix_size:
+    if len(rows) < min_number_rows or len(cols) < min_number_cols or len(rows)*len(cols) < largest_matrix_size:
         return True
     else:
         return False
@@ -3762,12 +3784,12 @@ def is_eligible_for_further_processings(matrix, rows, cols):
 
 if __name__ == '__main__':
     import time
-    min_number_rows = 3
-    min_number_cols = 3
-    min_portion_zero_clique = 0.01
-    only_task  = True
-    tasks_number_to_treat = 1
-    largest_matrix_size = 500 #when a matrix is below this size, we stock it in the Small_matricies_QUEUE
+    min_number_rows = 5 #the number of rows of the matrix is below this value, we stock it in the Small_matricies_QUEUE; 
+    min_number_cols = 5 #the number of columns of the matrix is below this value, we stock it in the Small_matricies_QUEUE; 
+    min_portion_zero_clique = 0.1 # when the proportion of the found zero clique in a given matrix is smaller  than this value,  we stop the division and stock  the matrix in the Small_matricies_QUEUE; 
+    only_task  = True # allows the perform only task generation (of True), otherwise we proceed to solve the generated tasks
+    tasks_number_to_treat = 2
+    largest_matrix_size = 20 #when a matrix is below this size, we stock it in the Small_matricies_QUEUE; otherwise, it it will be divided 
     König_test = True #allows to debug the updates in König results
     modified_König = False #changes to TRUE when König results have been modified
     # Define a priority queue (max-heap using negative size)
@@ -3856,7 +3878,7 @@ if __name__ == '__main__':
     print(f" Size of the queue: {len(QUEUE)}")
     #for size, (matrix_name, rows, cols, edges,nb_zeros, nb_ones, density, obj) in QUEUE:
     for _, size,  (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj) in QUEUE:
-        print(f" Matrix: {matrix_name}, Size: {len(rows)*len(cols)}, #Rows: {len(rows)}, #Cols: {len(cols)}, #Edges: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: density :.3f ") #, obj {obj}")
+        print(f" Matrix: {matrix_name}, Size: {len(rows)*len(cols)}, #Rows: {len(rows)}, #Cols: {len(cols)}, #Edges: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: {density :.3f}") #, obj {obj}")
     print()
     print('-' * 70)
     print(f"Size of Small_matricies_QUEUE: {len(Small_matricies_QUEUE)}")
