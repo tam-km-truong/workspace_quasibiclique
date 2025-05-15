@@ -3933,7 +3933,7 @@ def visualize_submatrix(rows_data, cols_data, edges, sub_rows: list, sub_cols: l
 
 def is_small(matrix, n_rows, n_cols):
     global min_number_rows, min_number_cols, largest_matrix_size
-    if n_rows <= min_number_rows and n_cols <= min_number_cols : 
+    if n_rows <= min_number_rows or n_cols <= min_number_cols : 
         return True
     else:
         return False

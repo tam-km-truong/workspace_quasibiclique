@@ -1431,12 +1431,12 @@ def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, m
     """ 
     #matrix_limit = 2 
     nbi_0, nbi_1, sparsity, density = density_calcul(rows, cols)
-    if debug >= 1: 
+    if debug >= 1 and density is not None and sparsity is not None: 
         print()
         print('-' * 70)
         print(f"***Stats:  Current matrix {matrix_name} in  {file_path} at level {dec_conq} and with model:  {model} and *** dec_conq: {dec_conq}")
         print("Size of current matrix : ", len(rows), "*", len(cols), "=", len(rows) * len(cols))
-        print(f"Prev_lower_bound : {prev_lower_bound}, number input zeros : {nbi_0},  number input ones : {nbi_1},  density: {density:.3f}; sparsity: {sparsity:.3f}")            
+        print(f"Prev_lower_bound : {prev_lower_bound}, number input zeros : {nbi_0},  number input ones : {nbi_1},  density: {float(density):.3f}; sparsity: {float(sparsity):.3f}")            
         print("rho = ",rho, "; delta : ", delta)
         # Safe printing: Convert None to "N/A" or provide a default value
         print(f"Input density : {density:.3f}" if density is not None else "Input density: N/A",  f"; KP_threshold: {KP_threshold:.5f}")
@@ -1464,9 +1464,9 @@ def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, m
     col_names_in = col_names 
     iter = 0
     kp_density = 0
-    if density == None:
-                sys.exit("Terminating program due to density == None")
-    while density < KP_threshold and len(rows_in) > min_number_rows  and len(cols_in) > min_number_cols:
+    #if density == None:
+                #sys.exit("Terminating program due to density == None")
+    while density is not None and density < KP_threshold and len(rows_in) > min_number_rows and len(cols_in) > min_number_cols:
         iter+=1
         if debug >= 2:
             print()
@@ -1515,7 +1515,7 @@ def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, m
         #sys.exit("Terminating program in while loop and because of density. we printed the current data")  
     #else:
     nb_zeros, nb_edges_1 , sparsity, density = density_calcul(rows_in, cols_in)
-    if debug >= 1: 
+    if debug >= 1 and density is not None: 
             print('-' * 40)
             print()
             print(f"""
@@ -1571,7 +1571,7 @@ def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, m
                 QBC_time_g = 0.0
                 return rows_in, cols_in, density, nb_edges_1, iter,  KP_time, kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 0, 0  
             else: # the task is eligible to go to exact 
-                if debug >= 1:
+                if debug >= 1 and density is not None: 
                     print('-' * 40)
                     print(f"In solve model_name = {model_name} and dec_conq = {dec_conq} => exact_with_König with nb_rows_in = {len(rows_in)} and nb_cols_in = {len(cols_in)} and density = {density:.3f}") 
             model_name = 'König_E'
@@ -1719,15 +1719,15 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                 cover_cols_degree = [(index, col_weights[index]) for index in cover_cols_set]
                 #print(f" cover_rows_degree = {cover_rows_degree}   ")
                 #sys.exit(f"Terminating program when testing axtraction added tuples (index, degree)  => EXIT 107.") 
-                cover_rows_degree.sort(key=lambda x: x[1], reverse=False)
-                cover_cols_degree.sort(key=lambda x: x[1], reverse=False)
-                if matrix_name == 5:
-                    print(f"nb cover_rows = {len(cover_rows)}   ")
-                    print(f"nb cover_cols = {len(cover_cols)}   ")
-                    print(f"nb rem_rows_set = {len(rem_rows_set)}   ")
-                    print(f"nb rem_cols_set = {len(rem_cols_set)}   ")
-                    print(f"# sorted_cover_rows_degree = {len(cover_rows_degree)}   ")
-                    print(f"# sorted_cover_cols_degree = {len(cover_cols_degree)}   ")
+                cover_rows_degree.sort(key=lambda x: x[1], reverse=Arg_reverse) #reverse=True gives better results  (as can be extected)
+                cover_cols_degree.sort(key=lambda x: x[1], reverse=Arg_reverse)
+                # if matrix_name == 5:
+                #     print(f"nb cover_rows = {len(cover_rows)}   ")
+                #     print(f"nb cover_cols = {len(cover_cols)}   ")
+                #     print(f"nb rem_rows_set = {len(rem_rows_set)}   ")
+                #     print(f"nb rem_cols_set = {len(rem_cols_set)}   ")
+                #     print(f"# sorted_cover_rows_degree = {len(cover_rows_degree)}   ")
+                #     print(f"# sorted_cover_cols_degree = {len(cover_cols_degree)}   ")
                     #sys.exit(f"Terminating program when matrix_name = {matrix_name}  => EXIT 108.") 
                 #sys.exit(f"Terminating program when testing axtraction added tuples (index, degree)  => EXIT 107.")
 
@@ -1752,14 +1752,14 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                 rem_cols_degree = [(index, col_weights[index]) for index in rem_cols_set]
                 #print(f"rem_rows_degree = {rem_rows_degree}   ")
                 #print(f"rem_cols_degree = {rem_cols_degree}   ")
-                rem_rows_degree.sort(key=lambda x: x[1], reverse=True)
-                rem_cols_degree.sort(key=lambda x: x[1], reverse=True)
-                if matrix_name == 5:
-                    print(f" # sorted_rem_rows_degree  = {len(rem_rows_degree)}   ")
-                    print(f" # sorted_rem_cols_degree = {len(rem_cols_degree)}   ")            
+                #rem_rows_degree.sort(key=lambda x: x[1], reverse=True)
+                #rem_cols_degree.sort(key=lambda x: x[1], reverse=True)
+                # if matrix_name == 5:
+                #     print(f" # sorted_rem_rows_degree  = {len(rem_rows_degree)}   ")
+                #     print(f" # sorted_rem_cols_degree = {len(rem_cols_degree)}   ")            
                     #sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 109.")  
                 #if König_test == True and modified_König == True and debug >=2:
-                if König_test == True  and debug >=2  and matrix_name == 5:
+                if König_test == True  and modified_König == True:
                     print() 
                     print(f"""
                     !!!!!!  König_test = {König_test} !!!!!! modified_König =  {modified_König}
@@ -1788,9 +1788,11 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
 
                 if len(cover_rows_degree) > max_number_rows:
                     modified_König = True
+                    cover_cols_degree = [(index, col_weights[index]) for index in cover_cols_set]
+                    cover_cols_degree.sort(key=lambda x: x[1], reverse=Arg_reverse)
                     cover_rows_degree = [(index, row_weights[index]) for index in cover_rows_set]
-                    cover_rows_degree.sort(key=lambda x: x[1], reverse=False)
-                    if König_test  == True and modified_König == True and debug >=2:
+                    cover_rows_degree.sort(key=lambda x: x[1], reverse=Arg_reverse)
+                    if König_test  == True and modified_König == True:
                         print(f"""
                               König_test= {König_test} ;  modified_König=  {modified_König} ; 
                               matrix_name = {matrix_name} with len(rows)= {len(rows)}; len(cols)= {len(cols)}
@@ -1802,31 +1804,43 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
 
                     while len(cover_rows_degree) > max_number_rows and cover_rows_degree:
                         (r,d) = cover_rows_degree.pop()
-                        if König_test  == True  and modified_König == True and debug >=2 and  matrix_name == 5:
+                        if König_test  == True  and modified_König == True:
                             print(f"""König_test= {König_test}; modified_König= {modified_König}; matrix_name = {matrix_name}  
                                   Removing row {(r,d)} from cover_rows_degree
                                   cover_rows_degree = {cover_rows_degree}
                                   """)
-                            #print(f" modified_König=  {modified_König} ; B.neighborsr({f'row_{r}'}), size: {len(list(B.neighbors(f'row_{r}')))}, list:  {list(B.neighbors(f'row_{r}'))} ")
+                            print(f" # B.neighbors(r)= {len(list(B.neighbors(f'row_{r}')))} , where r: {r}  while weight_r = {row_weights[r]} $$$$$$$????")
                         for c in B.neighbors(f"row_{r}"):
                             c_id = int(c.split("_")[1])
                             #print(f" c = {c} ; c_id = {c_id}  cover_cols=  {cover_cols} max_number_cover_cols =  {max_number_cols} !!!")
-                            if (c_id,col_weights[c_id]) not in cover_cols_degree and len(cover_cols_degree) < max_number_cols:
+                            while (c_id,col_weights[c_id]) not in cover_cols_degree and len(cover_cols_degree) < max_number_cols:
                                 cover_cols_degree.append((c_id,col_weights[c_id]))
-                                if König_test  == True and modified_König == True and debug >=2 and  matrix_name == 5:
+                                if König_test  == True and modified_König == True :
                                     print(f"""  König_test= {König_test};  modified_König=  {modified_König} ;  matrix_name {matrix_name} 
-                                    Adding {(c_id,col_weights[c_id])} to cover_cols_degree
-                                    # cover_cols_degree = {len(cover_cols_degree)};  cover_cols_degree = {cover_cols_degree} 
+                                    Adding {(c_id,col_weights[c_id])} to cover_cols_degree # cover_cols_degree = {len(cover_cols_degree)}; 
+                                    cover_cols_degree = {cover_cols_degree} 
                                     """)
                                
 
                 if len(cover_cols_degree) > max_number_cols:
                     modified_König = True 
                     cover_cols_degree = [(index, col_weights[index]) for index in cover_cols_set]
-                    cover_cols_degree.sort(key=lambda x: x[1], reverse=False)
-                    if  König_test == True and modified_König == True and debug >=2:
-                        print(f""" ??????????????  cover_cols_degree = {len(cover_cols_degree)} >  max_number_cols = {max_number_cols}
-                               cover_cols_degree = {cover_cols_degree}  """)
+                    cover_cols_degree.sort(key=lambda x: x[1], reverse=Arg_reverse)
+                    cover_rows_degree = [(index, row_weights[index]) for index in cover_rows_set]
+                    cover_rows_degree.sort(key=lambda x: x[1], reverse=Arg_reverse)
+                    # if  König_test == True and modified_König == True and debug >=2:
+                    #     print(f""" ??????????????  #cover_cols = {len(cover_cols_degree)} >  max_number_cols = {max_number_cols}
+                    #            cover_cols_degree = {cover_cols_degree}  """)
+                    if König_test  == True and modified_König == True :
+                        print(f"""
+                              König_test= {König_test} ;  modified_König=  {modified_König} ; 
+                              matrix_name = {matrix_name} with len(rows)= {len(rows)}; len(cols)= {len(cols)}
+                              max_number_cover_rows={max_number_rows}; max_number_cover_cols =  {max_number_cols}; 
+                              len(cover_rows_degree) = {len(cover_rows_degree)}; len(cover_cols_degree) = {len(cover_cols_degree)};  
+                              sorted_cover_rows_degree = {cover_rows_degree} 
+                              sorted_cols_degree = {cover_cols_degree} 
+                               """)
+
                     # if König_test  == True  and modified_König == True  and debug >=2:
                     #     print(f" modified_König became {modified_König} since  len(cover_cols)  {len(cover_cols)} > max_number_cols:  {max_number_cols}" )
                     #candidate_cols  = sorted(cover_cols_degree, key=lambda x: x[1])
@@ -1843,19 +1857,19 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                     while len(cover_cols_degree) > max_number_cols and cover_cols_degree:
                         (c,d) = cover_cols_degree.pop(0)
                         col_degree_map_c = {col_degree_map[c]}
-                        if König_test  == True and modified_König == True  and debug >=2:
+                        if König_test  == True and modified_König == True  :
                         #if matrix_name == 5:
                             print(f""" König_test= {König_test};  modified_König=  {modified_König} ;  matrix_name 
-                                  Removing col {(c,d)}  col_degree_map_c {col_degree_map_c} from cover_cols_degree
-                                  cover_cols_degree = {cover_cols_degree}
+                                  Removing col {(c,d)}  where col_degree_map_d {col_degree_map_c} (weight[c] = {col_weights[c]})
+                                  from cover_cols_degree cover_cols_degree = {cover_cols_degree}. 
                                   """)
                             #sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 111.")
                             print(f" # B.neighbors(c)= {len(list(B.neighbors(f'col_{c}')))} , where c: {c}  while col_degree_map_c= {col_degree_map_c} $$$$$$$????")
                         for r in B.neighbors(f"col_{c}"):
                             r_id = int(r.split("_")[1])
-                            if (r_id, row_weights[r_id]) not in cover_rows_degree and len(cover_rows_degree) < max_number_rows:
+                            while (r_id, row_weights[r_id]) not in cover_rows_degree and len(cover_rows_degree) < max_number_rows:
                                 cover_rows_degree.append((r_id, row_weights[r_id]))
-                                if König_test  == True and modified_König == True  and debug >=2:
+                                if König_test  == True and modified_König == True:
                                     print(f""" König_test= {König_test}; modified_König=  {modified_König}; Adding {(r_id, row_weights[r_id])} to cover_rows_degree ; # cover_rows_degree = {len(cover_rows_degree)}; 
                                             # cover_rows_degree = {len(cover_rows_degree)}   cover_rows_degree = {cover_rows_degree}  
                                             """)
@@ -1869,7 +1883,7 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                 total_weight = sum(row_weights[r] for r in cover_rows_set) + \
                             sum(col_weights[c] for c in cover_cols_set)
                 
-                if König_test  == True and modified_König == True  and debug >=2 :
+                if König_test  == True and modified_König == True :
                      print(f""" König_test= {König_test};  modified_König=  {modified_König};  for matrix_name = {matrix_name}
                      NEW cover_rows: length = {len(cover_rows_degree)}; NEW cover_cols: length = {len(cover_cols_degree)};
                      Its total_weight (NEW OBJECTOVE VALUE)  = {total_weight}!!!
@@ -1887,31 +1901,33 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
             if modified_König == True:
                 rem_rows_set = row_set - cover_rows_set
                 rem_cols_set = col_set - cover_cols_set
+            rem_row_indices = [row for row in rem_rows_set]
+            rem_col_indices = [col for col  in rem_cols_set]
+            if König_test  == True and modified_König == True :   
                 print(f" #row_set =  {len(row_set)}; row_set =  {row_set}")
                 print(f" #col_set =  {len(col_set)}  col_set =  {col_set}")
                 print(f" #cover_rows_set =  {len(cover_rows_set)} cover_rows_set =  {cover_rows_set} ")
                 print(f" #cover_cols_set =  {len(cover_cols_set)}  cover_cols_set =  {cover_cols_set}")
                 print(f" #rem_rows_set =  {len(rem_rows_set)} rem_rows_set =  {rem_rows_set} ")
                 print(f" #rem_cols_set =  {len(rem_cols_set)} rem_cols_set =  {rem_cols_set} ")
-            rem_row_indices = [row for row in rem_rows_set]
-            rem_col_indices = [col for col  in rem_cols_set]
-            if matrix_name == 5:
-                print(f"#rem_row_indices = {len(rem_row_indices)}, rem_row_indices = {rem_row_indices}   $$$$$$$$$$$$$$$$$$$$ ")                    
-                print(f"#rem_col_indices = {len(rem_col_indices)},  rem_col_indices = {rem_col_indices},$$$$$$$$$$$$$$$$$$$$ ")
+
+            # if matrix_name == 5:
+            #     print(f"#rem_row_indices = {len(rem_row_indices)}, rem_row_indices = {rem_row_indices}   $$$$$$$$$$$$$$$$$$$$ ")                    
+            #     print(f"#rem_col_indices = {len(rem_col_indices)},  rem_col_indices = {rem_col_indices},$$$$$$$$$$$$$$$$$$$$ ")
                 #sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 113.")
             rows_res = [(index, row_degree_map[index]) for index in rem_rows_set]
             cols_res = [(index, col_degree_map[index]) for index in rem_cols_set]
 
-            rows_res.sort(key=lambda x: x[1], reverse=False)
-            cols_res.sort(key=lambda x: x[1], reverse=False)
+            #rows_res.sort(key=lambda x: x[1], reverse=False)
+            #cols_res.sort(key=lambda x: x[1], reverse=False)
 
-            if matrix_name == 5:
-                print(f" # rows_res (remaining)  = {len(rows_res)}   ")
-                print(f" # cols_res (remaining) = {len(cols_res)}   ")
-                print(f"  sorted_rows_res   = {rows_res}   ")
-                print(f"  sorted_cols_res  = {cols_res}   ")
-                #sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 114.")
-            if König_test  == True and debug >=2 and matrix_name == 5:
+            # if matrix_name == 5:
+            #     print(f" # rows_res (remaining)  = {len(rows_res)}   ")
+            #     print(f" # cols_res (remaining) = {len(cols_res)}   ")
+            #     print(f"  sorted_rows_res   = {rows_res}   ")
+            #     print(f"  sorted_cols_res  = {cols_res}   ")
+            #     #sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 114.")
+            if König_test  == True and modified_König == True :
                 print(f""" König_test= {König_test};  modified_König=  {modified_König}
                 cover_row_set : length= {len(cover_rows_degree)}; cover_col_set : length= {len(cover_cols_degree)};
                 remaining_rows_set = {len(rem_rows_set)} remaining_rows_set = {rem_rows_set} 
@@ -3171,6 +3187,89 @@ def get_submatrices(rows_data, cols_data, edges, rows_res, cols_res):
 
     Returns:
     --------
+    (rows_M1, cols_M1, edges_M1, density_1, nb1_r), 
+    (rows_M2, cols_M2, edges_M2, density_2,  nb2_r), 
+    (rows_MC, cols_MC, edges_MC, density_MC, nb1_center_r)
+  
+    """
+
+    # Extract only indices if tuples are given
+    rows_res_set = {row if isinstance(row, int) else row[0] for row in rows_res}
+    cols_res_set = {col if isinstance(col, int) else col[0] for col in cols_res}
+
+    # Compute M1 (Excludes selected rows)
+    rows_M1 = [(row, deg) for row, deg in rows_data if row not in rows_res_set]
+    edges_M1 = [(r, c) for r, c in edges if r not in rows_res_set]
+    cols_M1 = [(col, sum(1 for r, c in edges_M1 if c == col)) for col, _ in cols_data]
+
+    # Compute M2 (Excludes selected columns)
+    cols_M2 = [(col, deg) for col, deg in cols_data if col not in cols_res_set]
+    edges_M2 = [(r, c) for r, c in edges if c not in cols_res_set]
+    rows_M2 = [(row, sum(1 for r, c in edges_M2 if r == row)) for row, _ in rows_data]
+
+    #Compute MC (intersection of M1 and M2)
+
+    rows_M1_ind = [row for row,_ in rows_M1]
+    rows_M1_set = set(rows_M1_ind)
+    cols_M2_ind = [col for col,_ in cols_M2]
+    cols_M2_set = set(cols_M2_ind)
+    edges_MC = [(r, c) for r, c in edges if r in rows_M1_set and c in cols_M2_set]
+    rows_MC = [(row, sum(1 for (r, c) in edges_MC  if r == row if c in cols_M2_set)) for row in rows_M1_set]
+    cols_MC =  [(col, sum(1 for r, c in edges_MC if c == col if r in rows_M1_set)) for col in cols_M2_ind]
+    if debug >= 2:
+        print(f"rows_M1_set = {rows_M1_set} ")
+        print(f"cols_M2_set = {cols_M2_set} ")
+        print(f"edges = {edges} ")
+        print(f"edges_MC= {edges_MC} ")
+        print(f"rows_MC= {rows_MC} ")
+        print(f"cols_MC= {cols_MC} ")
+    nb1_r =sum(degree for _, degree in rows_M1)
+    nb1_c =sum(degree for _, degree in cols_M1)
+    if nb1_r != nb1_c:
+        print("Warning: Mismatch in number of edges counted in rows and columns.")
+        print(f"nbi_1_r: {nb1_r}, nbi_1_c: {nb1_c}")
+        # Handle the mismatch as needed, e.g., raise an error or log a warning
+        sys.exit("Terminating program because of mismatch in number of edges counted in rows and columns. EXIT 222.")
+  
+    total_elements_M1 = len(rows_M1) * len(cols_M1)
+    density_1 = float(nb1_r / total_elements_M1) if total_elements_M1 > 0 else None
+    ##################################################
+    nb2_r =sum(degree for _, degree in rows_M2)
+    nb2_c =sum(degree for _, degree in cols_M2)
+    if nb2_r != nb2_c:
+        print("Warning: Mismatch in number of edges counted in rows and columns.")
+        print(f"nbi_1_r: {nb2_r}, nbi_1_c: {nb2_c}")
+        # Handle the mismatch as needed, e.g., raise an error or log a warning
+        sys.exit("Terminating program because of mismatch in number of edges counted in rows and columns. EXIT 222.")
+    total_elements_M2 = len(rows_M2) * len(cols_M2)
+    density_2 =  float(nb2_r / total_elements_M2) if total_elements_M2 > 0 else None
+    ####################################################################################
+    nb1_center_r = sum(degree for _, degree in rows_MC)
+    nb1_center_c = sum(degree for _, degree in cols_MC)
+    if nb1_center_r != nb1_center_c:
+        print("Warning: Mismatch in number of edges counted in rows and columns.")
+        print(f"nb1_center_r: {nb1_center_r}, nb1_center_c: {nb1_center_c}") 
+        # Handle the mismatch as needed, e.g., raise an error or log a warning
+        sys.exit("Terminating program because of mismatch in number of edges counted in rows and  columns. EXIT 223.")
+    total_elements_MC = len(rows_MC) * len(cols_MC)
+    density_MC = float(nb1_center_r/ total_elements_MC) if total_elements_MC > 0 else None
+    print(type(density_MC))
+    return (rows_M1, cols_M1, edges_M1, density_1, nb1_r), (rows_M2, cols_M2, edges_M2, density_2, nb2_r), (rows_MC, cols_MC, edges_MC, density_MC, nb1_center_r)
+
+def get_submatrices_only_M1_M2(rows_data, cols_data, edges, rows_res, cols_res):       
+    """
+    Computes submatrices M1 and M2 from the original matrix M.
+
+    Arguments:
+    ----------
+    rows_data: list of tuples (row, degree) of rows in the matrix.
+    cols_data: list of tuples (col, degree) of columns in the matrix.
+    edges: list of tuples (row, col) corresponding to the ones of the matrix.
+    rows_res: list of row indices or list of tuples (row, degree).
+    cols_res: list of column indices or list of tuples (col, degree).
+
+    Returns:
+    --------
     (rows_M1, cols_M1, edges_M1), (rows_M2, cols_M2, edges_M2)
     """
 
@@ -3208,7 +3307,6 @@ def get_submatrices(rows_data, cols_data, edges, rows_res, cols_res):
     density_2 = nb2_r / total_elements_M2 if total_elements_M2 > 0 else None
     return (rows_M1, cols_M1, edges_M1, density_1, nb1_r), (rows_M2, cols_M2, edges_M2,  density_2, nb2_r)
 
-   
 def get_submatrices_without_density(rows_data, cols_data, edges, rows_res, cols_res):       
     """
     Computes submatrices M1 and M2 from the original matrix M.
@@ -3274,6 +3372,7 @@ def density_calcul(rows, cols):
     Returns:
         tuple: (nbi_0, nbi_1, sparsity, density)
     """
+    global density, sparsity
     if not rows or not cols:  # ✅ Avoid division by zero
         return 0, 0, None, None  # None indicates sparsity and density are undefined
     
@@ -3293,8 +3392,8 @@ def density_calcul(rows, cols):
     nbi_0 = total_elements - nbi_1
 
     # Compute sparsity and density safely
-    sparsity = nbi_0 / total_elements if total_elements > 0 else None
-    density = nbi_1 / total_elements if total_elements > 0 else None
+    sparsity = float(nbi_0 / total_elements) if total_elements > 0 else None
+    density = float(nbi_1 / total_elements) if total_elements > 0 else None
 
     return nbi_0, nbi_1, sparsity, density
 
@@ -3521,6 +3620,18 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
     # Compute complementary row and column indices
     # Compute the density and  number of ones in the matrix
     nb_zeros, nb_ones, sparsity, density = density_calcul(rows, cols)
+    if is_small(matrix_name, len(rows),len(cols)):# or len(rows)*len(cols)==0:
+        if debug >= 1:
+                #nbi_0, nbi_1, sparsity, density = density_calcul(rows, cols)
+            print(f"""
+                   Task {matrix_name} with size ({len(rows)},{len(cols)}) and density {density} is added to Small_matricies_QUEUE.
+                   Return for node  {matrix_name} with size ({len(rows)},{len(cols)}) !!!
+                  """)
+            # Add the task to the priority queue
+        temp_obj =  float('-inf') 
+        add_task(Small_matricies_QUEUE, matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj) 
+        return  #matrix_name, rows, cols, density, nb_ones, QBC_time
+
     col_degree_map = {col: degree for col, degree in cols}
     row_degree_map = {row: degree for row, degree in rows}
     if dec_conq == 0: # Work with the original matrix
@@ -3528,7 +3639,6 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
             print(f"""
                   Decrease_and_conquer:  matrix {matrix_name}, of size ({len(rows)},{len(cols)}), #edges {len(edges_1)}, density: {density:.3f}, sparsity: {sparsity:.3f} # nb_ones: { nb_ones}, #nb_zeros: {nb_zeros} 
                   is at level dec_conq : {dec_conq}  while QUEUE_threshold is {QUEUE_threshold} and KP_threshold is {KP_threshold} !!!""")
-        #sys.exit("Terminating program when all tasks have been generated . EXIT 2.")
         if density < QUEUE_threshold: 
             if debug >= 1:
                 print() 
@@ -3538,7 +3648,7 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
                 #sys.exit("Terminating program for checking before calling decrease_and_conquer. EXIT the densit_resy issue.")
             decrease_and_conquer(1, matrix_name, rows, cols, edges_1, 0, 0)
             # adding new print statement
-            print(f"Return from decrease_and_conquer of {matrix_name} with size ({len(rows)},{len(cols)}) !!!.")
+            print(f"Return from node {matrix_name} with size ({len(rows)},{len(cols)}) !!!.")
             return
         #sys.exit("Terminating programis returned to decrease and conquer with d after decrease and conquer. EXIT 5.")
         else: #density >= QUEUE_threshold 
@@ -3546,7 +3656,8 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
                 #nbi_0, nbi_1, sparsity, density = density_calcul(rows, cols)
                 print(f"""
                       Task {matrix_name} with size ({len(rows)},{len(cols)})  and nb_ones {nb_ones} and nb_zeros: {nb_zeros} is added to the QUEUE  
-                      since it has a and density {density:.3f} > QUEUE_threshold {QUEUE_threshold}. Exit from decrease_and_conquer !!!
+                      since it has a and density {density:.3f} > QUEUE_threshold {QUEUE_threshold}. 
+                      Return from node {matrix_name} with size ({len(rows)},{len(cols)})!!!
                       """)
             # Add the task to the priority queue
             temp_obj =  float('-inf') 
@@ -3554,14 +3665,21 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
             return  #matrix_name, rows, cols, density, nb_ones, QBC_time
     if dec_conq >= 1:
         #nbi_0, nbi_1, sparsity, density = density_calcul(rows, cols)
-        if density > QUEUE_threshold:
+        if debug >= 1:
+            print(f" dec_conq =  {dec_conq}.   Current task {matrix_name} with size ({len(rows)},{len(cols)}) and density {density}  is  proceeded  while QUEUE_threshold =  {QUEUE_threshold}. !!!.")
+        ##########################################################################
+        if density is not None and float(density) > float(QUEUE_threshold):
+        # Votre logique ici
+        #if density > QUEUE_threshold:
             # Add the task to the priority queue
             temp_obj =  float('-inf') 
             add_task(QUEUE, matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj)
             if debug >= 1:
-                print(f" dec_conq =  {dec_conq}.   Task {matrix_name} with size ({len(rows)},{len(cols)}) and density {density:.3f}  has been addeded to the QUEUE with  QUEUE_threshold =  {QUEUE_threshold}. Return !!!.")
+                print(f""" dec_conq =  {dec_conq}.   Task {matrix_name} with size ({len(rows)},{len(cols)}) and density {density:.3f}  has been addeded to the QUEUE with  QUEUE_threshold =  {QUEUE_threshold}. 
+                Return from node {matrix_name} with size ({len(rows)},{len(cols)})!!!.
+                """)
             return
-        # Compute complementary row and column indices
+        #  density <= QUEUE_threshold: Compute complementary row and column indices
         rows_compl, cols_compl, edges_compl = get_complement_rowcols(rows, cols, edges_1)
         # Solve the problem, i.e. find the maximum zero size clique in the complementary matrix
         results = solve(None, dec_conq, matrix_name, rows_compl, cols_compl, edges_compl, selected_model, min_number_rows, min_number_cols, KP_time, QBC_time, rho, delta, KP_threshold)
@@ -3573,8 +3691,11 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         view = affichage(dec_conq, matrix_name, rows_res, cols_res, density, nb_ones, iter, KP_time,  kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, QBC_time_h, QBC_time_g)
         ( matrix_name, rows_res, cols_res, density, nb_ones, QBC_time_g) = view 
         #if len(rows_res) <=   min_number_rows len(cols_res) <=  min_number_cols:been added to the QUEUE!!!.")
-        current_portion = len(rows_res)*len(cols_res) / (len(rows)*len(cols))
-        if debug >= 2:
+        if (len(rows)*len(cols)) > 0:
+            current_portion = len(rows_res)*len(cols_res) / (len(rows)*len(cols))
+        else:
+            current_portion = 0
+        if debug >= 1:
             print(f"""
                     current_portion = {current_portion:.3f}; min_portion_zero_clique: {min_portion_zero_clique} 
                     len(rows_res)) = {len(rows_res)};  len(cols_res)= {len(cols_res)}, largest_matrix_size = {largest_matrix_size} 
@@ -3584,131 +3705,92 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
                     cols_res = {cols_res}
                 """)
         #rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density  = update_data(rows, cols, edges_1, row_indices_list, col_indices_list, debug)
-        if König_test and modified_König and debug >= 2:
-            # row_indices = {row for row in rows_res}
-            # col_indices = {col for col in cols_res}
-            # rows_res = [(index, row_degree_map[index]) for index in row_indices]
-            # cols_res = [(index, col_degree_map[index]) for index in col_indices]
-            # row_indices_list=list(row_indices)
-            # col_indices_list=list(col_indices)
-                print(f"""
-                    König_test and modified_König are both true
-                    rows_res = {rows_res}
-                    cols_res = {cols_res}
-                """)
-        #sys.exit("Terminating program for cheking . EXIT 110.")   
-        #nb_zeros, nb_ones, sparsity, density = density_calcul(rows_res, cols_res)
-
-        if current_portion <= min_portion_zero_clique and is_small(matrix_name, len(rows_res),  len(cols_res)):
-        #if current_portion <= min_portion_zero_clique and is_small(matrix_name, len(rows)- len(rows_res), len(cols)) and is_small(matrix_name, len(rows), len(cols) - len(cols_res)):
-            # if debug >= 2:
-            #     print(f"""
-            #         after is_small(matrix_name, rows_res, cols_res)={is_small(matrix_name, rows_res, cols_res)}
-            #         row_indices = {row_indices} 
-            #         col_indices ={col_indices}
-            #         rows_res = {rows_res}
-            #         cols_res = {cols_res}
-            #     """)
-                # Add the task to the priority queue
-            temp_obj =  float('-inf')
-            nb_zeros, nb_ones, sparsity, density = density_calcul(rows, cols) 
-            #density = None
-            add_task(QUEUE, matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj)
+        ML, MR, MC = get_submatrices(rows, cols, edges_1, rows_res, cols_res)
+        # node = 2*matrix_name
+        # node1= node + 1
+        node1=3*matrix_name+1
+        node2=3*matrix_name+2
+        node3=3*matrix_name+3
+        #nbL_0, nbL_1, sparsity_L, density_L = density_calcul(ML[0], ML[1])
+        #nbR_0, nbR_1, sparsity_R, density_R = density_calcul(MR[0], MR[1])
+        if debug >= 1:
+            print(f"\n Level {dec_conq-1} Central Matrix  {node1}:")
+            print(f"Size Rows: {len(MC[0])}, Size Cols: {len(MC[1])} Size edge1: {len(MC[2])} and #ones {MC[4]} and density: {MC[3]}    ")
+            print(f"\n Level {dec_conq-1}, Left Matrix {node2}:")
+            print(f"Size Rows: {len(ML[0])}, Size Cols: {len(ML[1])},  Size edge1: {len(ML[2])} and #ones {ML[4]}  and density: {ML[3]}  ") 
+            print(f"\n Level {dec_conq-1} Rigth Matrix  {node3}:")
+            print(f"Size Rows: {len(MR[0])}, Size Cols: {len(MR[1])} Size edge1: {len(MR[2])} and #ones {MR[4]} and density: {MR[3]}    ")
+            print()
+            print('-' * 70)
+        #sys.exit("Terminating program to test get_submatrices. EXIT 226.")
+        #if len(rows_res) <= min_number_rows and  len(cols_res) <= min_number_cols :
+        if len(rows)-len(rows_res) <= min_number_rows and  len(cols)-len(cols_res) <= min_number_cols:
+            #print(f" type of MC[3] is", type(MC[3]))
+            decrease_and_conquer(1, node1,  MC[0], MC[1], MC[2], 0, 0)
+                # adding new print statement
             if debug >= 1:
-                print(f"""
-                      A zero clique of size ({len(rows_res)},{len(cols_res)}) belonging to  matrix {matrix_name} of size ({len(rows)},{len(cols)}) and density: {density:.3f} has been found. 
-                      The zero clique represents {current_portion:.3f} portion from the entire matrix size while the value of the given min_portion_zero_clique is {min_portion_zero_clique}. 
-                      Moreover, is_small(matrix_name, rows_res, cols_res) =  {is_small(matrix_name, len(rows_res), len(cols_res))} since largest_matrix_size = {largest_matrix_size} and min_number_rows = {min_number_rows} and  min_number_cols =   {min_number_cols}. 
-                      For one of the above two reasons the  matrix {matrix_name} has been added to the queue with QUEUE_threshold: {QUEUE_threshold}. 
-                      Exit decrease and conquer!!! .
-                      """) 
-            # nb_ones = 0
-            # QBC_time = 0
-            # density = 0
-            #return  matrix_name, rows, cols, density, nb_ones, QBC_time 
+                print(f"Return from  node {node1} with size ({len(MC[0])},{len(MC[1])}) !!!.")
+                #return
             #sys.exit("Terminating program for cheking . EXIT 109.")   
             return  #matrix_name, QBC_time
-        if debug >= 1:
-            print(f"""
-                  dec_conq= {dec_conq}. Solve found sufficiently large zero clique of size  ({len(rows_res)},{len(cols_res)}) 
-                  in the complementary matrix of {matrix_name} of size ({len(rows)},{len(cols)}). 
-                  Its portion= {current_portion } > min_portion_zero_clique: {min_portion_zero_clique}. 
-                  In addition, the matrix {matrix_name} is not small  (is_small(matrix_name, rows, cols) = {is_small(matrix_name, len(rows), len(cols))}) 
-                  => get_submatrices will be called  !!!
-                  .""")
-        #sys.exit("Terminating program for cheking . EXIT 108.")
-        ML, MR = get_submatrices(rows, cols, edges_1, rows_res, cols_res)
-        #ML, MR = get_submatrices(rows_compl, cols_compl, edges_compl, rows_res, cols_res)
-    else:
-        print("dec_conq=", dec_conq)
-        sys.exit("Terminating program due to invalid value for dec_conq. EXIT 1.")
-    # Debugging output
-    node = 2*matrix_name
-    node1= node + 1
-
-    nbL_0, nbL_1, sparsity_L, density_L = density_calcul(ML[0], ML[1])
-    nbR_0, nbR_1, sparsity_R, density_R = density_calcul(MR[0], MR[1])
-    if debug >= 1:
-        print(f"\n Level {dec_conq-1}, Matrix {node}:")
-        print(f"Size Rows: {len(ML[0])}, Size Cols: {len(ML[1])},  Size edge1: {len(ML[2])} and density: {ML[3]} and #ones {ML[4]}  ") 
-        print(f"\n Level {dec_conq-1} Matrix  {node1}:")
-        print(f"Size Rows: {len(MR[0])}, Size Cols: {len(MR[1])} Size edge1: {len(MR[2])} and density: {MR[3]}  and #ones {MR[4]}  ")
-        print()
-        print('-' * 70)
-    if debug >= 3:
-        print(f"Size Rows: {len(ML[0])}, Size Cols: {len(ML[1])}, and density: {density_L:.3f}") 
-        print(f"Size Rows: {len(MR[0])}, Size Cols: {len(MR[1])}, and density: {density_R:.3f}")
-        print(f"\n Level {dec_conq-1}  Matrix {node} Rows:", ML[0])
-        print(f"Level  {dec_conq-1}  Matrix {node} Cols:", ML[1])
-        print(f"Level  {dec_conq-1}  Matrix {node} Edges :", ML[2])
-        print(f"\n Level  {dec_conq-1}  Matrix {node1} Rows:", MR[0])
-        print(f"Level {dec_conq-1}  Matrix {node1} Cols:", MR[1])
-        print(f"Level {dec_conq-1}  Matrix {node1} Edges :", MR[2])
-    #sys.exit("Terminating program for cheking . EXIT 108.")
-    ML_size = len(ML[0]) * len(ML[1])
-    MR_size = len(MR[0]) * len(MR[1])
-    if is_small(node, len(ML[0]), len(ML[1])):
-    #if len(ML[0]) <=  min_number_rows or len(ML[1]) <=  min_number_cols or ML_size <=largest_matrix_size:
-        if debug >= 1:
-            print() 
-            print(f" Left Node {node} with size : ({len(ML[0])},{len(ML[1])}) has been added to Small_matricies_QUEUE because of min required number rows = {min_number_rows} or min required  number columns = {min_number_cols} or  matrix size : {ML_size} <= min  required matrix_size = {largest_matrix_size}. "  )
+    #     #sys.exit("Terminating program for cheking . EXIT 108.")
+        if len(rows)-len(rows_res) > min_number_rows and len(cols)-len(cols_res) <= min_number_cols:
+        #if len(rows_res) > min_number_rows and len(cols_res) <= min_number_cols:
+            if debug >= 1:
+                print() 
+                print(f" Left Node {node2} with size : ({len(ML[0])},{len(ML[1])}) has re-entered dec_conquer "  )
+                #sys.exit("Terminating program for cheking . EXIT 111.")
+                print()
+            #temp_obj =  float('-inf')
+            #add_task(Small_matricies_QUEUE, node, ML[0], ML[1], ML[2], None, ML[4], ML[3], temp_obj)
+            decrease_and_conquer(1, node2, ML[0], ML[1], ML[2], 0, 0)
+            if debug >= 2:
+                print()  
+                print(f" Return from node {node2}  with size : ({len(ML[0])},{len(ML[1])}) " )
+            #continue processing with MR 
+            return 
             #sys.exit("Terminating program for cheking . EXIT 111.")
-            print()
-        temp_obj =  float('-inf')
-        add_task(Small_matricies_QUEUE, node, ML[0], ML[1], ML[2], nbL_0, ML[4], ML[3], temp_obj)
-        #continue processing with MR 
-        #return 
-        #sys.exit("Terminating program for cheking . EXIT 111.")
-    else: #continue recursivity by decrease and conquer approach
-        decrease_and_conquer(dec_conq-1, node, ML[0], ML[1], ML[2], KP_time, QBC_time)
-        if debug >= 2:
-            print()  
-            print(f" Return from {node} and continue with node1 = {node1}" )
-    #continue with the right node
-    if is_small(node1, len(MR[0]), len(MR[1])):
-    #if len(MR[0]) <=  min_number_rows or len(MR[1]) <=  min_number_cols or MR_size <=largest_matrix_size:
-        if debug >= 1:
-            print() 
-            print(f" Right Node {node1} with size : ({len(MR[0])},{len(MR[1])}) has been added to Small_matricies_QUEUE because of min number rows = {min_number_rows} or min number columns = {min_number_cols} or  matrix size : {MR_size} <= largest_matrix_size = {largest_matrix_size}."  )
-            #sys.exit("Terminating program for cheking . EXIT 111.")
-            print()
-        temp_obj =  float('-inf')
-        add_task(Small_matricies_QUEUE, node1, MR[0], MR[1], MR[2], nbR_0, MR[4], MR[3], temp_obj)
-        #Small_matricies_QUEUE.append((node, ML[0], ML[1], ML[2]))
-        return 
-    else:  #continue recursivity by decrease and conquer approach
-        if debug >= 1:
-            print() 
-            print(f"calling decrease_and_conquer for node {node1}" )
-        decrease_and_conquer(dec_conq-1, node1, MR[0], MR[1], MR[2], KP_time, QBC_time)
-        if debug >= 1:
-            print() 
-            print(f"return from decrease_and_conquer from {node1}   " )
-    if debug >= 1:
-            print() 
-            print(f"return in decrease_and_conquer from {matrix_name} " )
-    return #global_time #winning_node, rows_ind, cols_ind, density, nb_ones, global_time
+        if len(rows)-len(rows_res)  <= min_number_rows and len(cols)-len(cols_res) > min_number_cols:
+        #if len(rows_res)  <= min_number_rows and len(cols_res) > min_number_cols:
+            if debug >= 1:
+                print() 
+                print(f" Right Node {node3} with size : ({len(MR[0])},{len(MR[1])}) has re-entered dec_conquer "  )
+                #sys.exit("Terminating program for cheking . EXIT 111.")
+                print()
+            decrease_and_conquer(1, node3, MR[0], MR[1], MR[2], 0, 0)
+            if debug >= 2:
+                print()  
+                print(f" Return from node {node3}  with size : ({len(MR[0])},{len(MR[1])}) " )
+            #continue processing with MR 
+            return 
+        if len(rows)-len(rows_res) > min_number_rows and len(cols)-len(cols_res) > min_number_cols:
+        #if len(rows_res) > min_number_rows and len(cols_res) > min_number_cols:
+            if debug >= 1:
+                print() 
+                print(f" Left Node {node2} with size : ({len(ML[0])},{len(ML[1])}) has re-entered dec_conquer "  )
+                #sys.exit("Terminating program for cheking . EXIT 111.")
+                print()
+            decrease_and_conquer(1, node2, ML[0], ML[1], ML[2], 0, 0)
+            if debug >= 2:
+                print()  
+                print(f" Return from node {node2} with size : ({len(ML[0])},{len(ML[1])})  and continue with node = {node3} with size : ({len(MR[0])},{len(MR[1])})  " )
+                print() 
+                print(f" Right Node {node3} with size : ({len(MR[0])},{len(MR[1])}) has re-entered dec_conquer "  )
+                #sys.exit("Terminating program for cheking . EXIT 111.")
+                print()
+            decrease_and_conquer(1, node3, MR[0], MR[1], MR[2], 0, 0)
+            if debug >= 2:
+                print()  
+                print(f" Return from node {node3} with size ({len(MR[0])},{len(MR[1])}) " )
+            return 
+        else:
+            print(f""" Something wrong. This case is not expected
+                  len(rows_res) = {len(rows_res)};  len(cols_res) = {len(cols_res)};
+                  len(rows) = {len(rows)};  len(cols) = {len(cols)};
+                  """)
+            sys.exit("Terminating program to unexpected case ")
 
+        
 
 def write_matrix(rows_data, cols_data, edges):
     """
@@ -3933,7 +4015,7 @@ def visualize_submatrix(rows_data, cols_data, edges, sub_rows: list, sub_cols: l
 
 def is_small(matrix, n_rows, n_cols):
     global min_number_rows, min_number_cols, largest_matrix_size
-    if n_rows <= min_number_rows and n_cols <= min_number_cols : 
+    if n_rows <= min_number_rows or n_cols <= min_number_cols : 
         return True
     else:
         return False
@@ -3941,14 +4023,17 @@ def is_small(matrix, n_rows, n_cols):
 
 if __name__ == '__main__':
     import time
-    min_number_rows = 5 #the number of rows of the matrix is below this value, we stock it in the Small_matricies_QUEUE; 
-    min_number_cols = 20 #the number of columns of the matrix is below this value, we stock it in the Small_matricies_QUEUE; 
+    min_number_rows_percentage = 0.1
+    min_number_cols_percentage = 0.1
+    #min_number_rows = min_number_rows_percentage*len(rows) #the number of rows of the matrix is below this value, we stock it in the Small_matricies_QUEUE; 
+    #min_number_cols = min_number_cols_percentage*len(cols) #the number of columns of the matrix is below this value, we stock it in the Small_matricies_QUEUE; 
     min_portion_zero_clique = 0.05 # when the proportion of the found zero clique in a given matrix is smaller  than this value,  we stop the division and stock  the matrix in the Small_matricies_QUEUE; 
     only_task  = False # allows the perform only task generation (of True), otherwise we proceed to solve the generated tasks
-    tasks_number_to_treat = 1
+    tasks_number_to_treat = 3
     largest_matrix_size = 10 #when a matrix is below this size, we stock it in the Small_matricies_QUEUE; otherwise, it it will be divided 
     König_test = True #allows to debug the updates in König results
     modified_König = False #changes to TRUE when König results have been modified
+    Arg_reverse = False
     # Define a priority queue (max-heap using negative size)
     QUEUE = []
     COPY_QUEUE = []
@@ -3981,6 +4066,8 @@ if __name__ == '__main__':
     else:
         raise ValueError('Input need to be a matrix csv file, or a text file with a specific layout')
     ###################################################################
+    min_number_rows = int(min_number_rows_percentage*len(rows)) #the min_number of rows of the matrix is below this value, we stock it in the Small_matricies_QUEUE; 
+    min_number_cols = int(min_number_cols_percentage*len(cols)) #the min_number of columns of the matrix is below this value, we stock it in the Small_matricies_QUEUE; 
     nb_eges_0 = len(edges_compl)
     nb_eges_1 = len(edges_1)
     if debug >= 1:
@@ -4022,7 +4109,7 @@ if __name__ == '__main__':
     KP_time = 0.0
     QBC_time = 0.0 
     #dec_conq = 2
-    node = 1
+    node = 0
     #winning_node, rows, cols, density, nb_ones, global_time = decrease_and_conquer(dec_conq, node, rows, cols, edges_1, KP_time, QBC_time)
     decrease_and_conquer(dec_conq, node, rows, cols, edges_1, KP_time, QBC_time)
     end_tasks_generation = time.time()
@@ -4057,7 +4144,7 @@ if __name__ == '__main__':
         print("No tasks to process. Exiting.")
         sys.exit(f"Terminating program when no tasks to process.")
     for _, size, (matrix_name, task_rows, task_cols, edges, nb_zeros, nb_ones, density, obj) in sorted_copy_queue:
-        print(f"Matrix: {matrix_name}, Size: {len(task_rows)*len(task_cols)}, #Rows: {len(task_rows)}, #Cols: {len(task_cols)}, #Edges: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: {density:.3f}") #, obj {obj}")
+        print(f"Matrix: {matrix_name}, Size: {len(task_rows)*len(task_cols)}, #Rows: {len(task_rows)}, #Cols: {len(task_cols)}, #Edges: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: {density}") #, obj {obj}")
     if only_task:
         sys.exit(f"Terminating program when all tasks have been generated. Only_task = {only_task} => EXIT 333.")
     if len(QUEUE) == 0:
