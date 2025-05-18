@@ -1035,7 +1035,50 @@ def KP_QBc(cols_data, row_length, nb_edges_0, debug, rho=0.1):
 
     return model
 
-def König_E(rows, cols, edges, max_number_rows, max_number_cols):
+
+def König_E(rows, cols, edges):
+    """
+    ARGUMENTS:
+    ----------
+    * rows: list of the tuples (row, degree) of rows the matrix.
+    * cols: list of the tuples (col, degree) of columns the matrix.
+    * edges: list of tuples (row,col) corresponding to the zeros  of the matrix.
+    """
+
+    # ------------------------------------------------------------------------ #
+    # Model with minimization
+    # ------------------------------------------------------------------------ #
+    model = LpProblem(name='König_E', sense=LpMinimize)
+
+    # ------------------------------------------------------------------------ #
+    # Variables
+    # ------------------------------------------------------------------------ #
+
+    lpRows = {row: (LpVariable(f'row_{row}', 
+    cat='Continous',
+                    lowBound=0, upBound=1), degree) for row, degree in rows}
+    lpCols = {col: (LpVariable(f'col_{col}', 
+    cat='Continous', lowBound=0, upBound=1), degree) for col, degree in cols}
+
+
+    # ------------------------------------------------------------------------ #
+    # Objective function
+    # ------------------------------------------------------------------------ #
+    #model += lpSum([lpvar for lpvar, _ in lpRows.values()] + [lpvar for lpvar, _ in lpCols.values()]), 'min_number'
+
+    model += lpSum([degree*lpvar for lpvar, degree in lpRows.values()] +[degree*lpvar for lpvar, degree in lpCols.values()]), 'min_degrees'
+
+    # ------------------------------------------------------------------------ #
+    # Constraints
+    # ------------------------------------------------------------------------ #
+      # Constraints: each edge must be covered by either row or col
+    for row, col in edges:
+        model += (lpRows[row][0]+lpCols[col][0] >= 1), f'edge_{row}_{col}'
+
+    return model
+# end Köning_E
+
+def König_E_variant(rows, cols, edges, max_number_rows, max_number_cols):
     """
     ARGUMENTS:
     ----------
@@ -1671,7 +1714,7 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
             if debug >= 2:
                 print(f' dec_conq = ', dec_conq, '#rows =', len(rows), '#cols =', len(cols),' nb edges_compl =', len(edges_compl), 'min_number_rows', min_number_rows, 'min_number_cols', min_number_cols,  'max_number_rows', max_number_rows, 'max_number_cols', max_number_cols)
             #model = König_E(rows_compl, cols_compl, edges_1) 
-            model = König_E(rows, cols, edges_compl,max_number_rows, max_number_cols) 
+            model = König_E(rows, cols, edges_compl) 
     try:
         # Solve the model with Gurobi
         model.solve(GUROBI_CMD(msg=False, timeLimit=timelimit))
@@ -1769,8 +1812,8 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                     nb_rem_rows: {len(rem_rows_set)}, nb_rem_cols: {len(rem_cols_set)}
                     # cover_rows_set = {len(cover_rows_set)} 
                     # cover_cols_set = {len(cover_cols_set)}
-                    # sorted_cover_rows_degree = {cover_rows_degree} 
-                    # sorted_cover_cols_degree = {cover_cols_degree}
+                    # sorted_cover_rows_degree = {len(cover_rows_degree)} 
+                    # sorted_cover_cols_degree = {len(cover_cols_degree)}
                     # rem_rows_set = {len(rem_rows_set)}
                     # rem_cols_set = {len(rem_cols_set)}
                     # sorted_rem_rows_degree  = {len(rem_rows_degree)} 
@@ -1927,11 +1970,11 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
             #     print(f"  sorted_rows_res   = {rows_res}   ")
             #     print(f"  sorted_cols_res  = {cols_res}   ")
             #     #sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 114.")
-            if König_test  == True and modified_König == True :
+            if König_test  == True and modified_König == True and  debug >= 2:
                 print(f""" König_test= {König_test};  modified_König=  {modified_König}
                 cover_row_set : length= {len(cover_rows_degree)}; cover_col_set : length= {len(cover_cols_degree)};
-                remaining_rows_set = {len(rem_rows_set)} remaining_rows_set = {rem_rows_set} 
-                remaining_cols_set = {len(rem_cols_set)} remaining_cols_set = {rem_cols_set}
+                remaining_rows_set = {len(rem_rows_set)}  
+                remaining_cols_set = {len(rem_cols_set)} 
                 remaining (rows, degrees) (sorted) = {len(rows_res)} remaining (rows, degrees) (sorted) = {rows_res}
                 remaining (cols, degrees) (sorted)  = {len(cols_res)} remaining (cols, degrees) (sorted)  = {cols_res}
                 König lower bound = {len(cols_res)* len(rows_res)}
@@ -2464,7 +2507,7 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
         print("I am in warm_exact before calling König  $$$$$$$$$$$$$$$$$$")
         print()
     #model = König_E(rows, cols, edges_1)
-    model = König_E(rows, cols, edges_compl,max_number_rows,max_number_cols)
+    model = König_E(rows, cols, edges_compl)
     try:
         # Solve the model König_E  with Gurobi
         model.solve(GUROBI_CMD(msg=False, timeLimit= timelimit))#, options=[("MIPGap", 0.03)]))
@@ -3217,12 +3260,12 @@ def get_submatrices(rows_data, cols_data, edges, rows_res, cols_res):
     rows_MC = [(row, sum(1 for (r, c) in edges_MC  if r == row if c in cols_M2_set)) for row in rows_M1_set]
     cols_MC =  [(col, sum(1 for r, c in edges_MC if c == col if r in rows_M1_set)) for col in cols_M2_ind]
     if debug >= 2:
-        print(f"rows_M1_set = {rows_M1_set} ")
-        print(f"cols_M2_set = {cols_M2_set} ")
-        print(f"edges = {edges} ")
-        print(f"edges_MC= {edges_MC} ")
-        print(f"rows_MC= {rows_MC} ")
-        print(f"cols_MC= {cols_MC} ")
+        print(f" #rows_M1_set = {len(rows_M1_set)} ")
+        print(f" #cols_M2_set = {len(cols_M2_set)} ")
+        print(f" #edges = {len(edges)} ")
+        print(f" #edges_MC= {len(edges_MC)} ")
+        print(f" #rows_MC= {len(rows_MC)} ")
+        print(f" #cols_MC= {len(cols_MC)} ")
     nb1_r =sum(degree for _, degree in rows_M1)
     nb1_c =sum(degree for _, degree in cols_M1)
     if nb1_r != nb1_c:
@@ -3701,8 +3744,8 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
                     len(rows_res)) = {len(rows_res)};  len(cols_res)= {len(cols_res)}, largest_matrix_size = {largest_matrix_size} 
                     min_number_rows = { min_number_rows}; min_number_cols = {min_number_cols}
                     is_small(matrix_name, rows_res, cols_res) = {is_small(matrix_name, len(rows_res), len(cols_res))} 
-                    rows_res = {rows_res}
-                    cols_res = {cols_res}
+                    #rows_res = {len(rows_res)}
+                    #cols_res = {len(cols_res)}
                 """)
         #rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density  = update_data(rows, cols, edges_1, row_indices_list, col_indices_list, debug)
         ML, MR, MC = get_submatrices(rows, cols, edges_1, rows_res, cols_res)
@@ -4023,15 +4066,15 @@ def is_small(matrix, n_rows, n_cols):
 
 if __name__ == '__main__':
     import time
-    min_number_rows_percentage = 0.1
-    min_number_cols_percentage = 0.1
+    min_number_rows_percentage = 0.15
+    min_number_cols_percentage = 0.25
     #min_number_rows = min_number_rows_percentage*len(rows) #the number of rows of the matrix is below this value, we stock it in the Small_matricies_QUEUE; 
     #min_number_cols = min_number_cols_percentage*len(cols) #the number of columns of the matrix is below this value, we stock it in the Small_matricies_QUEUE; 
     min_portion_zero_clique = 0.05 # when the proportion of the found zero clique in a given matrix is smaller  than this value,  we stop the division and stock  the matrix in the Small_matricies_QUEUE; 
-    only_task  = False # allows the perform only task generation (of True), otherwise we proceed to solve the generated tasks
-    tasks_number_to_treat = 3
+    only_task  = True # allows the perform only task generation (of True), otherwise we proceed to solve the generated tasks
+    tasks_number_to_treat = 1
     largest_matrix_size = 10 #when a matrix is below this size, we stock it in the Small_matricies_QUEUE; otherwise, it it will be divided 
-    König_test = True #allows to debug the updates in König results
+    König_test = False #allows to debug the updates in König results
     modified_König = False #changes to TRUE when König results have been modified
     Arg_reverse = False
     # Define a priority queue (max-heap using negative size)
