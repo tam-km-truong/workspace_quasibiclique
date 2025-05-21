@@ -4066,15 +4066,15 @@ def is_small(matrix, n_rows, n_cols):
 
 if __name__ == '__main__':
     import time
-    min_number_rows_percentage = 0.1
-    min_number_cols_percentage = 0.2
+    min_number_rows_percentage = 0.15
+    min_number_cols_percentage = 0.25
     #min_number_rows = min_number_rows_percentage*len(rows) #the number of rows of the matrix is below this value, we stock it in the Small_matricies_QUEUE; 
     #min_number_cols = min_number_cols_percentage*len(cols) #the number of columns of the matrix is below this value, we stock it in the Small_matricies_QUEUE; 
     min_portion_zero_clique = 0.05 # when the proportion of the found zero clique in a given matrix is smaller  than this value,  we stop the division and stock  the matrix in the Small_matricies_QUEUE; 
-    only_task  = False # allows the perform only task generation (of True), otherwise we proceed to solve the generated tasks
+    only_task  = True # allows the perform only task generation (of True), otherwise we proceed to solve the generated tasks
     tasks_number_to_treat = 1
     largest_matrix_size = 10 #when a matrix is below this size, we stock it in the Small_matricies_QUEUE; otherwise, it it will be divided 
-    König_test = True #allows to debug the updates in König results
+    König_test = False #allows to debug the updates in König results
     modified_König = False #changes to TRUE when König results have been modified
     Arg_reverse = False
     # Define a priority queue (max-heap using negative size)
