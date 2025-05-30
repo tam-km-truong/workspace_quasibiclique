@@ -1724,7 +1724,7 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
         # Check if the model has an optimal/feasible solution
         if model.status in [1, 2, 9]:  # 1 = Optimal, 2 = Feasible, 9 = Time limit reached
             obj_value = value(model.objective)  # ✅ Extract objective value           
-            if debug >= 1:
+            if debug >= 2:
                 print('-' * 70)
                 print(f"Computed Objective Value for model {model_name} with  matrix_name = { matrix_name} and obj: {obj_value:.3f}") 
             if debug >= 4:
@@ -1748,28 +1748,18 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                     for var in model.variables()
                     if var.varValue is not None and var.varValue < 0.5
                 }
+  
                 cover_rows = [int(var_name[4:]) for var_name in solution if var_name.startswith("row")]
                 cover_cols = [int(var_name[4:]) for var_name in solution if var_name.startswith("col")]
                 cover_rows_set = set(cover_rows)
                 cover_cols_set = set(cover_cols) 
+
                 rem_rows = [int(var_name[4:]) for var_name in solution_remaining if var_name.startswith("row")]
                 rem_cols = [int(var_name[4:]) for var_name in solution_remaining if var_name.startswith("col")]
                 rem_rows_set = set(rem_rows)
                 rem_cols_set = set(rem_cols)
                 cover_rows_degree = [(index, row_weights[index]) for index in cover_rows_set]
                 cover_cols_degree = [(index, col_weights[index]) for index in cover_cols_set]
-                rem_rows_degree = [(index, row_weights[index]) for index in rem_rows_set]
-                rem_cols_degree = [(index, col_weights[index]) for index in rem_cols_set]
-                    # Build graph to help with neighbor tracking
-                B = nx.Graph()
-                #print("row_weights:", row_weights)
-                #print("Nodes to add (rows):", [f"row_{r}" for r in row_weights])
-                B.add_nodes_from([f"row_{r}" for r in row_weights], bipartite=0)
-                #print(f"Adding  !!! node row  {r} to B" for r in row_weights )
-                B.add_nodes_from([f"col_{c}" for c in col_weights], bipartite=1)
-                for r, c in edges_compl:
-                    B.add_edge(f"row_{r}", f"col_{c}")
-                    #print(f"Adding  edges_compl  ({r}, {c}) to B")
                 #print(f" cover_rows_degree = {cover_rows_degree}   ")
                 #sys.exit(f"Terminating program when testing axtraction added tuples (index, degree)  => EXIT 107.") 
                 cover_rows_degree.sort(key=lambda x: x[1], reverse=Arg_reverse) #reverse=True gives better results  (as can be extected)
@@ -1801,6 +1791,8 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                 # print(f"rem_rows_set = {rem_rows_set}   ")
                 # print(f"rem_cols_set  = {rem_cols_set}   ")
                 #sys.exit(f"Terminating program when testing axtraction added tuples (index, degree)  => EXIT 108.")
+                rem_rows_degree = [(index, row_weights[index]) for index in rem_rows_set]
+                rem_cols_degree = [(index, col_weights[index]) for index in rem_cols_set]
                 # if König_test == True  and modified_König == True and debug >=1 :
                 #     print(f"#rem_rows_degree = {len(rem_rows_degree)}   ")
                 #     print(f"#rem_cols_degree = {len(rem_cols_degree)}   ")
@@ -1830,6 +1822,14 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                     """)
                     #if matrix_name == 5:
                           #sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 111.")
+                # Build graph to help with neighbor tracking
+                B = nx.Graph()
+                B.add_nodes_from([f"row_{r}" for r in row_weights], bipartite=0)
+                #print(f"Adding  !!! node row  {r} to B" for r in row_weights )
+                B.add_nodes_from([f"col_{c}" for c in col_weights], bipartite=1)
+                for r, c in edges_compl:
+                    B.add_edge(f"row_{r}", f"col_{c}")
+                    #print(f"Adding  edges_compl  ({r}, {c}) to B")
 
                 if len(cover_rows_degree) > max_number_rows:
                     modified_König = True
@@ -1846,9 +1846,9 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                               #sorted_cover_rows_degree = {len(cover_rows_degree)} 
                               #sorted_cover_cols_degree = {len(cover_cols_degree)} 
                                """)
-                    while len(cover_rows_degree) >= max_number_rows : # here added +1
+                    while len(cover_rows_degree) > max_number_rows and cover_rows_degree:
                         (r,d) = cover_rows_degree.pop()
-                        if König_test  == True  and modified_König == True and debug >= 2:
+                        if König_test  == True  and modified_König == True and debug >= 1:
                             print(f"""König_test= {König_test}; modified_König= {modified_König}; matrix_name = {matrix_name}  
                                   Removing row {(r,d)} from cover_rows_degree
                                   #cover_rows_degree = {len(cover_rows_degree)}
@@ -1857,9 +1857,9 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                         for c in B.neighbors(f"row_{r}"):
                             c_id = int(c.split("_")[1])
                             #print(f" c = {c} ; c_id = {c_id}  cover_cols=  {cover_cols} max_number_cover_cols =  {max_number_cols} !!!")
-                            while (c_id,col_weights[c_id]) not in cover_cols_degree and len(cover_cols_degree) < max_number_cols -1 : # here added - 1
+                            while (c_id,col_weights[c_id]) not in cover_cols_degree and len(cover_cols_degree) < max_number_cols:
                                 cover_cols_degree.append((c_id,col_weights[c_id]))
-                                if König_test  == True and modified_König == True and debug >= 2:
+                                if König_test  == True and modified_König == True and debug >= 1:
                                     print(f"""  König_test= {König_test};  modified_König=  {modified_König} ;  matrix_name {matrix_name} 
                                     Adding {(c_id,col_weights[c_id])} to cover_cols_degree # cover_cols_degree = {len(cover_cols_degree)}; 
                                     """)
@@ -1897,7 +1897,7 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                     #         sorted(cover_cols_degree): {cover_cols_degree} 
                     #         """)
                         # print(f" modified_König=  {modified_König} ; max_number_cover_cols= {max_number_cols}  len(sorted(candidates) cover_cols): {len(candidates)} ; sorted(candidates) cover_cols: {candidates}") 
-                    while len(cover_cols_degree) >= max_number_cols  : # here added ???
+                    while len(cover_cols_degree) > max_number_cols and cover_cols_degree:
                         (c,d) = cover_cols_degree.pop(0)
                         col_degree_map_c = {col_degree_map[c]}
                         if König_test  == True and modified_König == True and debug >= 1  :
@@ -1910,9 +1910,9 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                             print(f" # B.neighbors(c)= {len(list(B.neighbors(f'col_{c}')))} , where c={c} and col_degree_map_c= {col_degree_map_c} $$$$$$$????")
                         for r in B.neighbors(f"col_{c}"):
                             r_id = int(r.split("_")[1])
-                            while (r_id, row_weights[r_id]) not in cover_rows_degree and len(cover_rows_degree) < max_number_rows -1 : # here added ??1
+                            while (r_id, row_weights[r_id]) not in cover_rows_degree and len(cover_rows_degree) < max_number_rows:
                                 cover_rows_degree.append((r_id, row_weights[r_id]))
-                                if König_test  == True and modified_König == True and debug >= 2 :
+                                if König_test  == True and modified_König == True and debug >= 1 :
                                     print(f""" König_test= {König_test}; modified_König=  {modified_König}; Adding {(r_id, row_weights[r_id])} to cover_rows_degree ; # cover_rows_degree = {len(cover_rows_degree)}; 
                                             # cover_rows_degree = {len(cover_rows_degree)}    
                                             """)
@@ -1970,13 +1970,13 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
             #     print(f"  sorted_rows_res   = {rows_res}   ")
             #     print(f"  sorted_cols_res  = {cols_res}   ")
             #     #sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 114.")
-            if König_test  == True and modified_König == True and  debug >= 1:
+            if König_test  == True and modified_König == True and  debug >= 2:
                 print(f""" König_test= {König_test};  modified_König=  {modified_König}
                 cover_row_set : length= {len(cover_rows_degree)}; cover_col_set : length= {len(cover_cols_degree)};
                 remaining_rows_set = {len(rem_rows_set)}  
                 remaining_cols_set = {len(rem_cols_set)} 
                 remaining (rows, degrees) (sorted) = {len(rows_res)} remaining (rows, degrees) (sorted) = {rows_res}
-                remaining (cols, degrees) (sorted)  = {len(cols_res)} 
+                remaining (cols, degrees) (sorted)  = {len(cols_res)} remaining (cols, degrees) (sorted)  = {cols_res}
                 König lower bound = {len(cols_res)* len(rows_res)}
                 """)
             # if matrix_name == 5:
@@ -1987,23 +1987,24 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                 num_ones = count_ones_in_submatrix(edges_compl,  rows_res,  cols_res)
                 #num_ones = visualize_submatrix(rows, cols, edges_compl, rows_res, cols_res)
                 #print(f"Extracted Solution for {model_name}: Computed total_weight: {total_weight:.3f}, len(cover_rows) = {len(cover_rows)}, len(cover_cols) = {len(cover_cols)}")
-                if König_test == True and modified_König == True and debug >=1:
+                if König_test == True and debug >=1:
                     print() 
                     print(f"""
                     König_test = {König_test} !!!!!! modified_König =  {modified_König} 
                     Extracted Solution for {model_name}:
                     Computed total_weight: {total_weight:.3f},
                     !!!!  nb_cover_rows_degree: {len(cover_rows_degree)}, !!!! nb_cover_cols_degree: {len(cover_cols_degree)},
-                    rows_res (remaining)  = {len(rows_res)}  
+                    rows_res (remaining)  = {len(rows_res)} 
+                    rows_res (remaining)  = {rows_res}   
                     cols_res (remaining) = {len(cols_res)} 
                     number of ones in remaining matrix : {num_ones}
                     """)
-            # if matrix_name == 5:
-            #     rem_row_indices = [row for row ,_ in row_set]
-            #     rem_col_indices = [col for col ,_   in col_set]
-            #     print(f" rem_row_indices = {rem_row_indices}")
-            #     print(f" rem_col_indices = {rem_col_indices}")
-            #     sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 116.")
+            if matrix_name == 5:
+                rem_row_indices = [row for row ,_ in row_set]
+                rem_col_indices = [col for col ,_   in col_set]
+                print(f" rem_row_indices = {rem_row_indices}")
+                print(f" rem_col_indices = {rem_col_indices}")
+                sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 116.")
                  
     except Exception as e:
         print(f"Error during solving: {e}")
@@ -3597,7 +3598,7 @@ def process_tasks(KU, EVALUATED, selected_model, global_time, tasks_number_to_tr
         if debug >=1:
             print() 
             print(f"""
-                ***QUEUE: SOLVING TASKS !!!  
+                ***QUEUE: START SOLVING TASK  
                 Currently is processed task number {matrix_name} with size {len(rows)} * {len(cols)} and density {density:.3f} and edges: {len(edges)}
                 and #ones {nb_ones}  and #zeros {nb_zeros}.  
                 Also, prev_lower_bound {best_obj} and obj_val {obj_val} while tasks_number_to_treat = {tasks_number_to_treat} 
@@ -3870,13 +3871,12 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         node1=3*matrix_name+1
         node2=3*matrix_name+2
         node3=3*matrix_name+3
-        nbC_0, nbC_1, sparsity_C, density_C = density_calcul(MC[0], MC[1])
-        nbL_0, nbL_1, sparsity_L, density_L = density_calcul(ML[0], ML[1])
-        nbR_0, nbR_1, sparsity_R, density_R = density_calcul(MR[0], MR[1])
+        #nbL_0, nbL_1, sparsity_L, density_L = density_calcul(ML[0], ML[1])
+        #nbR_0, nbR_1, sparsity_R, density_R = density_calcul(MR[0], MR[1])
         if debug >= 1:
-            print(f"\n Level {dec_conq-1} Central Matrix: {node1} of size: {len(MC[0])*len(MC[1])};  ({len(MC[0])},{len(MC[1])},{MC[3]:.3f}),  density_C:  {density_C:.3f}, #ones:{MC[4]}; Its father: Matrix {matrix_name}. ")
-            print(f"\n Level {dec_conq-1}  Left Matrix: {node2} of size: {len(ML[0])*len(ML[1])};  ({len(ML[0])},{len(ML[1])}, {ML[3]:.3f}),  density_L:  {density_L:.3f}, #ones:{ML[4]};   Its father: Matrix {matrix_name}. ")
-            print(f"\n Level {dec_conq-1} Rigth Matrix: {node3} of size: {len(MR[0])*len(MR[1])};  ({len(MR[0])},{len(MR[1])}, {MR[3]:.3f}),  density_R:  {density_R:.3f}, #ones:{MR[4]};    Its father: Matrix {matrix_name}. ")
+            print(f"\n Level {dec_conq-1} Central Matrix number: {node1} of size: ({len(MC[0])},{len(MC[1])},{len(MC[2])}),  density:  {MC[3]:.3f}, #ones:{MC[4]}; Its father: Matrix {matrix_name}. ")
+            print(f"\n Level {dec_conq-1}  Left Matrix number: {node2} of size: ({len(ML[0])},{len(ML[1])},{len(ML[2])}),  density:  {ML[3]:.3f}, #ones:{ML[4]};   Its father: Matrix {matrix_name}. ")
+            print(f"\n Level {dec_conq-1} Rigth Matrix number: {node3} of size: ({len(MR[0])},{len(MR[1])},{len(MR[2])}),  density:  {MR[3]:.3f}, #ones:{MR[4]};    Its father: Matrix {matrix_name}. ")
             # print(f"Size Rows: {len(MC[0])}, Size Cols: {len(MC[1])} Size edge1: {len(MC[2])} and #ones {MC[4]} and density: {MC[3]:.3f}    ")
             # print(f"\n Level {dec_conq-1}, Left Matrix {node2}:")
             # print(f"Size Rows: {len(ML[0])}, Size Cols: {len(ML[1])},  Size edge1: {len(ML[2])} and #ones {ML[4]}  and density: {ML[3]}  ") 
@@ -4210,13 +4210,13 @@ if __name__ == '__main__':
     #min_number_rows = min_number_rows_percentage*len(rows) #the number of rows of the matrix is below this value, we stock it in the SLIM ; 
     #min_number_cols = min_number_cols_percentage*len(cols) #the number of columns of the matrix is below this value, we stock it in the SLIM ; 
     min_portion_zero_clique = 0.05 # when the proportion of the found zero clique in a given matrix is smaller  than this value,  we stop the division and stock  the matrix in the SLIM ; 
-    only_task  = False # allows to perform task generation only (if True), otherwise we proceed to solving the generated tasks
-    tasks_number_to_treat = 3
-    atomic_matrix_size_percentage = 0.71 #when a matrix is below this size, we stock it in the Atomic_QUEUE; otherwise, it it will be divided 
+    only_task  = True # allows to perform task generation only (if True), otherwise we proceed to solving the generated tasks
+    tasks_number_to_treat = 1
+    atomic_matrix_size_percentage = 0.6 #when a matrix is below this size, we stock it in the Atomic_QUEUE; otherwise, it it will be divided 
     #atomic_matrix_size  #when a matrix is below this size, we stock it in the Atomic_QUEUE; otherwise, it it will be divided 
     König_test = True #allows to debug the updates in König results
     modified_König = False #changes to TRUE when König results have been modified
-    Arg_reverse = True #garantees choosing neighbours with small degrees when correcting the min_covers found bu König 
+    Arg_reverse = False #garantees choosing neighbours with small degrees when correcting the min_covers found bu König 
     # Define various priority queues (max-heap using negative size)
     ELITE = [] #best candidates
     COPY_ELITE = []
