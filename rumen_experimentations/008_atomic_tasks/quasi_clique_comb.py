@@ -12,6 +12,45 @@ an instance
 
 
 """
+import logging
+import sys
+
+# Custom verbosity levels
+SILENT = 50      # 0 - Critical only
+MINIMAL = 30     # 1 - Warning+
+VERBOSE = 20     # 2 - Info+ 
+DEBUG = 10       # 3 - Debug+
+
+def setup_logger(name: str, verbosity_level=1, log_file=None):
+    """
+    Setup logger with verbosity levels.
+    verbosity_level: 0=silent, 1=minimal, 2=verbose, 3=debug
+    """
+    level_map = {
+        0: SILENT, 1: MINIMAL, 2: VERBOSE, 3: DEBUG
+    }
+    global logger
+    level = level_map.get(verbosity_level, VERBOSE)
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    
+    # Console handler (uses stdout for redirection with >)
+    console_handler = logging.StreamHandler(sys.stdout)
+    # Simple format
+    formatter = logging.Formatter('%(levelname)s - %(message)s')
+    # Full format option:
+    # formatter = logging.Formatter('[%(asctime)s] %(levelname)s - %(name)s: %(message)s')
+    console_handler.setFormatter(formatter)
+    
+    if not logger.hasHandlers():
+        logger.addHandler(console_handler)
+        
+        # File handler (optional)
+        if log_file:
+            file_handler = logging.FileHandler(log_file)
+            file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
+
 from pulp import value, LpStatus, GUROBI_CMD
 import sys
 import csv 
@@ -1616,7 +1655,9 @@ def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, m
             else: # the task is eligible to go to exact 
                 if debug >= 1 and density is not None: 
                     print('-' * 40)
-                    print(f"In solve model_name = {model_name} and dec_conq = {dec_conq} => exact_with_König with nb_rows_in = {len(rows_in)} and nb_cols_in = {len(cols_in)} and density = {density:.3f}") 
+                    print(f"""In solve model_name = {model_name} and dec_conq = {dec_conq} => exact_with_König 
+                          with nb_rows_in = {len(rows_in)} and nb_cols_in = {len(cols_in)} and density = {density:.3f}
+                        """) 
             model_name = 'König_E'
             rows_res, cols_res, density, nb_edges_1, QBC_time_g = exact(dec_conq, matrix_name, model_name, rows_in, cols_in, row_names, col_names, edges_1_in, min_number_rows, min_number_cols, delta, debug, QBC_time)
             QBC_time_h = 0.0 
@@ -1707,7 +1748,8 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
         if dec_conq == 0:
             if debug >= 2:
                 print('-' * 70)
-                print(f' dec_conq = ', dec_conq, '#rows =', len(rows), '#cols =', len(cols),' nb edges_compl =', len(edges_compl), 'min_number_rows', min_number_rows, 'min_number_cols', min_number_cols,  'max_number_rows', max_number_rows, 'max_number_cols', max_number_cols)
+                print(f' dec_conq = ', dec_conq, 'calling König_E with #rows=', len(rows), '#cols =', len(cols))
+                print(f' #edges_compl =', len(edges_compl), 'min_number_rows=', min_number_rows, 'min_number_cols=', min_number_cols, 'max_number_rows=', max_number_rows, 'max_number_cols=', max_number_col)
             model = König_E(rows, cols, edges_compl)
             #model = König_E(rows, cols, edges_1)
         elif dec_conq >= 1:
@@ -1760,57 +1802,18 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                 cover_cols_degree = [(index, col_weights[index]) for index in cover_cols_set]
                 rem_rows_degree = [(index, row_weights[index]) for index in rem_rows_set]
                 rem_cols_degree = [(index, col_weights[index]) for index in rem_cols_set]
+                cover_rows_degree.sort(key=lambda x: x[1], reverse=Arg_reverse) 
+                cover_cols_degree.sort(key=lambda x: x[1], reverse=Arg_reverse)
                     # Build graph to help with neighbor tracking
                 B = nx.Graph()
                 #print("row_weights:", row_weights)
                 #print("Nodes to add (rows):", [f"row_{r}" for r in row_weights])
                 B.add_nodes_from([f"row_{r}" for r in row_weights], bipartite=0)
-                #print(f"Adding  !!! node row  {r} to B" for r in row_weights )
                 B.add_nodes_from([f"col_{c}" for c in col_weights], bipartite=1)
                 for r, c in edges_compl:
                     B.add_edge(f"row_{r}", f"col_{c}")
                     #print(f"Adding  edges_compl  ({r}, {c}) to B")
-                #print(f" cover_rows_degree = {cover_rows_degree}   ")
-                #sys.exit(f"Terminating program when testing axtraction added tuples (index, degree)  => EXIT 107.") 
-                cover_rows_degree.sort(key=lambda x: x[1], reverse=Arg_reverse) #reverse=True gives better results  (as can be extected)
-                cover_cols_degree.sort(key=lambda x: x[1], reverse=Arg_reverse)
-                # if matrix_name == 5:
-                #     print(f"nb cover_rows = {len(cover_rows)}   ")
-                #     print(f"nb cover_cols = {len(cover_cols)}   ")
-                #     print(f"nb rem_rows_set = {len(rem_rows_set)}   ")
-                #     print(f"nb rem_cols_set = {len(rem_cols_set)}   ")
-                #     print(f"# sorted_cover_rows_degree = {len(cover_rows_degree)}   ")
-                #     print(f"# sorted_cover_cols_degree = {len(cover_cols_degree)}   ")
-                    #sys.exit(f"Terminating program when matrix_name = {matrix_name}  => EXIT 108.") 
                 #sys.exit(f"Terminating program when testing axtraction added tuples (index, degree)  => EXIT 107.")
-
-                # (f_row, f_degree)=  cover_rows_degree.pop()
-                # print(f" !! first couple in cover_rows_degree, {(f_row, f_degree)}, {f_row} ")
-                # print(f" new sorted_cover_rows_degree = {cover_rows_degree}   ")
-                # cover_cols_degree.append((f_row, f_degree))
-                # print(f"new cover_cols_set =  {cover_cols_degree} ")
-                # sys.exit(f"Terminating program when testing axtraction added tuples (index, degree)  => EXIT 103.")
-  
-                #(f_sec, f_sec_d)= cover_rows_degree.pop()
-                #print(f" !! second couple in cover_rows_degree, {(f_sec, f_sec_d)}, {f_sec} ")
-                #print(f" new sorted_cover_rows_degree = {cover_rows_degree}   ")
-                #cover_cols_set.add(f_sec)
-                #print(f"new cover_cols_set = {cover_cols_set}   ")
-                #sys.exit(f"Terminating program when testing axtraction added tuples (index, degree)  => EXIT 108.")  
-
-                # print(f"rem_rows_set = {rem_rows_set}   ")
-                # print(f"rem_cols_set  = {rem_cols_set}   ")
-                #sys.exit(f"Terminating program when testing axtraction added tuples (index, degree)  => EXIT 108.")
-                # if König_test == True  and modified_König == True and debug >=1 :
-                #     print(f"#rem_rows_degree = {len(rem_rows_degree)}   ")
-                #     print(f"#rem_cols_degree = {len(rem_cols_degree)}   ")
-                #rem_rows_degree.sort(key=lambda x: x[1], reverse=True)
-                #rem_cols_degree.sort(key=lambda x: x[1], reverse=True)
-                # if matrix_name == 5:
-                #     print(f" # sorted_rem_rows_degree  = {len(rem_rows_degree)}   ")
-                #     print(f" # sorted_rem_cols_degree = {len(rem_cols_degree)}   ")            
-                    #sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 109.")  
-                #if König_test == True and modified_König == True and debug >=2:
                 if König_test == True  and modified_König == True and debug >=1 :
                     print() 
                     print(f"""
@@ -1818,105 +1821,60 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                     Computed by GUROBI OBJECTIVE Value for model {model_name} and matrix_name = {matrix_name}, obj: {obj_value:.3f} !!!
                     #cover_rows: {len(cover_rows)}, max_number_rows: {max_number_rows}, 
                     #cover_cols: {len(cover_cols)}, max_number_cols: {max_number_cols},
-                    #rem_rows: {len(rem_rows_set)}, #rem_cols: {len(rem_cols_set)}
-                    #cover_rows_set = {len(cover_rows_set)} 
-                    #cover_cols_set = {len(cover_cols_set)}
-                    #sorted_cover_rows_degree = {len(cover_rows_degree)} 
-                    #sorted_cover_cols_degree = {len(cover_cols_degree)}
-                    #rem_rows_set = {len(rem_rows_set)}
-                    #rem_cols_set = {len(rem_cols_set)}
-                    #sorted_rem_rows_degree  = {len(rem_rows_degree)} 
-                    #sorted_rem_cols_degree = {len(rem_cols_degree)} 
+                    #rem_rows: {len(rem_rows_set)}, #rem_cols: {len(rem_cols_set)}, Surface(lower_bound): {len(rem_rows_set)*len(rem_cols_set)}
                     """)
-                    #if matrix_name == 5:
-                          #sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 111.")
-
-                if len(cover_rows_degree) > max_number_rows:
+                if len(cover_rows_degree) >= max_number_rows: #here it was >
                     modified_König = True
-                    cover_cols_degree = [(index, col_weights[index]) for index in cover_cols_set]
-                    cover_cols_degree.sort(key=lambda x: x[1], reverse=Arg_reverse)
-                    cover_rows_degree = [(index, row_weights[index]) for index in cover_rows_set]
-                    cover_rows_degree.sort(key=lambda x: x[1], reverse=Arg_reverse)
                     if König_test  == True and modified_König == True and debug >= 1:
                         print(f"""
                               König_test= {König_test} ;  modified_König=  {modified_König} Arg_reverse = {Arg_reverse} ; 
-                              matrix_name = {matrix_name} with len(rows)= {len(rows)}; len(cols)= {len(cols)}
+                              matrix_name = {matrix_name} with #rows = {len(rows)}; #cols= {len(cols)}
                               max_number_cover_rows={max_number_rows}; max_number_cover_cols =  {max_number_cols};  
-                              len(cover_rows_degree) = {len(cover_rows_degree)}; len(cover_cols_degree) = {len(cover_cols_degree)};  
-                              #sorted_cover_rows_degree = {len(cover_rows_degree)} 
-                              #sorted_cover_cols_degree = {len(cover_cols_degree)} 
+                              #cover_rows = {len(cover_rows)}; #cover_cols = {len(cover_cols)};  
                                """)
-                    while len(cover_rows_degree) >= max_number_rows : # here added +1
+                    while len(cover_rows_degree) >= max_number_rows : # here it was >=
                         (r,d) = cover_rows_degree.pop()
                         if König_test  == True  and modified_König == True and debug >= 2:
                             print(f"""König_test= {König_test}; modified_König= {modified_König}; matrix_name = {matrix_name}  
-                                  Removing row {(r,d)} from cover_rows_degree
-                                  #cover_rows_degree = {len(cover_rows_degree)}
+                                  Removing row {(r,d)} from cover_rows
+                                  #cover_rows = {len(cover_rows_degree)}
                                   """)
-                            print(f" # B.neighbors(r)= {len(list(B.neighbors(f'row_{r}')))} , where r: {r}  while weight_r = {row_weights[r]} $$$$$$$????")
+                            print(f"#B.neighbors(r)= {len(list(B.neighbors(f'row_{r}')))} , where r: {r}  while weight_r = {row_weights[r]} ????")
                         for c in B.neighbors(f"row_{r}"):
                             c_id = int(c.split("_")[1])
-                            #print(f" c = {c} ; c_id = {c_id}  cover_cols=  {cover_cols} max_number_cover_cols =  {max_number_cols} !!!")
-                            while (c_id,col_weights[c_id]) not in cover_cols_degree and len(cover_cols_degree) < max_number_cols -1 : # here added - 1
+                            if (c_id,col_weights[c_id]) not in cover_cols_degree and len(cover_cols_degree) < max_number_cols -1 : # here it was  - 1
                                 cover_cols_degree.append((c_id,col_weights[c_id]))
                                 if König_test  == True and modified_König == True and debug >= 2:
                                     print(f"""  König_test= {König_test};  modified_König=  {modified_König} ;  matrix_name {matrix_name} 
-                                    Adding {(c_id,col_weights[c_id])} to cover_cols_degree # cover_cols_degree = {len(cover_cols_degree)}; 
+                                    Adding {(c_id,col_weights[c_id])} to cover_cols, #cover_cols_degree = {len(cover_cols_degree)};  #cover_rows_degree = {len(cover_rows_degree)}
                                     """)
                                
-
-                if len(cover_cols_degree) > max_number_cols:
+                if len(cover_cols_degree) >= max_number_cols: #here it was 
                     modified_König = True 
-                    cover_cols_degree = [(index, col_weights[index]) for index in cover_cols_set]
-                    cover_cols_degree.sort(key=lambda x: x[1], reverse=Arg_reverse)
-                    cover_rows_degree = [(index, row_weights[index]) for index in cover_rows_set]
-                    cover_rows_degree.sort(key=lambda x: x[1], reverse=Arg_reverse)
-                    # if  König_test == True and modified_König == True and debug >=2:
-                    #     print(f""" ??????????????  #cover_cols = {len(cover_cols_degree)} >  max_number_cols = {max_number_cols}
-                    #            cover_cols_degree = {cover_cols_degree}  """)
                     if König_test  == True and modified_König == True and debug >= 1:
                         print(f"""
                               König_test= {König_test} ;  modified_König=  {modified_König} Arg_reverse = {Arg_reverse}; 
-                              matrix_name = {matrix_name} with len(rows)= {len(rows)}; len(cols)= {len(cols)}
+                              matrix_name = {matrix_name} with #rows = {len(rows)}; #cols = {len(cols)}
                               max_number_cover_rows={max_number_rows}; max_number_cover_cols =  {max_number_cols}; 
-                              len(cover_rows_degree) = {len(cover_rows_degree)}; len(cover_cols_degree) = {len(cover_cols_degree)};  
-                              #sorted_cover_rows_degree = {len(cover_rows_degree)} 
-                              #sorted_cols_degree = {len(cover_cols_degree)} 
+                              #cover_rows = {len(cover_rows)}; #cover_cols = {len(cover_cols)};  
                                """)
-
-                    # if König_test  == True  and modified_König == True  and debug >=2:
-                    #     print(f" modified_König became {modified_König} since  len(cover_cols)  {len(cover_cols)} > max_number_cols:  {max_number_cols}" )
-                    #candidate_cols  = sorted(cover_cols_degree, key=lambda x: x[1])
-                    # if König_test  == True and modified_König == True  and debug >=2:
-                    #     print(f"""
-                    #         König_test= {König_test} ;  modified_König=  {modified_König} ; 
-                    #         matrix_name = {matrix_name} with len(rows)= {len(rows)}; len(cols)= {len(cols)}
-                    #         max_number_cover_rows={max_number_rows}; max_number_cover_cols =  {max_number_cols};  
-                    #         len(cover_rows_degree) = {len(cover_rows_degree)}; len(cover_cols_degree) = {len(cover_cols_degree)};
-                    #         cover_rows_degree = {cover_rows_degree} 
-                    #         sorted(cover_cols_degree): {cover_cols_degree} 
-                    #         """)
-                        # print(f" modified_König=  {modified_König} ; max_number_cover_cols= {max_number_cols}  len(sorted(candidates) cover_cols): {len(candidates)} ; sorted(candidates) cover_cols: {candidates}") 
-                    while len(cover_cols_degree) >= max_number_cols  : # here added ???
+                    while len(cover_cols_degree) >= max_number_cols  : # here it was >= 
                         (c,d) = cover_cols_degree.pop(0)
                         col_degree_map_c = {col_degree_map[c]}
                         if König_test  == True and modified_König == True and debug >= 1  :
-                        #if matrix_name == 5:
-                            print(f""" König_test= {König_test};  modified_König=  {modified_König} ;  matrix_name 
-                                  Removing col {(c,d)}  where col_degree_map_c = {col_degree_map_c} = (weight[c] = {col_weights[c]})
-                                  from cover_cols_degree cover_cols_degree with lenght  {len(cover_cols_degree)}. 
+                            print(f"""König_test= {König_test};  modified_König=  {modified_König} ;  matrix_name = {matrix_name}
+                                  Removing col {(c,d)}  where col_degree_map_c = {col_degree_map_c} = weight[c] = {col_weights[c]} from cover_cols where #cover_cols = {len(cover_cols_degree)}. 
                                   """)
                             #sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 111.")
-                            print(f" # B.neighbors(c)= {len(list(B.neighbors(f'col_{c}')))} , where c={c} and col_degree_map_c= {col_degree_map_c} $$$$$$$????")
+                            print(f"#B.neighbors(c)= {len(list(B.neighbors(f'col_{c}')))}, where c={c} and col_degree_map_c= {col_degree_map_c} $$$$$$$????")
                         for r in B.neighbors(f"col_{c}"):
                             r_id = int(r.split("_")[1])
-                            while (r_id, row_weights[r_id]) not in cover_rows_degree and len(cover_rows_degree) < max_number_rows -1 : # here added ??1
+                            if (r_id, row_weights[r_id]) not in cover_rows_degree and len(cover_rows_degree) < max_number_rows -1 : # here it was - 1
                                 cover_rows_degree.append((r_id, row_weights[r_id]))
                                 if König_test  == True and modified_König == True and debug >= 2 :
-                                    print(f""" König_test= {König_test}; modified_König=  {modified_König}; Adding {(r_id, row_weights[r_id])} to cover_rows_degree ; # cover_rows_degree = {len(cover_rows_degree)}; 
-                                            # cover_rows_degree = {len(cover_rows_degree)}    
-                                            """)
-                                    #sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 111.")
+                                    print(f"""König_test= {König_test}; modified_König {modified_König};
+                                        Adding row {(r_id, row_weights[r_id])} to cover_rows_degree ; #cover_rows = {len(cover_rows_degree)}; #cover_cols = {len(cover_cols_degree)}    
+                                        """)
 
                 cover_row_indices = [row for row, _ in cover_rows_degree]
                 cover_col_indices = [col for col, _  in cover_cols_degree]
@@ -1928,15 +1886,10 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                 
                 if König_test  == True and modified_König == True and debug >= 1 :
                      print(f""" König_test= {König_test};  modified_König=  {modified_König};  for matrix_name = {matrix_name}
-                     NEW cover_rows: length = {len(cover_rows_degree)}; NEW cover_cols: length = {len(cover_cols_degree)};
-                     Its total_weight (NEW OBJECTOVE VALUE)  = {total_weight}!!!
-                     length new_cover_rows = {len(cover_rows_degree)}; length new_cover_cols = {len(cover_cols_degree)}
+                     NEW #cover_rows = {len(cover_rows_degree)}; NEW #cover_cols = {len(cover_cols_degree)};
+                     Its total_weight (NEW OBJECTIVE VALUE)  = {total_weight}!!!
+                     #new_cover_rows = {len(cover_rows_degree)}; #new_cover_cols = {len(cover_cols_degree)}
                      """) 
-                
-            # if matrix_name == 2:
-            #     sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 112.")
-            # Convert extracted indices back to tuples (index, degree)
-
             row_indices = [row for row,_ in rows]
             col_indices = [col for col,_  in cols]
             row_set = set(row_indices)
@@ -1946,31 +1899,16 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                 rem_cols_set = col_set - cover_cols_set
             rem_row_indices = [row for row in rem_rows_set]
             rem_col_indices = [col for col  in rem_cols_set]
-            if König_test  == True and modified_König == True :   
+            if König_test  == True and modified_König == True and  debug >= 1:   
                 print(f" #row_set =  {len(row_set)}; ")
                 print(f" #col_set =  {len(col_set)} ")
                 print(f" #cover_rows_set =  {len(cover_rows_set)}  ")
                 print(f" #cover_cols_set =  {len(cover_cols_set)}  ")
                 print(f" #rem_rows_set =  {len(rem_rows_set)}  ")
                 print(f" #rem_cols_set =  {len(rem_cols_set)} ")
-
-            # if matrix_name == 5:
-            #     print(f"#rem_row_indices = {len(rem_row_indices)}, rem_row_indices = {rem_row_indices}   $$$$$$$$$$$$$$$$$$$$ ")                    
-            #     print(f"#rem_col_indices = {len(rem_col_indices)},  rem_col_indices = {rem_col_indices},$$$$$$$$$$$$$$$$$$$$ ")
-                #sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 113.")
             rows_res = [(index, row_degree_map[index]) for index in rem_rows_set]
             cols_res = [(index, col_degree_map[index]) for index in rem_cols_set]
-
-            #rows_res.sort(key=lambda x: x[1], reverse=False)
-            #cols_res.sort(key=lambda x: x[1], reverse=False)
-
-            # if matrix_name == 5:
-            #     print(f" # rows_res (remaining)  = {len(rows_res)}   ")
-            #     print(f" # cols_res (remaining) = {len(cols_res)}   ")
-            #     print(f"  sorted_rows_res   = {rows_res}   ")
-            #     print(f"  sorted_cols_res  = {cols_res}   ")
-            #     #sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 114.")
-            if König_test  == True and modified_König == True and  debug >= 1:
+            if König_test and modified_König and debug >= 1:
                 print(f""" König_test= {König_test};  modified_König=  {modified_König}
                 cover_row_set : length= {len(cover_rows_degree)}; cover_col_set : length= {len(cover_cols_degree)};
                 remaining_rows_set = {len(rem_rows_set)}  
@@ -1979,32 +1917,20 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                 remaining (cols, degrees) (sorted)  = {len(cols_res)} 
                 König lower bound = {len(cols_res)* len(rows_res)}
                 """)
-            # if matrix_name == 5:
-            #     sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 115.")
-            # Print the solution 
             if debug >= 1:
                 print('-' * 70)
                 num_ones = count_ones_in_submatrix(edges_compl,  rows_res,  cols_res)
-                #num_ones = visualize_submatrix(rows, cols, edges_compl, rows_res, cols_res)
-                #print(f"Extracted Solution for {model_name}: Computed total_weight: {total_weight:.3f}, len(cover_rows) = {len(cover_rows)}, len(cover_cols) = {len(cover_cols)}")
                 if König_test == True and modified_König == True and debug >=1:
                     print() 
                     print(f"""
                     König_test = {König_test} !!!!!! modified_König =  {modified_König} 
                     Extracted Solution for {model_name}:
                     Computed total_weight: {total_weight:.3f},
-                    !!!!  nb_cover_rows_degree: {len(cover_rows_degree)}, !!!! nb_cover_cols_degree: {len(cover_cols_degree)},
-                    rows_res (remaining)  = {len(rows_res)}  
-                    cols_res (remaining) = {len(cols_res)} 
+                    !!!!  #cover_rows_degree: {len(cover_rows_degree)}, !!!! #cover_cols_degree: {len(cover_cols_degree)},
+                    #rows_res (remaining)  = {len(rows_res)}  
+                    #cols_res (remaining) = {len(cols_res)} 
                     number of ones in remaining matrix : {num_ones}
                     """)
-            # if matrix_name == 5:
-            #     rem_row_indices = [row for row ,_ in row_set]
-            #     rem_col_indices = [col for col ,_   in col_set]
-            #     print(f" rem_row_indices = {rem_row_indices}")
-            #     print(f" rem_col_indices = {rem_col_indices}")
-            #     sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 116.")
-                 
     except Exception as e:
         print(f"Error during solving: {e}")
     # Print model status
@@ -2023,7 +1949,7 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
     if model.status in [1, 2, 9]: 
         if model.status == 9: 
             print()
-            print(f" !!!!! When soving matrix {matrix_name} with  model {model_name} the time limit of {timelimit} has been reached ")
+            print(f" !!!!! When solving matrix {matrix_name} with  model {model_name} the time limit of {timelimit} has been reached ")
             print()  
         # Save the solution to a CSV file 
         if p.lower().endswith('.csv'):
@@ -2034,12 +1960,11 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
 
         with open(solution_file, mode="w", newline="") as file:
             writer = csv.writer(file)
-
             # Write the objective value
             if model_name == 'König_E':
                 lower_bound = len(rows_res)*len(cols_res)
-                print(f"Lower Bound Value by König_E: {lower_bound:.3f}")
-                writer.writerow(["Lower Bound Value by König_E:",lower_bound])
+                print(f"LB by König_E (extended): {lower_bound:.3f}")
+                writer.writerow(["LB by König_E (extended):",lower_bound])
             elif model_name == 'max_e_h' :
                 lower_bound = len(rows_res)*len(cols_res)
                 writer.writerow(["Lower Bound Value by max_e_h:",lower_bound])
@@ -2049,9 +1974,9 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                 writer.writerow(["Objective Value", obj_value])
 
             # Write number of rows
-            writer.writerow(["# of rows", len(rows_res)])
+            writer.writerow(["#rows", len(rows_res)])
             # Write number of columns
-            writer.writerow(["# of columns", len(cols_res)])
+            writer.writerow(["#columns", len(cols_res)])
 
             # Write variable values
             writer.writerow(["Variable", "Value"])
@@ -2060,17 +1985,12 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                     if var_name.startswith("row") or var_name.startswith("col"): 
                         writer.writerow([var_name, var_value])
             else:
-                #sys.exit("Terminating program due to checking. EXIT 1")
-                # for var_name, var_value in solution_remaining.items():
-                #     if var_name.startswith("row") or var_name.startswith("col"): 
-                #         writer.writerow([var_name, var_value])
-
                 for var_name in rem_row_indices:
                      writer.writerow([var_name, 0]) 
                 for var_name in rem_col_indices:
                      writer.writerow([var_name, 0])
 
-        print(f"Solution of matrix {matrix_name} saved to {solution_file}")
+        print(f"After extension König Solution of matrix {matrix_name} saved to {solution_file}")
         #sys.exit("Terminating program due to checking. EXIT 1")
     #return rows_res, cols_res, obj_value
     else:
@@ -2079,20 +1999,22 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
         model.writeLP("debug_model_when_infeasible.lp")
 
     #if not rows_res or not cols_res :  # Equivalent to checking len(rows_res) == 0
-    if not cols_res :  # Equivalent to checking len(cols_res) == 0
+    if not rows_res or not cols_res :  # Equivalent to checking len(cols_res) == 0
         if debug >= 1:
-            print(f"Matrix degeneration. All columns deleted. Continue with previous columns")
-        cols_res = [index for index, _ in cols_res]
-    rows_res = [index for index, _ in rows_res]
-    cols_res = [index for index, _ in cols_res]
+            print(f"Matrix degeneration. König returns degenerated matrix. Continue without  König")
+        rows_res = [str(c) for c,_ in rows]
+        rows_res = [int(r) for r in rows_res]
+        cols_res = [str(c) for c,_ in cols]
+        cols_res = [int(c) for c in cols_res]
     # Convert from 0-based to the original row/column names
-    # row_names_res = [row_names[r] for r in row_indices if 0 <= r < len(row_names)]
-    # col_names_res = [col_names[c] for c in row_indices if 0 <= c < len(col_names)]
-    row_names_res = [row_names[r] for r in rows_res if 0 <= r < len(row_names)]
-    col_names_res = [col_names[c] for c in cols_res if 0 <= c < len(col_names)]
+    row_names_res = [row_names[r] for r in rem_row_indices if 0 <= r < len(rem_row_indices)] #just added 
+    col_names_res = [col_names[c] for c in rem_col_indices if 0 <= c < len(rem_col_indices)] #just added 
+    #row_names_res = [row_names[r] for r in rows_res if 0 <= r < len(row_names)]
+    #col_names_res = [col_names[c] for c in cols_res if 0 <= c < len(col_names)]
     row_names_res = [int(r) if isinstance(r, (np.int64, np.int32)) else r for r in row_names_res]
+    col_names_res = [int(r) if isinstance(r, (np.int64, np.int32)) else r for r in col_names_res]
     #nbi_0, nbi_1, sparsity, density = density_calcul(rows_res, cols_res)
-    if debug >= 3: 
+    if debug >= 2: 
         print("\n-- Debugging Step: debug = ???, debug, checking extracted solution after solving model **** --", model.name )
         print('len_rows_res=', len(rows_res))
         #print('row_res=', rows_res)
@@ -2362,7 +2284,7 @@ def warm_exact(prev_lower_bound, dec_conq, matrix_name,model_name, rows, cols, r
     if  model.status == 0:
         print("*****Model in warm start is infeasible.!!! The given lower bound cannot be improved. Return the below data*** ")
         #the solution found by the heuristic cannot be improved. Return it as the final solution
-        if debug >=3:
+        if debug >=2:
             print(f"rows_rem: {rows_rem}, \n  cols_rem: {cols_rem},  \n  rows_res: {rows_res},  \n  cols_res: {cols_res},  \n  lower_bound  {lower_bound}")
         return rows_rem, cols_rem, density, lower_bound, QBC_time_h, QBC_time_r
     if debug >= 1:
@@ -2494,15 +2416,23 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
     obj_value = None  # ✅ Initialize to None
     rows_res = []
     cols_res = []
+    global modified_König
+    modified_König = False
+    row_weights = dict(rows)
+    col_weights = dict(cols)
+    row_degree_map = {row: degree for row, degree in rows}
+    col_degree_map = {col: degree for col, degree in cols}
+
     max_number_rows = len(rows)-min_number_rows
     max_number_cols = len(cols)-min_number_cols
     rows_compl, cols_compl, edges_compl = get_complement_rowcols(rows, cols, edges_1)
     # obj_total =  0.0
     #############################
-    if debug >= 3:
+    if debug >= 2:
         print('-' * 40)
         print()
-        print("I am in warm_exact before calling König  $$$$$$$$$$$$$$$$$$")
+        print("I am in warm_exact just before calling König_E  $$$$$$$$$")
+        print(f'with #rows=', len(rows), '#cols =', len(cols),' #edges_compl =', len(edges_compl))
         print()
     #model = König_E(rows, cols, edges_1)
     model = König_E(rows, cols, edges_compl)
@@ -2510,30 +2440,206 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
         # Solve the model König_E  with Gurobi
         model.solve(GUROBI_CMD(msg=False, timeLimit= timelimit))#, options=[("MIPGap", 0.03)]))
         # Print model status
-        if debug >= 2:
+        if debug >= 1:
             print('-' * 70)
-            print(f"Model status: {LpStatus[model.status]}")
+            print(f"Model status: {LpStatus[model.status]}  model.status = {model.status} model_name = {model_name} ")
         # Extract solution values (only nonzero rows and columns)
         if model.status in [1, 2, 9]:  # 1 = Optimal, 2 = Feasible, 9 = Time limit reached
             obj_value = value(model.objective) # ✅ Extract objective value
-            if debug >= 2:
+            if debug >= 1:
                 print('-' * 70)
-                print(f"Computed by König_E Objective Value : {obj_value:.3f} ")
-            # Extract solution values (only nonzero rows and columns)
-            solution = {
-                var.name: var.varValue
-                for var in model.variables()
-                if var.varValue <= 0.5#and var_name.startswith("row") or var_name.startswith("col")
+                print(f"Computed Objective Value for model {model_name} with  matrix_name = { matrix_name} and obj: {obj_value:.3f}") 
+            if debug >= 4:
+                print('-' * 70)  
+                for var in model.variables():
+                    print(f"{var.name} = {var.varValue}")       
+            # Extract solution values 
+            solution = {    #corresponds to rows/cols that deleted by Kônig
+                    var.name: var.varValue
+                    for var in model.variables()
+                    if var.varValue is not None and var.varValue > 0.5
+            }
+            solution_remaining = {  #corresponds to rows/cols that remain after deletion   
+                    var.name: var.varValue
+                    for var in model.variables()
+                    if var.varValue is not None and var.varValue < 0.5
             }
             # Read results and classify into rows and columns
-            # row_indices = [int(var_name[4:]) for var_name in solution if var_name.startswith("row")]
-            # col_indices = [int(var_name[4:]) for var_name in solution if var_name.startswith("col")]
-
-            rows_res = [var_name[4:] for var_name in solution if var_name.startswith("row")]
-            cols_res = [var_name[4:] for var_name in solution if var_name.startswith("col")]
+            cover_rows = [int(var_name[4:]) for var_name in solution if var_name.startswith("row")]
+            cover_cols = [int(var_name[4:]) for var_name in solution if var_name.startswith("col")]
+            cover_rows_set = set(cover_rows)
+            cover_cols_set = set(cover_cols) 
+            rem_rows = [int(var_name[4:]) for var_name in solution_remaining if var_name.startswith("row")]
+            rem_cols = [int(var_name[4:]) for var_name in solution_remaining if var_name.startswith("col")]
+            rem_rows_set = set(rem_rows)
+            rem_cols_set = set(rem_cols)
+            cover_rows_degree = [(index, row_weights[index]) for index in cover_rows_set]
+            cover_cols_degree = [(index, col_weights[index]) for index in cover_cols_set]
+            rem_rows_degree = [(index, row_weights[index]) for index in rem_rows_set]
+            rem_cols_degree = [(index, col_weights[index]) for index in rem_cols_set]
+            cover_rows_degree.sort(key=lambda x: x[1], reverse=Arg_reverse) 
+            cover_cols_degree.sort(key=lambda x: x[1], reverse=Arg_reverse)
+            print(f"After solving König : cover_rows_set = {len(cover_rows_set)},  cover_cols_set = {len(cover_cols_set)}************** ")
+            print(f"After solving König : rem_rows_set = {len(rem_rows_set)},  rem_cols_set = {len(rem_cols_set)}************** ")
+                # Build graph to help with neighbor tracking
+            B = nx.Graph()
+            #print("row_weights:", row_weights)
+            #print("Nodes to add (rows):", [f"row_{r}" for r in row_weights])
+            B.add_nodes_from([f"row_{r}" for r in row_weights], bipartite=0)
+            B.add_nodes_from([f"col_{c}" for c in col_weights], bipartite=1)
+            for r, c in edges_compl:
+                B.add_edge(f"row_{r}", f"col_{c}")
+            #print(f"Adding  edges_compl  ({r}, {c}) to B")#reverse=True gives better results  (as can be extected)
+            if König_test  and debug >=1 :
+                print() 
+                print(f"""
+                !!!!!!  König_test = {König_test} !!!!!! modified_König =  {modified_König}
+                Computed by GUROBI OBJECTIVE Value for model {model_name} and matrix_name = {matrix_name}, obj: {obj_value:.3f} !!!
+                #cover_rows: {len(cover_rows)}, max_number_rows: {max_number_rows}, 
+                #cover_cols: {len(cover_cols)}, max_number_cols: {max_number_cols},
+                #rem_rows: {len(rem_rows_set)}, #rem_cols: {len(rem_cols_set)}, Surface(lower_bound): {len(rem_rows_set)*len(rem_cols_set)}
+                """)
+            if len(cover_rows_degree) > max_number_rows: #here it was >
+                modified_König = True
+                if König_test   and modified_König and debug >= 1:
+                    print(f"""
+                        König_test= {König_test} ;  modified_König=  {modified_König} Arg_reverse = {Arg_reverse} ; 
+                        matrix_name = {matrix_name} with len(rows)= {len(rows)}; len(cols)= {len(cols)}
+                        max_number_cover_rows={max_number_rows}; max_number_cover_cols =  {max_number_cols};  
+                        #cover_rows = {len(cover_rows)}; #cover_cols = {len(cover_cols)};  
+                        """)               
+                while len(cover_rows_degree) > max_number_rows : # here added +1;  to be checked the equal case 
+                    (r,d) = cover_rows_degree.pop()
+                    if König_test  and modified_König and debug >= 2:
+                        print(f"""König_test= {König_test}; modified_König= {modified_König}; matrix_name = {matrix_name}  
+                        Removing row {(r,d)} from cover_rows  #cover_rows = {len(cover_rows_degree)}
+                         """)
+                        print(f"#B.neighbors(r)= {len(list(B.neighbors(f'row_{r}')))} , where r={r}  while weight_r={row_weights[r]} ????")
+                    for c in B.neighbors(f"row_{r}"):
+                        c_id = int(c.split("_")[1])
+                        if (c_id,col_weights[c_id]) not in cover_cols_degree  and len(cover_cols_degree) < max_number_cols : #-1 : # attention here added - 1
+                            cover_cols_degree.append((c_id,col_weights[c_id]))
+                            if König_test  and modified_König  and debug >= 2:
+                                    print(f"""  König_test= {König_test};  modified_König=  {modified_König} ;  matrix_name {matrix_name} 
+                                    Adding {(c_id,col_weights[c_id])} to cover_cols, #cover_cols_degree = {len(cover_cols_degree)};  #cover_rows_degree = {len(cover_rows_degree)}
+                                    """)
+            print(f""" I exit cover updates EXIT 665 !!!!!!!!!!!!!!!!!!
+                  """)                            
+            if len(cover_cols_degree) > max_number_cols: #here it was >
+                modified_König = True 
+                if König_test  and modified_König  and debug >= 1:
+                    print(f"""
+                        König_test= {König_test} ;  modified_König=  {modified_König} Arg_reverse = {Arg_reverse}; 
+                        matrix_name = {matrix_name} with len(rows)= {len(rows)}; len(cols)= {len(cols)}
+                        max_number_cover_rows={max_number_rows}; max_number_cover_cols =  {max_number_cols}; 
+                        #cover_rows = {len(cover_rows)}; #cover_cols = {len(cover_cols)};  
+                        """)
+                while len(cover_cols_degree) > max_number_cols: # here added ???
+                    (c,d) = cover_cols_degree.pop(0)
+                    col_degree_map_c = {col_degree_map[c]}
+                    # if König_test  and modified_König  and debug >= 1  :
+                    #     print(f"""König_test= {König_test};  modified_König=  {modified_König} ;  matrix_name = {matrix_name}
+                    #     Removed col {(c,d)} from cover_cols. Then length cover_cols={len(cover_cols_degree)} while max_number_cols={max_number_cols}
+                    #     """)
+                    #     print(f"#B.neighbors(c)= {len(list(B.neighbors(f'col_{c}')))}, where c={c} and col_degree_map_c= {col_degree_map_c} $$$$$$$????")
+                    for r in B.neighbors(f"col_{c}"):
+                        r_id = int(r.split("_")[1])
+                        #print(f" (r_id, row_weights[r_id]) = {(r_id, row_weights[r_id])} before if test")
+                        if (r_id, row_weights[r_id]) not in cover_rows_degree and len(cover_rows_degree) < max_number_rows:  #-1 : # attention here added ??1
+                            cover_rows_degree.append((r_id, row_weights[r_id]))
+                            #print(f" (r_id, row_weights[r_id]) = {(r_id, row_weights[r_id])} after if test")
+                            # if König_test  and modified_König and debug >= 1 :
+                            #     print(f""" König_test= {König_test}; modified_König=  {modified_König}; 
+                            #         Added {(r_id, row_weights[r_id])} to cover_rows_degree. Then #cover_rows_degree = {len(cover_rows_degree)} and max_number_rows = {max_number_rows}
+                            #         while cover_cols with lenght  {len(cover_cols_degree)} and  max_number_cols= {max_number_cols}
+                            #         """)
+                    #print(f" Finished for loop for  B.neighbors(col_{c}):")
+                print(f"I exit while loop  EXIT 666 !!!!!!!!!!!!!!!!!!")
+            #sys.exit(f"Terminating program when König I exit cover updates EXIT 666 !!!!!!!!!!!!!!!!!!.")
+            cover_row_indices = [row for row, _ in cover_rows_degree]
+            cover_col_indices = [col for col, _  in cover_cols_degree]
+            cover_rows_set = set(cover_row_indices)
+            cover_cols_set = set(cover_col_indices)
+            if König_test and modified_König  and debug >= 1 :
+                print(f""" König_test= {König_test};  modified_König=  {modified_König};  for matrix_name = {matrix_name}
+                NEW #cover_rows_degree = {len(cover_rows_degree)}; NEW #cover_cols_degree = {len(cover_cols_degree)};
+                #new_cover_rows_set = {len(cover_rows_set)}; #new_cover_cols_set = {len(cover_cols_set)}
+                """) 
+                # Final total weight
+            total_weight = sum(row_weights[r] for r in cover_rows_set) + \
+                            sum(col_weights[c] for c in cover_cols_set)           
+            if König_test  and modified_König and debug >= 1 :
+                print(f""" König_test= {König_test};  modified_König=  {modified_König};  for matrix_name = {matrix_name}
+                NEW #cover_rows = {len(cover_rows_degree)}; NEW #cover_cols = {len(cover_cols_degree)};
+                Its new TOTAL_weight = {total_weight}!!!
+                #new_cover_rows = {len(cover_rows_degree)}; #new_cover_cols = {len(cover_cols_degree)}
+                """)
+            print("&&&&&") 
+            #sys.exit(f"Terminating program when König is working  line 2546 => EXIT 111.")
+            row_indices = [row for row,_ in rows]
+            col_indices = [col for col,_  in cols]
+            row_set = set(row_indices)
+            col_set = set(col_indices)
+            #import pdb; pdb.set_trace()
+            print(f" #row_set =  {len(row_set)}; ")
+            print(f"LINE 2544 #col_set =  {len(col_set)} ")
+            print(f" LINE 2545 !!! ")
+            if modified_König :
+                rem_rows_set = row_set - cover_rows_set
+                rem_cols_set = col_set - cover_cols_set
+                print(f" LINE 2549 !!! ")
+                print(f" #rem_rows_set =  {len(rem_rows_set)}  ")
+                print(f" #rem_cols_set =  {len(rem_cols_set)} ")
+                #sys.exit(f"Terminating program at line 2553 => EXIT 110.")
+            #sys.exit(f"Terminating program at line 2554 => EXIT 111.")
+            rem_row_indices = list(rem_rows_set)
+            rem_col_indices = list(rem_cols_set)
+            print(f" #rem_row_indices =  {len(rem_row_indices)}  ")
+            print(f" #rem_col_indices =  {len(rem_col_indices)} ")
+            print(f" LINE 2552 !!! ")
+            if König_test and modified_König and  debug >= 1: 
+                print(f" LINE 2556 !!! ")  
+                print(f" #row_set =  {len(row_set)}; ")
+                print(f" #col_set =  {len(col_set)} ")
+                print(f" LINE 2559 !!! ")
+                print(f" #cover_rows_set =  {len(cover_rows_set)}  ")
+                print(f" #cover_cols_set =  {len(cover_cols_set)}  ")
+                print(f" #rem_rows_set =  {len(rem_rows_set)}  ")
+                print(f" #rem_cols_set =  {len(rem_cols_set)} ")
+                print(f" LINE 2564 !!! ")
+            #sys.exit(f"Terminating program when König is working  line 2546 => EXIT 111.")
+            rows_res = [(index, row_degree_map[index]) for index in rem_rows_set]
+            cols_res = [(index, col_degree_map[index]) for index in rem_cols_set]
+            print(f" LINE 2568 !!! ")
+            if König_test and modified_König and debug >= 1:
+                print(f""" König_test= {König_test};  modified_König=  {modified_König}
+                cover_row_set : length= {len(cover_rows_degree)}; cover_col_set : length= {len(cover_cols_degree)};
+                remaining_rows_set = {len(rem_rows_set)}  
+                remaining_cols_set = {len(rem_cols_set)} 
+                remaining (rows, degrees) (sorted) = {len(rows_res)} remaining (rows, degrees) (sorted) = {rows_res}
+                remaining (cols, degrees) (sorted)  = {len(cols_res)}  cols_res = {cols_res} 
+                König lower bound = {len(cols_res)* len(rows_res)}
+                """)
+            if debug >= 1:
+                print('-' * 70)
+                num_ones = count_ones_in_submatrix(edges_compl,  rows_res,  cols_res)
+                if König_test and modified_König  and debug >=1:
+                    print() 
+                    print(f"""
+                    König_test = {König_test} !!!!!! modified_König =  {modified_König} 
+                    Extracted Solution for {model_name}:
+                    Computed total_weight: {total_weight:.3f},
+                    !!!!  #cover_rows_degree: {len(cover_rows_degree)}, !!!! #cover_cols_degree: {len(cover_cols_degree)},
+                    #rows_res (remaining)  = {len(rows_res)}  
+                    #cols_res (remaining) = {len(cols_res)} 
+                    number of ones in remaining matrix : {num_ones}
+                    """)      
     except Exception as e:
         print(f"Error during solving: {e}")
     # Print model status
+    lower_bound = len(rows_res)*len(cols_res) #Low_bound provided by König solution
+    print(f"Lower Bound Value by König_E: {lower_bound:.3f}")  
+    #sys.exit(f"Terminating program when König is working  line 2610 => EXIT 111.")
     if debug >= 1:
          print(f"Model status: {LpStatus.get(model.status, 'Unknown Status')}")
     # ✅ Ensure obj_value is valid before using it
@@ -2543,6 +2649,10 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
 
     # ✅ Only proceed with saving the solution if the model found a feasible solution
     if model.status in [1, 2, 9]:
+        if model.status == 9: 
+            print()
+            print(f" !!!!! When solving matrix {matrix_name} with  model {model_name} the time limit of {timelimit} has been reached ")
+            print()  
         # Save the solution to a CSV file
         if p.lower().endswith('.csv'):
             file_path_no_ext = file_path.replace(".csv", "").replace("data/", "")
@@ -2553,22 +2663,26 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
             writer = csv.writer(file)
             # Write the objective value
             #if model_name == 'max_e_h':
-            lower_bound = len(rows_res)*len(cols_res)    
-            writer.writerow(["Obj value",lower_bound ])
-            print(f"lower_bound = {lower_bound}  !!!")
+            lower_bound = len(rows_res)*len(cols_res)
+            print(f"LB by König_E (extended): {lower_bound:.3f}")   
+            writer.writerow(["LB by König_E (extended):",lower_bound ])
             # else:
             #     writer.writerow(["Objective Value", obj_value])
             # Write number of rows
-            writer.writerow(["# of rows", len(rows_res)])
+            writer.writerow(["#rows", len(rows_res)])
             # Write number of columns
-            writer.writerow(["# of columns", len(cols_res)])
+            writer.writerow(["#columns", len(cols_res)])
             # Write variable values
             writer.writerow(["Variable", "Value"])
-            for var_name, var_value in solution.items():
-                 if var_name.startswith("row") or var_name.startswith("col"): 
-                    writer.writerow([var_name, var_value])
+            for var_name in rem_row_indices:
+                 writer.writerow([var_name, 0]) 
+            for var_name in rem_col_indices:
+                    writer.writerow([var_name, 0])
+            # for var_name, var_value in solution.items():
+            #      if var_name.startswith("row") or var_name.startswith("col"): 
+            #         writer.writerow([var_name, var_value])
 
-        print(f"Solution saved to {solution_file}")
+        print(f"After extension König Solution of matrix {matrix_name}  saved to {solution_file}")
 
     else:
         print("No feasible solution found.")
@@ -2577,34 +2691,33 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
         #sys.exit("Terminating program due to infeasibility. EXIT 1")
 
     if not rows_res or not cols_res :  # Equivalent to checking len(rows_res) == 0
-       if debug >= 1:
+        if debug >= 1:
             print("Attention!  König returns degenerated matrix. Continue without  König ")
-       rows_res = [str(c) for c,_ in rows]
-       rows_res = [int(r) for r in rows_res]
-       cols_res = [str(c) for c,_ in cols]
-       cols_res = [int(c) for c in cols_res]
-       #sys.exit("Terminating program due to matrix degeneration (all rows or all columns have been deleted). EXIT 6 ")
-    else:
-        rows_res = [str(c) for c in rows_res]
+        rows_res = [str(c) for c,_ in rows]
         rows_res = [int(r) for r in rows_res]
-        cols_res = [str(c) for c in cols_res]
+        cols_res = [str(c) for c,_ in cols]
         cols_res = [int(c) for c in cols_res]
+        sys.exit("Terminating program due to matrix degeneration (all rows or all columns have been deleted). EXIT 6 ")
+    else:
+        rows_res = [str(c) for c,_ in rows_res]
+        rows_res = [int(r) for r in rows_res]
+        cols_res = [str(c) for c,_ in cols_res]
+        cols_res = [int(c) for c in cols_res]
+    #sys.exit(f"Terminating program when König is working  line 2673 => EXIT 111.")         
     # Convert from 0-based to the original row/column names
     row_names_res = [row_names[r] for r in rows_res if 0 <= r < len(row_names)]
     col_names_res = [col_names[c] for c in cols_res if 0 <= c < len(col_names)]
     row_names_res = [int(r) if isinstance(r, (np.int64, np.int32)) else r for r in row_names_res]
     col_names_res = [int(r) if isinstance(r, (np.int64, np.int32)) else r for r in col_names_res]
-    if debug >= 1: 
+    if debug >= 2: 
         print("\n-- Debugging Step: checking extracted solution after solving model**** --", model.name )
-        print('len_rows_res=', len(rows_res))
-        #print('row_res=', rows_res)
-        print('len_cols_res=', len(cols_res))
+        print('len_rows_res=', len(rows_res), 'len_cols_res=', len(cols_res))
         #print('cols_res=', cols_res)
-        print("nb row_names_res, =", len(row_names_res))
+        print("#row_names_res, =", len(row_names_res))
         #print("row_names_res =", row_names_res)
         #print("col_names_res =", col_names_res)
-        print(" nb col_names_res, =", len(col_names_res)) 
-        print()
+        print("#col_names_res, =", len(col_names_res)) 
+        #print()
         print('-' * 40)
     # now we call max_e_r with rows_res and cols_res
 
@@ -2622,20 +2735,20 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
         print('-' * 40)
         print(f'Results from updating data after solving model = {model.name}, delta :{delta}, with EXECUTION TIME:, {QBC_time_h-QBC_time:.5f}') 
         #print("Number of Remaining number  Rows  :", len(rows_res), "Number of Remaining number Columns :", len(cols_rem))
-        print(f"Found matrix with rows_res of lenght = {len(rows_res)}  and cols_res of lenght ={len(cols_res)}") 
+        print(f"Found matrix with #rows_res = {len(rows_res)}  and #cols_res ={len(cols_res)}") 
         print("Remaining  number Edges_0 :", nb_edges_0_rem, "Remaining  number Edges_1 :", nb_edges_1, "Density :", density , "current obj value", obj_value)
         print('-' * 40)
         print()
     #nb_rows_rem = len(rows_rem) 
-        if debug >= 3:
-            print(" Original Rows  :", rows )
-            print(" Original Cold  :", cols )
-            print(" Remaining Rows  :", rows_res )
-            print(" Remaining  Cols  :", cols_res )
-            print(" Remaining Rows with degree :", rows_rem )
-            print(" Remaining  Cols with degree :", cols_rem )
+    if debug >= 2:
+        print(" #Original Rows  :", len(rows ))
+        print(" #Original Cold  :", len(cols ))
+        print(" #Remaining Rows  :", len(rows_res ))
+        print(" #Remaining  Cols  :", len(cols_res ))
+        print(" #Remaining Rows with degree :", len(rows_rem ))
+        print(" #Remaining  Cols with degree :", len(cols_rem ))
 
-    #sys.exit("Terminating program before callong  max_e_wr EXIT 11")
+    #sys.exit("Terminating program before calling  max_e_wr EXIT 11")
     if dec_conq >= 1: # the task is not going to be solved but to saved in a file for further solving
         #density= 1
         #nb_edges_1 = len(rows_res)*len(cols_res)
@@ -2648,14 +2761,17 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
     if prev_lower_bound >= 1+ nb_edges_1:
         lower_bound = prev_lower_bound
         if debug >= 1:
-            print(f" A lower_bound = {lower_bound} has been previously found and given as input. ")
+            print(f" A lower_bound = {lower_bound} has been previously found and given as input for warm start. ")
     else:   
         #lower_bound = nb_edges_1 
         if debug >= 1:
-            print(f" A lower_bound = {lower_bound} has been found by König_E ")
+            print(f" A lower_bound = {lower_bound} has been found by König_E  and given as input for warm start.")
     if debug >= 1:
-        print(f" Start computing max_er with lower_bound =  {lower_bound}. ")
+        print(f" Start computing max_er model  with lower_bound =  {lower_bound}. ")
+        print(" #Original Rows  :", len(rows), "#Original Cols  :", len(cols) )
+        print(" #Remaining Rows  :", len(rows_res),  " #Remaining  Cols  :", len(cols_res) )
     model = max_e_wr(rows, cols, edges_1, rows_res, cols_res, lower_bound, delta)
+    #sys.exit(f"Terminating program when König is working  2741 => EXIT 111 before GUROBI.")         
     try:
         # Solve the model with Gurobi
         model.solve(GUROBI_CMD(msg=False, timeLimit= timelimit))#, options=[("MIPGap", 0.03)]))
@@ -2665,7 +2781,7 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
         #     print('-' * 70)
         #     print("No solution found above the found by max_e_h lower bound!!! This lower_bound is considered as the solution")
         #     print('-' * 70) 
-        if debug >= 2:
+        if debug >= 1:
             print('-' * 70)
             print(f"Model status: {LpStatus[model.status]}")
         # Extract solution values (only nonzero rows and columns)
@@ -2673,7 +2789,7 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
             obj_value = value(model.objective) # ✅ Extract objective value
             if debug >= 2:
                 print('-' * 70)
-                print(f"Computed Objective Value: {obj_value:.3f}")
+                print(f"Computed by warm start Objective Value: {obj_value:.3f}")
             # Extract solution values (only nonzero rows and columns)
             solution = {
                 var.name: var.varValue
@@ -2685,7 +2801,7 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
             cols_res = [var_name[4:] for var_name in solution if var_name.startswith("col")]
     except Exception as e:
         print(f"Error during solving: {e}")
-    if debug >= 2:
+    if debug >= 1:
             print('-' * 70)
             print(f"Model status: {LpStatus[model.status]}")
     # Check if the model has an optimal/feasible solution
@@ -2693,8 +2809,8 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
     if  model.status == 0:
         print("*****Model in warm start is infeasible.!!! The given lower bound cannot be improved. Return the below data*** ")
         #the solution found by the heuristic cannot be improved. Return it as the final solution
-        if debug >=3:
-            print(f"rows_rem: {rows_rem}, \n  cols_rem: {cols_rem},  \n  rows_res: {rows_res},  \n  cols_res: {cols_res},  \n  lower_bound  {lower_bound}")
+        if debug >=2:
+            print(f"#rows_rem: {len(rows_rem)}, \n  #cols_rem: {len(cols_rem)},  \n  #rows_res: {len(rows_res)},  \n  #cols_res: {len(cols_res)},  \n  lower_bound  {lower_bound}")
         return rows_rem, cols_rem, density, lower_bound, QBC_time_h, QBC_time_r
     if debug >= 1:
         print("*****Model in warm start is feasible. The solution has been improved !!!*** ")
@@ -2706,6 +2822,7 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
             print(f" !!!!! When soving matrix {matrix_name} with  model {model_name} the time limit of {timelimit} has been reached ")
             print() 
     # Save the solution to a file
+        #sys.exit(f"Terminating program when König is working  2741 => EXIT 111 after GUROBI.")
         file_path_no_ext = file_path.replace(".csv", "").replace("data/", "")
         solution_file = f"../Experiments/{file_path_no_ext}/results_wstart_{dec_conq}_M_{matrix_name}.csv"
         with open(solution_file, mode="w", newline="") as file:
@@ -2728,11 +2845,11 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
         print("No feasible solution found.")
         print("Model is infeasible. Exporting LP file for debugging...")
         model.writeLP("debug_model_if_infeasible.lp")
-        #sys.exit("Terminating program due to infeasibility. EXIT 10")
+        sys.exit("Terminating program due to infeasibility. EXIT 10")
 
    #Reading and analyse of the obtained results")
     #read the results from the solver
-
+    #sys.exit(f"Terminating program when König is working  2826 => EXIT 112 after GUROBI.")
     if not rows_res or not cols_res :  # Equivalent to checking len(rows_res) == 0
        print("matrix degenerated (all rows or all columns have been deleted)")
        sys.exit("Terminating program due to matrix degeneration (all rows or all columns have been deleted). EXIT 7 ")
@@ -3467,7 +3584,7 @@ def affichage(dec_conq,matrix_name, rows_res, cols_res, density, nb_ones, iter, 
         print(f""" 
         End of computations for matrix {matrix_name} in  {file_path} with DEC_CONQ={dec_conq} 
         With  model: {selected_model} and quasi-biclique error: {delta} 
-        Size of REMAINING MATRIX : ({ len(rows_res)},{len(cols_res)}), with  density : {density} and number of ones: {nb_ones} 
+        Size of REMAINING MATRIX : ({ len(rows_res)},{len(cols_res)}), with  density : {density} and number of ones (or previous lower_bound): {nb_ones} 
         Global Time (in sec): {global_time:.3f}
         Total Time in QBC approaches: {global_time_c:.3f}
         Time in greedy approach: {KP_time:.3f},  size of matrix found by greedy : ({nb_kp_rows},{nb_kp_cols}) 
@@ -3825,8 +3942,8 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
             return  #matrix_name, rows, cols, density, nb_ones, QBC_time
     if dec_conq >= 1:
         #nbi_0, nbi_1, sparsity, density = density_calcul(rows, cols)
-        if debug >= 1:
-            print(f" dec_conq =  {dec_conq}.   Current task {matrix_name} with size ({len(rows)},{len(cols)}) and density {density:.3f}  is  proceeded  while ELITE_threshold =  {ELITE_threshold}. !!!.")
+        #if debug >= 1:
+        logger.info(f" dec_conq =  {dec_conq}.   Current task {matrix_name} with size ({len(rows)},{len(cols)}) and density {density:.3f}  is  proceeded  while ELITE_threshold =  {ELITE_threshold}. !!!.")
         ##########################################################################
         if density is not None and float(density) > float(ELITE_threshold):
         # Votre logique ici
@@ -3834,8 +3951,7 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
             # Add the task to the priority queue
             temp_obj =  float('-inf') 
             add_task(ELITE, matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj)
-            if debug >= 1:
-                print(f""" dec_conq =  {dec_conq}.   Task {matrix_name} with size ({len(rows)},{len(cols)}) and density {density:.3f}  has been ADDED to the ELITE with  ELITE_threshold =  {ELITE_threshold}. 
+            logger.info(f""" dec_conq =  {dec_conq}.   Task {matrix_name} with size ({len(rows)},{len(cols)}) and density {density:.3f}  has been ADDED to the ELITE with  ELITE_threshold =  {ELITE_threshold}. 
                 Return from node {matrix_name} with size ({len(rows)},{len(cols)})!!!.
                 """)
             return
@@ -3857,11 +3973,11 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
             current_portion = 0
         if debug >= 1:
             print(f"""
-                    current_portion of zero clique = {current_portion:.3f}; min_portion_zero_clique: {min_portion_zero_clique} 
-                    len(rows_res)) = {len(rows_res)};  len(cols_res)= {len(cols_res)}, atomic_matrix_size = {atomic_matrix_size} 
+                    current_portion of zero clique = {current_portion:.3f}; min_portion_zero_clique: {min_portion_zero_clique}
+                    #rows_res = {len(rows_res)}, #cols_res = {len(cols_res)}, surface = {len(rows_res)*len(cols_res)}, atomic_matrix_size = {atomic_matrix_size} 
                     min_number_rows = { min_number_rows}; min_number_cols = {min_number_cols}
                     is_small(matrix_name, rows_res, cols_res) = {is_small(matrix_name, len(rows_res), len(cols_res))} 
-                    #rows_res = {len(rows_res)} #cols_res = {len(cols_res)}
+                    
                 """)
         #rows_rem, cols_rem, edges_1_rem, nb_edges_0_rem, density  = update_data(rows, cols, edges_1, row_indices_list, col_indices_list, debug)
         ML, MR, MC = get_submatrices(rows, cols, edges_1, rows_res, cols_res)
@@ -4211,8 +4327,9 @@ if __name__ == '__main__':
     #min_number_cols = min_number_cols_percentage*len(cols) #the number of columns of the matrix is below this value, we stock it in the SLIM ; 
     min_portion_zero_clique = 0.05 # when the proportion of the found zero clique in a given matrix is smaller  than this value,  we stop the division and stock  the matrix in the SLIM ; 
     only_task  = False # allows to perform task generation only (if True), otherwise we proceed to solving the generated tasks
-    tasks_number_to_treat = 3
-    atomic_matrix_size_percentage = 0.71 #when a matrix is below this size, we stock it in the Atomic_QUEUE; otherwise, it it will be divided 
+    tasks_number_to_treat = 4
+    atomic_matrix_size_percentage = 0.71
+    #when a matrix is below this size, we stock it in the Atomic_QUEUE; otherwise, it it will be divided 
     #atomic_matrix_size  #when a matrix is below this size, we stock it in the Atomic_QUEUE; otherwise, it it will be divided 
     König_test = True #allows to debug the updates in König results
     modified_König = False #changes to TRUE when König results have been modified
@@ -4231,6 +4348,7 @@ if __name__ == '__main__':
     start_model_building_and_solving = time.time()
     # Read the arguments
     file_path, selected_model, rho, delta,  KP_threshold, ELITE_threshold, dec_conq = parse_arguments()
+    setup_logger('debug', debug)
     p = file_path 
     if p.lower().endswith('.txt'):
         rows, cols, edges_1, row_names, col_names  = get_data_txt_file(file_path)
