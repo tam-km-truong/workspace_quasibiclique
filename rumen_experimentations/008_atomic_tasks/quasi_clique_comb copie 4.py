@@ -1493,7 +1493,7 @@ def zero_cleaner(rows, cols, row_names, col_names, edges_1, nb_edges_0, iter, rh
 # ============================================================================ #
 
 
-def solve(debug,prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, min_number_rows, min_number_cols, KP_time, QBC_time, rho=1.0, delta=0.1, density_threshold=0.87):
+def solve(prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, model, min_number_rows, min_number_cols, KP_time, QBC_time, rho=1.0, delta=0.1, density_threshold=0.87):
     """
     Function to solve the maximum biclique problem, this function reads the data,
     create a LP model using the data and return a list of rows and a list of 
@@ -1521,7 +1521,8 @@ def solve(debug,prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, mo
         print(f"Prev_lower_bound : {prev_lower_bound}, number input zeros : {nbi_0},  number input ones : {nbi_1},  density: {float(density):.3f}; sparsity: {float(sparsity):.3f}")            
         print("rho = ",rho, "; delta : ", delta)
         # Safe printing: Convert None to "N/A" or provide a default value
-        print(f"Input density : {density:.3f}" if density is not None else "Input density: N/A",  f";  , KP_threshold: {KP_threshold:.5f}, Solver_KP_threshold: {Solver_KP_threshold:.5f}, required density_threshold: {density_threshold}")
+        print(f"Input density : {density:.3f}" if density is not None else "Input density: N/A",  f"; KP_threshold: {KP_threshold:.5f}")
+        #print(f"Input density : {density:.3f}, ; density_threshold: {density_threshold}")
         if debug >= 3 : 
             print("rows =", rows)
             print("cols =", cols)
@@ -1547,11 +1548,11 @@ def solve(debug,prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, mo
     kp_density = 0
     #if density == None:
                 #sys.exit("Terminating program due to density == None")
-    while density is not None and density < density_threshold and len(rows_in) > min_number_rows and len(cols_in) > min_number_cols:
+    while density is not None and density < KP_threshold and len(rows_in) > min_number_rows and len(cols_in) > min_number_cols:
         iter+=1
         if debug >= 2:
             print()
-            print(f"calling knapsack approaches for zero deletion; density= {density:.3f} and  density_threshold {density_threshold}  KP_threshold= {KP_threshold:.3f}")
+            print(f"calling knapsack approaches for zero deletion; density= {density:.3f} and KP_threshold= {KP_threshold:.3f}")
             print()
         #sys.exit("Terminating program because not done EXIT 0")
         if debug >= 3:
@@ -1580,7 +1581,7 @@ def solve(debug,prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, mo
             #print()
             print(f"""
             End of greedy approaches. Exit while loop. I did: {iter} iterations
-            Density : {density:.3f} > {density_threshold:.3f}
+            Density : {density:.3f} > {KP_threshold:.3f}
             It took me : {KP_time:.3f} time
             Found matrix of size : ({len(rows_res)}, {len(cols_res)}) and density : {density:.3f}
             """)
@@ -1816,6 +1817,7 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                 if König_test == True  and modified_König == True and debug >=1 :
                     print() 
                     print(f"""
+                    !!!!!!  König_test = {König_test} !!!!!! modified_König =  {modified_König}
                     Computed by GUROBI OBJECTIVE Value for model {model_name} and matrix_name = {matrix_name}, obj: {obj_value:.3f} !!!
                     #cover_rows: {len(cover_rows)}, max_number_rows: {max_number_rows}, 
                     #cover_cols: {len(cover_cols)}, max_number_cols: {max_number_cols},
@@ -1908,11 +1910,11 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
             cols_res = [(index, col_degree_map[index]) for index in rem_cols_set]
             if König_test and modified_König and debug >= 1:
                 print(f""" König_test= {König_test};  modified_König=  {modified_König}
-                #cover_row_set = {len(cover_rows_degree)}; #cover_col_set= {len(cover_cols_degree)};
+                cover_row_set : length= {len(cover_rows_degree)}; cover_col_set : length= {len(cover_cols_degree)};
                 remaining_rows_set = {len(rem_rows_set)}  
                 remaining_cols_set = {len(rem_cols_set)} 
-                remaining (rows, degrees) = {len(rows_res)} 
-                remaining (cols, degrees)  = {len(cols_res)} 
+                remaining (rows, degrees) (sorted) = {len(rows_res)} remaining (rows, degrees) (sorted) = {rows_res}
+                remaining (cols, degrees) (sorted)  = {len(cols_res)} 
                 König lower bound = {len(cols_res)* len(rows_res)}
                 """)
             if debug >= 1:
@@ -2491,6 +2493,7 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
             if König_test  and debug >=1 :
                 print() 
                 print(f"""
+                !!!!!!  König_test = {König_test} !!!!!! modified_König =  {modified_König}
                 Computed by GUROBI OBJECTIVE Value for model {model_name} and matrix_name = {matrix_name}, obj: {obj_value:.3f} !!!
                 #cover_rows: {len(cover_rows)}, max_number_rows: {max_number_rows}, 
                 #cover_cols: {len(cover_cols)}, max_number_cols: {max_number_cols},
@@ -2570,7 +2573,8 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
                 NEW #cover_rows = {len(cover_rows_degree)}; NEW #cover_cols = {len(cover_cols_degree)};
                 Its new TOTAL_weight = {total_weight}!!!
                 #new_cover_rows = {len(cover_rows_degree)}; #new_cover_cols = {len(cover_cols_degree)}
-                """) 
+                """)
+            print("&&&&&") 
             #sys.exit(f"Terminating program when König is working  line 2546 => EXIT 111.")
             row_indices = [row for row,_ in rows]
             col_indices = [col for col,_  in cols]
@@ -2578,7 +2582,8 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
             col_set = set(col_indices)
             #import pdb; pdb.set_trace()
             print(f" #row_set =  {len(row_set)}; ")
-            print(f"#col_set =  {len(col_set)} ")
+            print(f"LINE 2544 #col_set =  {len(col_set)} ")
+            print(f" LINE 2545 !!! ")
             if modified_König :
                 rem_rows_set = row_set - cover_rows_set
                 rem_cols_set = col_set - cover_cols_set
@@ -2591,10 +2596,12 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name,model_name, rows, 
             rem_col_indices = list(rem_cols_set)
             print(f" #rem_row_indices =  {len(rem_row_indices)}  ")
             print(f" #rem_col_indices =  {len(rem_col_indices)} ")
+            print(f" LINE 2552 !!! ")
             if König_test and modified_König and  debug >= 1: 
                 print(f" LINE 2556 !!! ")  
                 print(f" #row_set =  {len(row_set)}; ")
                 print(f" #col_set =  {len(col_set)} ")
+                print(f" LINE 2559 !!! ")
                 print(f" #cover_rows_set =  {len(cover_rows_set)}  ")
                 print(f" #cover_cols_set =  {len(cover_cols_set)}  ")
                 print(f" #rem_rows_set =  {len(rem_rows_set)}  ")
@@ -3290,12 +3297,6 @@ def parse_arguments():
         '--KP_threshold', dest='KP_threshold', required=False, default=0.87, type=float,
         help='Below this value greedy approaches are used; above, exact methods',
     )
-
-    argparser.add_argument(
-        '--Solver_KP_threshold', dest='Solver_KP_threshold', required=False, default=0.87, type=float,
-        help='Below this value greedy approaches are used during the second step where tasks are solved; above--exact methods',
-    )
-    
     
     argparser.add_argument(
         '--ELITE_threshold', dest='ELITE_threshold', required=False, default=0.87, type=float,
@@ -3361,7 +3362,7 @@ def parse_arguments():
         argparser.print_help()
         sys.exit(1)
 
-    return (arg.filepath, arg.model, arg.rho, arg.delta,   arg.KP_threshold, arg.Solver_KP_threshold, arg.ELITE_threshold,  arg.debug, arg.warm_debug, arg.dec_conq, arg.timelimit, arg.only_task, arg.atomic_matrix_size_percentage, arg.min_portion_zero_clique, arg.tasks_number_to_treat)
+    return (arg.filepath, arg.model, arg.rho, arg.delta,  arg.KP_threshold, arg.ELITE_threshold,  arg.debug, arg.warm_debug, arg.dec_conq, arg.timelimit, arg.only_task, arg.atomic_matrix_size_percentage, arg.min_portion_zero_clique, arg.tasks_number_to_treat)
     
 def get_submatrices(rows_data, cols_data, edges, rows_res, cols_res):       
     """
@@ -3720,20 +3721,19 @@ def add_task(KU, matrix_name, rows, cols, edges,  nb_zeros, nb_ones, density, ob
     heapq.heappush(KU, (-edge_count, edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj)))  # Negative for max-heap
     #heapq.heappush(KU, (edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj)))  # Negative for max-heap
 
-def process_tasks(lower_bound, best_matrix, best_rows, best_cols, best_density, Solver_KP_threshold, KP_threshold, KU, EVALUATED, selected_model, global_time, tasks_number_to_treat):
+def process_tasks(KU, EVALUATED, selected_model, global_time, tasks_number_to_treat):
     global ELITE, EVALUATED_ELITE, SLIM , MEDIUM 
 
-    #best_matrix = None  # Track the best task number
-    best_obj = lower_bound  # Track the highest objective value
+    best_matrix = None  # Track the best task number
+    best_obj = 0 # float('-inf')  # Track the highest objective value
+    #best_obj = given_lower_bound  # Track the highest objective value
+    #prev_lower_bound  = float('-inf') 
     #prev_lower_bound  = given_lower_bound 
     solved_count = 0  # Count of tasks that were solved
     skipped_count = 0  # Count of tasks that were skipped
     fathomed_count = 0 # Count for fathomed tasks
     dec_conq = 0
     KP_time = 0
-    # best_rows = None  # Track the best rows
-    # best_cols = None  # Track the best columns
-    # best_density = None  # Track the best density
     all_checked = False
     while KU and solved_count <  tasks_number_to_treat: 
         _, edge_count, (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj_val) = heapq.heappop(KU)  # Extract highest priority task
@@ -3751,10 +3751,10 @@ def process_tasks(lower_bound, best_matrix, best_rows, best_cols, best_density, 
                 Currently is processed task number {matrix_name} with size {len(rows)} * {len(cols)} and density {density:.3f} and edges: {len(edges)}
                 and #ones {nb_ones}  and #zeros {nb_zeros}.  
                 Also, prev_lower_bound {best_obj} and obj_val {obj_val} while tasks_number_to_treat = {tasks_number_to_treat} 
-                selected_model {selected_model} dec_conq {dec_conq} delta {delta} ELITE threshold {ELITE_threshold} KP_threshold {KP_threshold} Solver_KP_threshold {Solver_KP_threshold} rho {rho} ***
+                selected_model {selected_model} dec_conq {dec_conq} delta {delta} ELITE threshold {ELITE_threshold} rho {rho} ***
                 """)
             print() 
-        results = solve(warm_debug, best_obj,dec_conq, matrix_name, rows, cols, edges, selected_model, min_number_rows, min_number_cols, KP_time, QBC_time, rho, delta, Solver_KP_threshold)   
+        results = solve(best_obj,dec_conq, matrix_name, rows, cols, edges, selected_model, min_number_rows, min_number_cols, KP_time, QBC_time, rho, delta, KP_threshold)   
         # Unpack results
         (rows_res, cols_res, density, nb_ones, iter, KP_time, 
         kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 
@@ -3822,7 +3822,7 @@ def process_tasks_OLD(selected_model, global_time, tasks_number_to_treat):
                 selected_model {selected_model} dec_conq {dec_conq} delta {delta} ELITE threshold {ELITE_threshold} rho {rho} ***
                 """)
             print() 
-        results = solve(warm_debug, best_obj,dec_conq, matrix_name, rows, cols, edges, selected_model, min_number_rows, min_number_cols, KP_time, QBC_time, rho, delta, Solver_KP_threshold)   
+        results = solve(best_obj,dec_conq, matrix_name, rows, cols, edges, selected_model, min_number_rows, min_number_cols, KP_time, QBC_time, rho, delta, KP_threshold)   
         # Unpack results
         (rows_res, cols_res, density, nb_ones, iter, KP_time, 
         kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 
@@ -3991,7 +3991,7 @@ def decrease_and_conquer(dec_conq, matrix_name, rows, cols, edges_1, KP_time, QB
         #  density <= ELITE_threshold: Compute complementary row and column indices
         rows_compl, cols_compl, edges_compl = get_complement_rowcols(rows, cols, edges_1)
         # Solve the problem, i.e. find the maximum zero size clique in the complementary matrix
-        results = solve(debug, None, dec_conq, matrix_name, rows_compl, cols_compl, edges_compl, selected_model, min_number_rows, min_number_cols, KP_time, QBC_time, rho, delta, KP_threshold)
+        results = solve(None, dec_conq, matrix_name, rows_compl, cols_compl, edges_compl, selected_model, min_number_rows, min_number_cols, KP_time, QBC_time, rho, delta, KP_threshold)
         # Unpack results, 
         (rows_res, cols_res, density, nb_ones, iter, KP_time, 
         kp_density, nb_kp_rows, nb_kp_cols, nb_kp_ones, 
@@ -4396,9 +4396,9 @@ if __name__ == '__main__':
     EVALUATED_MEDIUM = []
     start_model_building_and_solving = time.time()
     # Read the arguments
-    file_path, selected_model, rho, delta, KP_threshold, Solver_KP_threshold, ELITE_threshold, debug, warm_debug, dec_conq, timelimit, only_task, atomic_matrix_size_percentage, min_portion_zero_clique, tasks_number_to_treat = parse_arguments() #, dec_conq, tasks_number_to_treat, only_task, min_portion_zero_clique, debug, warm_debug, timelimit   = parse_arguments()
+    file_path, selected_model, rho, delta, KP_threshold, ELITE_threshold, debug, warm_debug, dec_conq, timelimit, only_task, atomic_matrix_size_percentage, min_portion_zero_clique, tasks_number_to_treat = parse_arguments() #, dec_conq, tasks_number_to_treat, only_task, min_portion_zero_clique, debug, warm_debug, timelimit   = parse_arguments()
     setup_logger('debug', debug)  # Commented out because setup_logger is not defined
-    #print(f" !!!!!!!!! only_task: {only_task}, tasks_number_to_treat: {tasks_number_to_treat}, debug: {debug}, warm_debug: {warm_debug}, timelimit: {timelimit} ")
+    print(f" !!!!!!!!! only_task: {only_task}, tasks_number_to_treat: {tasks_number_to_treat}, debug: {debug}, warm_debug: {warm_debug}, timelimit: {timelimit}")
     p = file_path 
     if p.lower().endswith('.txt'):
         rows, cols, edges_1, row_names, col_names  = get_data_txt_file(file_path)
@@ -4432,11 +4432,11 @@ if __name__ == '__main__':
                 print(f" Input Data in csv files : {file_path}")
     print(f"""
             Number Rows: {len(rows)}, Number Cols: {len(cols)} 
-            Number Edges_1: {len(edges_1)}, Number Edges_0: {len(edges_compl)} Matrix size: {len(rows)*len(cols)}
+            Number Edges_1: {len(edges_1)}, Number Edges_0: {len(edges_compl)})
             min_number_rows_percentage: {min_number_rows_percentage} min_number_rows: {min_number_rows}
             min_number_cols_percentage: {min_number_cols_percentage} min_number_cols: {min_number_cols}
             atomic_matrix_size_percentage: {atomic_matrix_size_percentage}, atomic_matrix_size: {atomic_matrix_size}
-            rho :{rho}, delta: {delta}, KP_threshold: {KP_threshold}, Solver_KP_threshold:  {Solver_KP_threshold}, ELITE_threshold: {ELITE_threshold} 
+            rho :{rho}, delta: {delta}, KP_threshold: {KP_threshold}, ELITE_threshold: {ELITE_threshold} 
             Selected model: {selected_model}, debug level: {debug} warm_debug: {warm_debug}
             König_test:  {König_test}, Arg_reverse: {Arg_reverse}
             dec_conq: {dec_conq}, only_task: {only_task}, tasks_number_to_treat: {tasks_number_to_treat}
@@ -4484,15 +4484,14 @@ if __name__ == '__main__':
     #for size, (matrix_name, rows, cols, edges,nb_zeros, nb_ones, density, obj) in QUEUE:
         for _, edge_count,  (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj) in ELITE:
             surface= len(rows)*len(cols)
-            print(f" ELITE Matrix: {matrix_name}, #Edges: {edge_count}, Surface: {surface}, #Rows: {len(rows)}, #Cols: {len(cols)}, #Edges_1: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: {density:.3f}") #, obj {obj}")
+            print(f" ELITE Matrix: {matrix_name}, edge_count: {edge_count}, Surface: {surface}, #Rows: {len(rows)}, #Cols: {len(cols)}, #Edges_1: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: {density:.3f}") #, obj {obj}")
     print()
     print('-' * 70)
-    print(f"Size of MEDIUM queue: {len(MEDIUM)}")
     import heapq
     COPY_MEDIUM = list(MEDIUM)  # Copy the heap
     heapq.heapify(COPY_MEDIUM)  # Ensure it maintains heap properties
     print()
-    #print(f"Size of COPY_MEDIUM queue: {len(COPY_MEDIUM)}")
+    print(f"Size of COPY_MEDIUM queue: {len(COPY_MEDIUM)}")
     # for matrix_name, rows, cols, edge_count in SLIM :
     #     #size = len(rows)*len(cols)
     #     print(f" Matrix: {matrix_name}, # Rows: {len(rows)},  # Cols: {len(cols)},  # Edges: {len(edge_count)}")
@@ -4515,71 +4514,44 @@ if __name__ == '__main__':
     if only_task == 1:
         sys.exit(f"Terminating program when all tasks have been generated. Only_task = {only_task} => EXIT 333.")
     ###############################################################
-    if len(ELITE) == 0 and len(MEDIUM)== 0 : 
-        #print("No tasks to process since both ELITE and MEDIUM are empty. EXIT 999.")
-        sys.exit(f"No tasks to process since both ELITE and MEDIUM are empty. EXIT 899.")
-       # sys.exit(0)
     import heapq
     COPY_ELITE = list(ELITE)  # Copy the heap
     heapq.heapify(COPY_ELITE)  # Ensure it maintains heap properties
     print()
     print('-' * 70)
     sorted_copy_queue = sorted(COPY_ELITE, key=lambda x: x[1], reverse=True)
-    # print(f"Size of the COPY_ELITE: {len(sorted_copy_queue)}")
-    # if len(sorted_copy_queue) >0 : 
-    #     for _, edge_count, (matrix_name, task_rows, task_cols, edges, nb_zeros, nb_ones, density, obj) in sorted_copy_queue:
-    #         surface= len(task_rows)*len(task_cols)
-    #         print(f" COPY_ELITE Matrix: {matrix_name}, #Edges: {len(edges)}, Surface: {surface}, #Rows: {len(task_rows)}, #Cols: {len(task_cols)}, #Edges: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: {density:.3f}") #, obj {obj}")
-    # define the number of tasks to treat
-    if len(ELITE) ==0:
-        ELITE_tasks_number_to_treat = 0
-        MEDIUM_tasks_number_to_treat = tasks_number_to_treat
-        best_obj = 0
-    if len(ELITE) <= tasks_number_to_treat:
-        ELITE_tasks_number_to_treat = len(ELITE)
-        MEDIUM_tasks_number_to_treat = tasks_number_to_treat - ELITE_tasks_number_to_treat
-    else:
-        ELITE_tasks_number_to_treat = tasks_number_to_treat
-        MEDIUM_tasks_number_to_treat = 0
-    print(f"Start solving tasks with ELITE_tasks_number_to_treat: {ELITE_tasks_number_to_treat}, MEDIUM_tasks_number_to_treat: {MEDIUM_tasks_number_to_treat}")
-    #sys.exit(f" Check  EXIT 777.")
-    solved_count_ELITE = 0
-    fathomed_count_ELITE = 0
-    solved_count_MEDIUM = 0
-    fathomed_count_MEDIUM = 0
-    best_task = None
-    best_obj = 0
-    best_rows = None
-    best_cols = None
-    best_density = 0.0
+    print(f"Size of the COPY_ELITE: {len(sorted_copy_queue)}")
+    if len(sorted_copy_queue) >0 : 
+    # if len(sorted_copy_queue) == 0:
+    #     print("In COPY_ELITE : No tasks to process. Exit 222 .")
+    #     sys.exit(f"Terminating program when no tasks to process in COPY_ELITE.")
+        for _, edge_count, (matrix_name, task_rows, task_cols, edges, nb_zeros, nb_ones, density, obj) in sorted_copy_queue:
+            surface= len(task_rows)*len(task_cols)
+            print(f" COPY_ELITE Matrix: {matrix_name}, #Edges: {len(edges)}, Surface: {surface}, #Rows: {len(task_rows)}, #Cols: {len(task_cols)}, #Edges: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: {density:.3f}") #, obj {obj}")
+        if len(ELITE) > 0 and len(ELITE) < tasks_number_to_treat:
+            tasks_number_to_treat = len(ELITE)
+    # else :
+    #     tasks_number_to_treat = tasks_number_to_treat
+    if len(ELITE) == 0 and len(COPY_MEDIUM)== 0 : 
+        #print("No tasks to process since both ELITE and MEDIUM are empty. EXIT 999.")
+        sys.exit(f"No tasks to process since both ELITE and MEDIUM are empty. EXIT 899.")
+       # sys.exit(0)
+    if len(MEDIUM) > 0 and len(MEDIUM) < tasks_number_to_treat:
+        tasks_number_to_treat = len(MEDIUM) 
+    #else:
+        #sys.exit(f"Something wrong. len(COPY_ELITE) ={len(COPY_ELITE)} len(COPY_MEDIUM)=  {len(COPY_MEDIUM)} tasks_number_to_treat = {tasks_number_to_treat} EXIT 555")
+    # Solve the tasks
     start_tasks_solving = time.time()
     ###############################updates   len(MEDIUM)
     if len(ELITE) > 0 :
-        best_task, best_obj, best_rows, best_cols, best_density, fathomed_count_ELITE, solved_count_ELITE = process_tasks(0, None,  None,  None,  None, Solver_KP_threshold,KP_threshold, ELITE, EVALUATED_ELITE, selected_model, 0, ELITE_tasks_number_to_treat)
-        #end_tasks_solving = time.time()
-        # print('-' * 70)
-        # print(f"Evaluated ELITE queue's size: {len(EVALUATED_ELITE)}")
-        # for matrix_name, rows, cols, edge_count, obj, nb_rows_res, nb_cols_res in EVALUATED_ELITE:
-        #     surface= len(rows)*len(cols)
-        #     print(f" ELITE Matrix: {matrix_name}, #Edges: {edge_count}, Surface: {surface}, #Rows: {len(rows)},  #Cols: {len(cols)},  #rows_clique: {nb_rows_res} #columns_clique  {nb_cols_res}, Max clique  size {obj}")
+        best_task, best_obj, best_rows, best_cols, best_density, fathomed_count, solved_count = process_tasks(ELITE, EVALUATED_ELITE, selected_model, 0, tasks_number_to_treat)
+        end_tasks_solving = time.time()
+        nb_skipped = len(COPY_ELITE)- solved_count
+            # Print evaluated queue
+        #print("\nEvaluated Queue:")
+        # for task in EVALUATED_ELITE:
+        #     print(task)
         # print()
-        # print('-' * 70)
-        # print()
-        # print('-' * 70)
-        #sorted_copy_queue = sorted(COPY_ELITE, key=lambda x: x[1], reverse=True)
-        # print(f"Size of the COPY_ELITE: {len(sorted_copy_queue)}")
-        # for _, size,  (matrix_name, task_rows, task_cols, edges, nb_zeros, nb_ones, density, obj) in sorted_copy_queue:
-        #     surface= len(task_rows)*len(task_cols)
-        #     print(f" ELITE Matrix: {matrix_name}, #Edges: {len(edges)}, Surface: {surface}, #Rows: {len(task_rows)}, #Cols: {len(task_cols)}, #Edges: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: {density:.3f}") #, obj {obj}")
-    #nb_skipped_ELITE = len(ELITE)- solved_count_ELITE 
-    #nb_skipped_MEDIUM = len(MEDIUM)- solved_count_MEDIUM
-    # if len(ELITE) > 0: 
-    #     nb_skipped = len(COPY_ELITE)- solved_count
-    # elif len(ELITE) == 0  and len(MEDIUM) > 0: 
-    #     nb_skipped = len(COPY_MEDIUM)- solved_count
-    # else:
-        #sys.exit(f"Something wrong. len(COPY_ELITE) = {len(COPY_ELITE)}  len(COPY_MEDIUM) = {len(COPY_MEDIUM)} Check  EXIT 777.")
-        #print(f" len(COPY_ELITE) = {len(COPY_ELITE)} and  len(COPY_MEDIUM) = {len(COPY_MEDIUM)} ")
         print('-' * 70)
         print(f"Evaluated ELITE queue's size: {len(EVALUATED_ELITE)}")
         for matrix_name, rows, cols, edge_count, obj, nb_rows_res, nb_cols_res in EVALUATED_ELITE:
@@ -4588,38 +4560,61 @@ if __name__ == '__main__':
         print()
         print('-' * 70)
         print()
-        print(f"Best task: {best_task}, Best objective: {best_obj} with # rows {len(best_rows)} and # cols {len(best_cols)} and best_density: {best_density:.3f}")
-        print(f"Number of solved tasks in ELITE: {solved_count_ELITE}, Number of fathomed tasks in ELITE: {fathomed_count_ELITE},")
-        #print(f"Number of skipped tasks in ELITE : {nb_skipped_ELITE}")
-    if MEDIUM_tasks_number_to_treat > 0:
-        if  best_obj> 0 :
-            lower_bound = best_obj
-            best_previous_matrix = best_task
-            in_best_rows = best_rows
-            in_best_cols = best_cols
-            in_best_density = best_density
-        else:
-            lower_bound = 0 
-            best_previous_matrix = None 
-            in_best_rows = None
-            in_best_cols = None
-            in_best_density = None 
-    #         # if len(ELITE) < tasks_number_to_treat:
-    #         #     tasks_number_to_treat = tasks_number_to_treat - len(ELITE)
-        print() 
         print('-' * 70)
-        print(f"Start solving tasks with MEDIUM_tasks_number_to_treat: {MEDIUM_tasks_number_to_treat} and lower_bound: {lower_bound} and best_previous_matrix = {best_previous_matrix} ")
-        best_task, best_obj, best_rows, best_cols, best_density, fathomed_count_MEDIUM, solved_count_MEDIUM = process_tasks(lower_bound, best_previous_matrix, in_best_rows, in_best_cols, in_best_density, Solver_KP_threshold, KP_threshold, MEDIUM, EVALUATED_MEDIUM, selected_model, 0, MEDIUM_tasks_number_to_treat)
-        print() # Number of skipped tasks: {nb_skipped} ???
-        print('-' * 70)
-        print(f"Number of solved tasks in MEDIUM: {solved_count_MEDIUM}, Number of fathomed tasks in MEDIUM : {fathomed_count_MEDIUM},")
+        sorted_copy_queue = sorted(COPY_ELITE, key=lambda x: x[1], reverse=True)
+        print(f"Size of the COPY_ELITE: {len(sorted_copy_queue)}")
+        for _, size,  (matrix_name, task_rows, task_cols, edges, nb_zeros, nb_ones, density, obj) in sorted_copy_queue:
+            surface= len(task_rows)*len(task_cols)
+            print(f" ELITE Matrix: {matrix_name}, #Edges: {len(edges)}, Surface: {surface}, #Rows: {len(task_rows)}, #Cols: {len(task_cols)}, #Edges: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: {density:.3f}") #, obj {obj}")
+        nb_skipped = len(COPY_ELITE)- solved_count
+    elif len(MEDIUM) > 0:
+                best_task, best_obj, best_rows, best_cols, best_density, fathomed_count, solved_count = process_tasks(MEDIUM, EVALUATED_MEDIUM, selected_model, 0, tasks_number_to_treat)
+    # if len(ELITE) == 0 and len(MEDIUM)== 0 : 
+    #     #print("No tasks to process since both ELITE and MEDIUM are empty. EXIT 999.")
+    #     sys.exit(f"No tasks to process since both ELITE and MEDIUM are empty. EXIT 999.")
+    #    # sys.exit(0)
     end_tasks_solving = time.time()
+    if len(ELITE) > 0: 
+        nb_skipped = len(COPY_ELITE)- solved_count
+    elif len(ELITE) == 0  and len(MEDIUM) > 0: 
+        nb_skipped = len(COPY_MEDIUM)- solved_count
+    else:
+        #sys.exit(f"Something wrong. len(COPY_ELITE) = {len(COPY_ELITE)}  len(COPY_MEDIUM) = {len(COPY_MEDIUM)} Check  EXIT 777.")
+        print(f" len(COPY_ELITE) = {len(COPY_ELITE)} and  len(COPY_MEDIUM) = {len(COPY_MEDIUM)} ")
+    print('-' * 70)
+    print(f"Evaluated ELITE queue's size: {len(EVALUATED_ELITE)}")
+    for matrix_name, rows, cols, edge_count, obj, nb_rows_res, nb_cols_res in EVALUATED_ELITE:
+        surface= len(rows)*len(cols)
+        print(f" ELITE Matrix: {matrix_name}, #Edges: {edge_count}, Surface: {surface}, #Rows: {len(rows)},  #Cols: {len(cols)},  #rows_clique: {nb_rows_res} #columns_clique  {nb_cols_res}, Max clique  size {obj}")
+    print()
+    print('-' * 70)
+        # print()
+        # print('-' * 70)
+        # sorted_copy_queue = sorted(COPY_ELITE, key=lambda x: x[1], reverse=True)
+        # print(f"Size of the COPY_ELITE: {len(sorted_copy_queue)}")
+        # for _, size,  (matrix_name, task_rows, task_cols, edges, nb_zeros, nb_ones, density, obj) in sorted_copy_queue:
+        #     surface= len(task_rows)*len(task_cols)
+        #     print(f" ELITE Matrix: {matrix_name},  #Edges: {len(edges)}, Surface: {surface}, #Rows: {len(task_rows)}, #Cols: {len(task_cols)}, #Edges: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: {density:.3f}") #, obj {obj}") 
+
+    print()
+    # print('-' * 70)
+    # sorted_atomic = sorted(MEDIUM, key=lambda x: x[1], reverse=True)
+    # print(f"Size of MEDIUM: {len(MEDIUM)}")
+    # # #for matrix_name, rows, cols, edge_count in SLIM :
+    # # for matrix_name, rows, cols, edge_count in SLIM :
+    # #     #size = len(rows)*len(cols)
+    # #     print(f" Matrix: {matrix_name}, # Rows: {len(rows)},  # Cols: {len(cols)},  # Edges: {len(edge_count)}")
+    # for _, edge_count,  (matrix_name, rows, cols, edges, nb_zeros, nb_ones, density, obj) in sorted_atomic:
+    #     print(f" MEDIUM Matrix : {matrix_name},#Edges: {len(edges)}, Surface: {len(rows)*len(cols)}, #Rows: {len(rows)}, #Cols: {len(cols)}, #Edges: {len(edges)}, #Ones: {nb_ones}, #Zeros: {nb_zeros}, Density: {density:.3f} ") #, obj {obj}")
+
+    # print('-' * 70)
+    print()
+    print(f"Best task: {best_task}, Best objective: {best_obj} with # rows {len(best_rows)} and # cols {len(best_cols)}")
+    print(f"Number of solved tasks: {solved_count}, Number of fathomed tasks: {fathomed_count},")
     print() # Number of skipped tasks: {nb_skipped} ???
     print('-' * 70)
     print("***End of computations !!!")
     print()
-    solved_count = solved_count_ELITE #+ solved_count_MEDIUM
-    fathomed_count = fathomed_count_ELITE # +fathomed_count_MEDIUM
     final_print(dec_conq, in_rows, in_cols, in_edges_1,selected_model, solved_count, fathomed_count,None, rho, delta)
     print(f"Best task: {best_task}, Best objective: {best_obj} with # rows {len(best_rows)} and # cols {len(best_cols)}")
     print()
@@ -4654,9 +4649,9 @@ if __name__ == '__main__':
 
     row_set = set(row_indices)
     col_set = set(col_indices)
-    #if warm_debug >= 1:
-    print(f"#row_set: {len(row_set)}")
-    print(f"#col_set: {len(col_set)}")
+    if debug >= 1:
+        print(f"#row_set: {len(row_set)}")
+        print(f"#col_set: {len(col_set)}")
     num_one = count_ones_in_submatrix(edges_1,  row_set,  col_set)
 
  

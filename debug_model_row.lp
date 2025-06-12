@@ -1,81 +1,63 @@
 \* row_knapsack_problem *\
 Minimize
-knapsack: 164 row_0 + 145 row_1 + 140 row_10 + 141 row_11 + 140 row_12
- + 123 row_13 + 155 row_14 + 138 row_15 + 151 row_16 + 148 row_18 + 120 row_19
- + 129 row_2 + 147 row_20 + 124 row_21 + 128 row_22 + 126 row_25 + 135 row_26
- + 121 row_27 + 158 row_29 + 144 row_3 + 131 row_30 + 157 row_31 + 142 row_32
- + 131 row_33 + 132 row_34 + 157 row_35 + 128 row_36 + 148 row_37 + 128 row_38
- + 145 row_39 + 151 row_4 + 121 row_41 + 151 row_42 + 121 row_43 + 128 row_45
- + 138 row_46 + 119 row_47 + 136 row_48 + 133 row_49 + 164 row_5 + 149 row_50
- + 138 row_51 + 155 row_52 + 148 row_53 + 136 row_54 + 158 row_55 + 138 row_56
- + 161 row_57 + 150 row_58 + 151 row_59 + 120 row_6 + 130 row_61 + 148 row_62
- + 162 row_63 + 144 row_7 + 166 row_8 + 122 row_9
+knapsack: 77 row_1 + 164 row_10 + 169 row_11 + 184 row_12 + 165 row_17
+ + 169 row_18 + 175 row_19 + 170 row_2 + 176 row_20 + 177 row_21 + 181 row_22
+ + 178 row_23 + 170 row_24 + 167 row_25 + 178 row_26 + 166 row_27 + 176 row_28
+ + 178 row_29 + 179 row_3 + 165 row_30 + 176 row_31 + 176 row_32 + 165 row_33
+ + 174 row_35 + 169 row_36 + 168 row_39 + 183 row_4 + 88 row_40 + 179 row_42
+ + 178 row_43 + 177 row_44 + 173 row_45 + 174 row_46 + 179 row_48 + 175 row_49
+ + 179 row_5 + 182 row_51 + 155 row_53 + 157 row_54 + 178 row_6 + 176 row_7
+ + 179 row_8 + 178 row_9
 Subject To
-sensitivity: 7 row_0 + 26 row_1 + 31 row_10 + 30 row_11 + 31 row_12
- + 48 row_13 + 16 row_14 + 33 row_15 + 20 row_16 + 23 row_18 + 51 row_19
- + 42 row_2 + 24 row_20 + 47 row_21 + 43 row_22 + 45 row_25 + 36 row_26
- + 50 row_27 + 13 row_29 + 27 row_3 + 40 row_30 + 14 row_31 + 29 row_32
- + 40 row_33 + 39 row_34 + 14 row_35 + 43 row_36 + 23 row_37 + 43 row_38
- + 26 row_39 + 20 row_4 + 50 row_41 + 20 row_42 + 50 row_43 + 43 row_45
- + 33 row_46 + 52 row_47 + 35 row_48 + 38 row_49 + 7 row_5 + 22 row_50
- + 33 row_51 + 16 row_52 + 23 row_53 + 35 row_54 + 13 row_55 + 33 row_56
- + 10 row_57 + 21 row_58 + 20 row_59 + 51 row_6 + 41 row_61 + 23 row_62
- + 9 row_63 + 27 row_7 + 5 row_8 + 49 row_9 >= 1213.1
+sensitivity: 120 row_1 + 33 row_10 + 28 row_11 + 13 row_12 + 32 row_17
+ + 28 row_18 + 22 row_19 + 27 row_2 + 21 row_20 + 20 row_21 + 16 row_22
+ + 19 row_23 + 27 row_24 + 30 row_25 + 19 row_26 + 31 row_27 + 21 row_28
+ + 19 row_29 + 18 row_3 + 32 row_30 + 21 row_31 + 21 row_32 + 32 row_33
+ + 23 row_35 + 28 row_36 + 29 row_39 + 14 row_4 + 109 row_40 + 18 row_42
+ + 19 row_43 + 20 row_44 + 24 row_45 + 23 row_46 + 18 row_48 + 22 row_49
+ + 18 row_5 + 15 row_51 + 42 row_53 + 40 row_54 + 19 row_6 + 21 row_7
+ + 18 row_8 + 19 row_9 >= 2763.6
 Bounds
- row_0 <= 1
  row_1 <= 1
  row_10 <= 1
  row_11 <= 1
  row_12 <= 1
- row_13 <= 1
- row_14 <= 1
- row_15 <= 1
- row_16 <= 1
+ row_17 <= 1
  row_18 <= 1
  row_19 <= 1
  row_2 <= 1
  row_20 <= 1
  row_21 <= 1
  row_22 <= 1
+ row_23 <= 1
+ row_24 <= 1
  row_25 <= 1
  row_26 <= 1
  row_27 <= 1
+ row_28 <= 1
  row_29 <= 1
  row_3 <= 1
  row_30 <= 1
  row_31 <= 1
  row_32 <= 1
  row_33 <= 1
- row_34 <= 1
  row_35 <= 1
  row_36 <= 1
- row_37 <= 1
- row_38 <= 1
  row_39 <= 1
  row_4 <= 1
- row_41 <= 1
+ row_40 <= 1
  row_42 <= 1
  row_43 <= 1
+ row_44 <= 1
  row_45 <= 1
  row_46 <= 1
- row_47 <= 1
  row_48 <= 1
  row_49 <= 1
  row_5 <= 1
- row_50 <= 1
  row_51 <= 1
- row_52 <= 1
  row_53 <= 1
  row_54 <= 1
- row_55 <= 1
- row_56 <= 1
- row_57 <= 1
- row_58 <= 1
- row_59 <= 1
  row_6 <= 1
- row_61 <= 1
- row_62 <= 1
- row_63 <= 1
  row_7 <= 1
  row_8 <= 1
  row_9 <= 1
