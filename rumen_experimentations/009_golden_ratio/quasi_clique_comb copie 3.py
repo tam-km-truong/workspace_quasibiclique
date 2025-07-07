@@ -1702,6 +1702,18 @@ def solve(debug,prev_lower_bound, dec_conq, matrix_name, rows, cols, edges_1, mo
 #######################################################################
     #END OF SOLVE
 ##################################################################
+def Golden_ratio(length):
+    """
+    Divide a stick of a given legth in two parts a and b such that the ratio of the longer part a to the shorter part b is equal to the golden ratio phi = 1,6180339887...
+    Arguments: length: the length of the stick.
+    Returns: a tuple (a, b) where a is the longer part and b is the shorter part.
+    """
+    phi = 1.6180339887   # Golden ratio
+    a = length / phi 
+    a = int(a)
+    b = length - a
+    return a, b
+
 
 def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, edges_1, min_number_rows, min_number_cols, delta, debug, QBC_time):
     """
@@ -1819,9 +1831,9 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                     Computed by GUROBI OBJECTIVE Value for model {model_name} and matrix_name = {matrix_name}, obj: {obj_value:.3f} !!!
                     #cover_rows: {len(cover_rows)}, max_number_rows: {max_number_rows}, 
                     #cover_cols: {len(cover_cols)}, max_number_cols: {max_number_cols},
-                    #rem_rows: {len(rem_rows_set)}, #rem_cols: {len(rem_cols_set)}, Surface(lower_bound): {len(rem_rows_set)*len(rem_cols_set)}
+                    #rem_rows: {len(rem_rows_set)}, #rem_cols: {len(rem_cols_set)}, Remaining surface(lower_bound): {len(rem_rows_set)*len(rem_cols_set)}
                     """)
-                if len(cover_rows_degree) >= max_number_rows: #here it was >
+                if len(cover_rows) >= max_number_rows: #here it was >
                     modified_König = True
                     if König_test  == True and modified_König == True and debug >= 1:
                         print(f"""
@@ -1830,9 +1842,17 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                               max_number_cover_rows={max_number_rows}; max_number_cover_cols =  {max_number_cols};  
                               #cover_rows = {len(cover_rows)}; #cover_cols = {len(cover_cols)};  
                                """)
-                    while len(cover_rows_degree) >= max_number_rows : # here it was >=
+                    a,b = Golden_ratio(len(cover_rows_degree))
+                    if b > max_number_cols:
+                        up_bound_cols = max_number_cols
+                    else:
+                        up_bound_cols = b
+                    if debug >= 1:
+                        print(f"Golden ratio a = {a}, b = {b} for cover_rows with length = {len(cover_rows)} up_bound_cols = {up_bound_cols} ")      
+                    #while len(cover_rows_degree) >= max_number_rows : # here it was >=
+                    while len(cover_rows_degree) > a : # here it was >=
                         (r,d) = cover_rows_degree.pop()
-                        if König_test  == True  and modified_König == True and debug >= 2:
+                        if König_test  == True  and modified_König == True and debug >= 1:
                             print(f"""König_test= {König_test}; modified_König= {modified_König}; matrix_name = {matrix_name}  
                                   Removing row {(r,d)} from cover_rows
                                   #cover_rows = {len(cover_rows_degree)}
@@ -1840,9 +1860,10 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                             print(f"#B.neighbors(r)= {len(list(B.neighbors(f'row_{r}')))} , where r: {r}  while weight_r = {row_weights[r]} ????")
                         for c in B.neighbors(f"row_{r}"):
                             c_id = int(c.split("_")[1])
-                            if (c_id,col_weights[c_id]) not in cover_cols_degree and len(cover_cols_degree) < max_number_cols -1 : # here it was  - 1
+                            #if (c_id,col_weights[c_id]) not in cover_cols_degree and len(cover_cols_degree) < max_number_cols -1 : # here it was  - 1
+                            if (c_id,col_weights[c_id]) not in cover_cols_degree and len(cover_cols_degree) < up_bound_cols : # here it was  - 1
                                 cover_cols_degree.append((c_id,col_weights[c_id]))
-                                if König_test  == True and modified_König == True and debug >= 2:
+                                if König_test  == True and modified_König == True and debug >= 1:
                                     print(f"""  König_test= {König_test};  modified_König=  {modified_König} ;  matrix_name {matrix_name} 
                                     Adding {(c_id,col_weights[c_id])} to cover_cols, #cover_cols_degree = {len(cover_cols_degree)};  #cover_rows_degree = {len(cover_rows_degree)}
                                     """)
@@ -1853,10 +1874,18 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                         print(f"""
                               König_test= {König_test} ;  modified_König=  {modified_König} Arg_reverse = {Arg_reverse}; 
                               matrix_name = {matrix_name} with #rows = {len(rows)}; #cols = {len(cols)}
-                              max_number_cover_rows={max_number_rows}; max_number_cover_cols =  {max_number_cols}; 
+                              max_number_rows={max_number_rows}; max_number_cols = {max_number_cols}; 
                               #cover_rows = {len(cover_rows)}; #cover_cols = {len(cover_cols)};  
                                """)
-                    while len(cover_cols_degree) >= max_number_cols  : # here it was >= 
+                    a,b = Golden_ratio(len(cover_cols_degree))
+                    if  max_number_rows > b:
+                        up_bound_rows = b
+                    else:
+                        up_bound_rows = max_number_rows
+                    if debug >= 1:
+                        print(f" !!!!Golden ratio a = {a}, b = {b} for cover_cols_degree with length = {len(cover_cols_degree)} up_bound_rows  = {up_bound_rows }!!!!!!!")
+                    #while len(cover_cols_degree) >= max_number_cols +1  : # here it was >= 
+                    while len(cover_cols_degree) > a   : # here it was >= 
                         (c,d) = cover_cols_degree.pop(0)
                         col_degree_map_c = {col_degree_map[c]}
                         if König_test  == True and modified_König == True and debug >= 1  :
@@ -1864,14 +1893,18 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                                   Removing col {(c,d)}  where col_degree_map_c = {col_degree_map_c} = weight[c] = {col_weights[c]} from cover_cols where #cover_cols = {len(cover_cols_degree)}. 
                                   """)
                             #sys.exit(f"Terminating program when Convert extracted indices back to tuples (index, degree)  => EXIT 111.")
-                            print(f"#B.neighbors(c)= {len(list(B.neighbors(f'col_{c}')))}, where c={c} and col_degree_map_c= {col_degree_map_c} $$$$$$$????")
+                            #print(f"#B.neighbors(c)= {len(list(B.neighbors(f'col_{c}')))}, where c={c} and col_degree_map_c= {col_degree_map_c} $$$$$$$????")
+                            print(f"B.neighbors(c)= {list(B.neighbors(f'col_{c}'))}, where c={c} and col_degree_map_c= {col_degree_map_c} $$$$$$$????")
                         for r in B.neighbors(f"col_{c}"):
                             r_id = int(r.split("_")[1])
-                            if (r_id, row_weights[r_id]) not in cover_rows_degree and len(cover_rows_degree) < max_number_rows -1 : # here it was - 1
+                            if (r_id, row_weights[r_id]) not in cover_rows_degree and len(cover_rows_degree) < up_bound_rows  : # here it was - 1
+                                #print(f"r_id = {r_id}, row_weights[r_id] = {row_weights[r_id]}")
+                            #if (r_id) not in cover_rows and len(cover_rows) < max_number_rows -1 : # here it was - 1
                                 cover_rows_degree.append((r_id, row_weights[r_id]))
-                                if König_test  == True and modified_König == True and debug >= 2 :
+                                if König_test  == True and modified_König == True and debug >= 1 :
                                     print(f"""König_test= {König_test}; modified_König {modified_König};
-                                        Adding row {(r_id, row_weights[r_id])} to cover_rows_degree ; #cover_rows = {len(cover_rows_degree)}; #cover_cols = {len(cover_cols_degree)}    
+                                        Adding row {(r_id, row_weights[r_id])} to cover_rows_degree ; #cover_rows = {len(cover_rows_degree)}; #cover_cols = {len(cover_cols_degree)}
+                                        r_id = {r_id}, row_weights[r_id] = {row_weights[r_id]}    
                                         """)
 
                 cover_row_indices = [row for row, _ in cover_rows_degree]
@@ -3272,17 +3305,17 @@ def parse_arguments():
     )
 
     argparser.add_argument(
-        '--model', dest='model', required=False, default='max_e_r',
+        '--model', dest='model', required=False, default='max_e_K,',
         help='Select the model to use',
     )
 
     argparser.add_argument(
-        '--rho', dest='rho', required=False, default=1.0, type=float,
+        '--rho', dest='rho', required=False, default=0.7, type=float,
         help='Select the zero deletion rho value',
     )
 
     argparser.add_argument(
-        '--delta', dest='delta', required=False, default=0.1, type=float,
+        '--delta', dest='delta', required=False, default=0.0, type=float,
         help='Select the error rho value (tolerance)',
     )
 
@@ -3292,7 +3325,7 @@ def parse_arguments():
     )
 
     argparser.add_argument(
-        '--Solver_KP_threshold', dest='Solver_KP_threshold', required=False, default=0.87, type=float,
+        '--Solver_KP_threshold', dest='Solver_KP_threshold', required=False, default=0.9, type=float,
         help='Below this value greedy approaches are used during the second step where tasks are solved; above--exact methods',
     )
     
@@ -3881,7 +3914,7 @@ def tasks_manager(dec_conq, matrix_name, rows, cols, edges_1, density, QBC_time)
         nb_ones = None
         add_task(SLIM , matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj) 
         return  # matrix_name, rows, cols, density, nb_ones, QBC_time
-    elif density <= ELITE_threshold:  # or len(rows)*len(cols)==0:
+    elif density > ELITE_threshold:  # or len(rows)*len(cols)==0:
         if debug >= 1:
             # nbi_0, nbi_1, sparsity, density = density_calcul(rows, cols)
             print(f"""
@@ -4670,6 +4703,11 @@ if __name__ == '__main__':
     #if warm_debug >= 1:
     print(f"#row_set: {len(row_set)}")
     print(f"#col_set: {len(col_set)}")
+    print(f"row_set: {row_set}")
+    print(f"col_set: {col_set}")
+    # if warm_debug >= 1:
+    #   print(f"best_rows: {best_rows}")
+    #   print(f"best_cols: {best_cols}")
     num_one = count_ones_in_submatrix(edges_1,  row_set,  col_set)
 
  

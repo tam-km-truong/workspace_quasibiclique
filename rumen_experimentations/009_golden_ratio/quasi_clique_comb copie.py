@@ -3272,17 +3272,17 @@ def parse_arguments():
     )
 
     argparser.add_argument(
-        '--model', dest='model', required=False, default='max_e_r',
+        '--model', dest='model', required=False, default='max_e_K,',
         help='Select the model to use',
     )
 
     argparser.add_argument(
-        '--rho', dest='rho', required=False, default=1.0, type=float,
+        '--rho', dest='rho', required=False, default=0.7, type=float,
         help='Select the zero deletion rho value',
     )
 
     argparser.add_argument(
-        '--delta', dest='delta', required=False, default=0.1, type=float,
+        '--delta', dest='delta', required=False, default=0.0, type=float,
         help='Select the error rho value (tolerance)',
     )
 
@@ -3292,7 +3292,7 @@ def parse_arguments():
     )
 
     argparser.add_argument(
-        '--Solver_KP_threshold', dest='Solver_KP_threshold', required=False, default=0.87, type=float,
+        '--Solver_KP_threshold', dest='Solver_KP_threshold', required=False, default=0.9, type=float,
         help='Below this value greedy approaches are used during the second step where tasks are solved; above--exact methods',
     )
     
@@ -3881,7 +3881,7 @@ def tasks_manager(dec_conq, matrix_name, rows, cols, edges_1, density, QBC_time)
         nb_ones = None
         add_task(SLIM , matrix_name, rows, cols, edges_1, nb_zeros, nb_ones, density, temp_obj) 
         return  # matrix_name, rows, cols, density, nb_ones, QBC_time
-    elif density <= ELITE_threshold:  # or len(rows)*len(cols)==0:
+    elif density > ELITE_threshold:  # or len(rows)*len(cols)==0:
         if debug >= 1:
             # nbi_0, nbi_1, sparsity, density = density_calcul(rows, cols)
             print(f"""
@@ -4670,6 +4670,11 @@ if __name__ == '__main__':
     #if warm_debug >= 1:
     print(f"#row_set: {len(row_set)}")
     print(f"#col_set: {len(col_set)}")
+    print(f"row_set: {row_set}")
+    print(f"col_set: {col_set}")
+    # if warm_debug >= 1:
+    #   print(f"best_rows: {best_rows}")
+    #   print(f"best_cols: {best_cols}")
     num_one = count_ones_in_submatrix(edges_1,  row_set,  col_set)
 
  
