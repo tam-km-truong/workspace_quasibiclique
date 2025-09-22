@@ -7,9 +7,11 @@ Install Gurobi Solver with free academic licence using your University account a
 
 Install Pandas, using PyPI or Conda. A detailed installation tutorial can be find at: https://pandas.pydata.org/docs/getting_started/install.html
 
-an instance 
- python3 quasi_clique_comb.py --filepath data/data3.csv   --model  max_e_c  --rho 0.1  --delta 0.1 --debug 0  --KP_threshold  0.83 --dec_conq 0 --timelimit 100 
+an instance
+ python3 quasi_clique_comb.py --filepath data/data3.csv   --model  max_e_c  --rho 0.1  --delta 0.1 --debug 0  --KP_threshold  0.83 --dec_conq 0 --timelimit 100
 
+
+ python3 -u rumen_experimentations/009_golden_ratio/quasi_clique_comb.py --filepath data/data3.csv --only_task 0 --atomic_matrix_size_percentage 0.79 --KP_threshold 0.9 --ELITE_threshold 0.95 --Solver_KP_threshold 0.95 --tasks_number_to_treat 3 --model max_e_K  --debug 1 --warm_debug 1 >../Experiments/data3/Atom_79_ET_95_ST_95_KT_0.9_Tasks_3_deb_1_wdeb_1.txt
 
 """
 import heapq
@@ -263,7 +265,7 @@ def max_e_r(rows_data, cols_data, edges, delta):
     LpProblem:
         The ILP model.
 
-    This is an improved model from Chnag et al. 
+    This is an improved model from Chnag et al.
     """
     model = LpProblem(name="max_e_r", sense=LpMaximize)
 
@@ -521,7 +523,7 @@ def max_e_wr(rows_data, cols_data, edges, rows_res, cols_res, prev_obj, delta):
 
 def max_e_h(rows_data, cols_data, edges, delta):
     """
-    A heuristic proposed to max edge biclique problem.  The particularity is to use an objective that does not require  quadratic variables 
+    A heuristic proposed to max edge biclique problem.  The particularity is to use an objective that does not require  quadratic variables
     Arguments:
     ----------
     rows_data: list of tuples (row, degree) of rows in the matrix.
@@ -534,7 +536,7 @@ def max_e_h(rows_data, cols_data, edges, delta):
     LpProblem:
         The ILP model.
 
-    Goal : compute heuristically a good solution to be used as warm start 
+    Goal : compute heuristically a good solution to be used as warm start
     Particularities : no quadratic variables
     """
     Big_R = len(rows_data) + 1
@@ -587,7 +589,7 @@ def max_e_h(rows_data, cols_data, edges, delta):
 
 def max_e_h_slack(rows_data, cols_data, edges, delta):
     """
-    A heuristic proposed to max edge biclique problem.  The particularity is to use an objective that does not require  quadratic variables 
+    A heuristic proposed to max edge biclique problem.  The particularity is to use an objective that does not require  quadratic variables
     Arguments:
     ----------
     rows_data: list of tuples (row, degree) of rows in the matrix.
@@ -600,7 +602,7 @@ def max_e_h_slack(rows_data, cols_data, edges, delta):
     LpProblem:
         The ILP model.
 
-    Goal : compute heuristically a good solution to be used as warm start 
+    Goal : compute heuristically a good solution to be used as warm start
     Particularities : no quadratic variables
     """
     model = LpProblem(name="max_e_h", sense=LpMaximize)
@@ -839,7 +841,7 @@ def __col_density(rows_data, cols_data, edges, model, lpRows, lpCols, delta):
     model: LpProblem to add constraints to.
     lpRows: dict of row variables and their degrees.
     lpCols: dict of column variables and their degrees.
-    delta: float, error tolerance for density constraints. 
+    delta: float, error tolerance for density constraints.
     Attention : in the text it is written as ALPHA TO DO: (ALPHA : = 1-DELTA) !!!!
     """
     mu = 0.0001
@@ -894,7 +896,7 @@ def max_Ones(rows_data, cols_data, edges, rho):
     * rows_data: list of the tuples (row, degree) of rows the matrix.
     * cols_data: list of the tuples (col, degree) of columns the matrix.
     * edges: list of tuple (row,col) corresponding to the zeros  of the matrix.
-    * rho: percentage of accepted zeros 
+    * rho: percentage of accepted zeros
     """
 
     # ------------------------------------------------------------------------ #
@@ -951,7 +953,7 @@ def max_Ones_comp(rows_data, cols_data, edges, rho):
     * rows_data: list of the tuples (row, degree) of rows the matrix.
     * cols_data: list of the tuples (col, degree) of columns the matrix.
     * edges: list of tuple (row,col) corresponding to the zeros  of the matrix.
-    * rho: percentage of accepted zeros 
+    * rho: percentage of accepted zeros
     """
 
     # ------------------------------------------------------------------------ #
@@ -1032,9 +1034,9 @@ def KP_QBr(rows_data, col_length, nb_edges_0, debug, rho=0.1):
     ARGUMENTS:
     ----------
     * rows_data: list of the tuples (row, degree) of rows the matrix.
-    * col_length: number of columns 
+    * col_length: number of columns
     * nb_edges_0: number of zeros in the matrix. Coresponds to the capacity of the knapsack
-    * rho: percentage of non deleted zeros 
+    * rho: percentage of non deleted zeros
     """
     row_length = len(rows_data)  # number of rows
     if debug >= 3:
@@ -1139,7 +1141,10 @@ def König_E(rows, cols, edges):
     # ------------------------------------------------------------------------ #
     # Model with minimization
     # ------------------------------------------------------------------------ #
-    model = LpProblem(name='König_E', sense=LpMinimize)
+    # model = LpProblem(name='König_E', sense=LpMinimize)
+    model = LpProblem(name='König_E', sense=LpMaximize)
+    cardinality_row = len(set(row for row, _ in rows))
+    cardinality_col = len(set(col for col, _ in cols))
 
     # ------------------------------------------------------------------------ #
     # Variables
@@ -1154,11 +1159,12 @@ def König_E(rows, cols, edges):
     # ------------------------------------------------------------------------ #
     # Objective function
     # ------------------------------------------------------------------------ #
-    model += lpSum([lpvar for lpvar, _ in lpRows.values()] +
-                   [lpvar for lpvar, _ in lpCols.values()]), 'min_number'
-
-    # model += lpSum([degree*lpvar for lpvar, degree in lpRows.values()] +
-    #               [degree*lpvar for lpvar, degree in lpCols.values()]), 'min_degrees'
+    # model += lpSum([lpvar for lpvar, _ in lpRows.values()] +
+    #               [lpvar for lpvar, _ in lpCols.values()]), 'min_number'
+    # model += lpSum([(1-lpvar) for lpvar, degree in lpRows.values()] +
+    #               [(1-lpvar) for lpvar, degree in lpCols.values()]), 'max_degrees'
+    model += lpSum([(cardinality_row-degree)*(1-lpvar) for lpvar, degree in lpRows.values()] +
+                   [(cardinality_col-degree)*(1-lpvar) for lpvar, degree in lpCols.values()]), 'max_degrees'
 
     # ------------------------------------------------------------------------ #
     # Constraints
@@ -1875,6 +1881,8 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
                 print(f' #edges_compl =', len(edges_compl), 'min_number_rows=', min_number_rows, 'min_number_cols=',
                       min_number_cols, 'max_number_rows=', max_number_rows, 'max_number_cols=', max_number_col)
             model = König_E(rows, cols, edges_compl)
+            print("Exporting LP file for debugging...")
+            model.writeLP("debug_model_König_E.lp")
             # model = König_E(rows, cols, edges_1)
         elif dec_conq >= 1:
             if debug >= 2:
@@ -1885,6 +1893,8 @@ def exact(dec_conq, matrix_name, model_name, rows, cols, row_names, col_names, e
     try:
         # Solve the model with Gurobi
         model.solve(GUROBI_CMD(msg=False, timeLimit=timelimit))
+        print("Exporting LP file for debugging...")
+        model.writeLP("debug_model_König_E.lp")
         if debug >= 1:
             print('-' * 70)
             print(
@@ -2291,6 +2301,8 @@ def warm_exact(prev_lower_bound, dec_conq, matrix_name, model_name, rows, cols, 
         if debug >= 2:
             print('-' * 70)
             print(f"Model status: {LpStatus[model.status]}")
+            print("Exporting LP file for debugging...")
+            model.writeLP("debug_model_max_e_h.lp")
         # Extract solution values (only nonzero rows and columns)
         if model.status in [1, 2, 9]:  # 1 = Optimal, 2 = Feasible, 9 = Time limit reached
             obj_value = value(model.objective)  # ✅ Extract objective value
@@ -2453,6 +2465,7 @@ def warm_exact(prev_lower_bound, dec_conq, matrix_name, model_name, rows, cols, 
         # Solve the model with Gurobi
         # , options=[("MIPGap", 0.03)]))
         model.solve(GUROBI_CMD(msg=False, timeLimit=timelimit))
+
         # , options=[("MIPStart", 1), ("Heuristics", 0.0), ("NoRelHeurTime", 0)] )#,gapRel=0.3))
         # Print model status
         # if model.status == GRB.CUTOFF:
@@ -2462,6 +2475,8 @@ def warm_exact(prev_lower_bound, dec_conq, matrix_name, model_name, rows, cols, 
         if debug >= 2:
             print('-' * 70)
             print(f"Model status: {LpStatus[model.status]}")
+            print("Exporting LP file for debugging...")
+            model.writeLP("debug_model_max_e_wr.lp")
         # Extract solution values (only nonzero rows and columns)
         if model.status in [1, 2, 9]:
             obj_value = value(model.objective)  # ✅ Extract objective value
@@ -2677,6 +2692,8 @@ def warm_exact_König(prev_lower_bound, dec_conq, matrix_name, model_name, rows,
                 print('-' * 70)
                 print(
                     f"Computed Objective Value for model {model_name} with  matrix_name = { matrix_name} and obj: {obj_value:.3f}")
+                print("Exporting LP file for debugging...")
+                model.writeLP("debug_model_König_E.lp")
             if debug >= 4:
                 print('-' * 70)
                 for var in model.variables():
@@ -4773,7 +4790,7 @@ if __name__ == '__main__':
         LpMinimize, LpProblem, LpVariable, LpContinuous, lpSum
     )
     from gurobipy import Model, GRB
-    min_number_rows_percentage = 0.025
+    min_number_rows_percentage = 0.1
     min_number_cols_percentage = 0.025
     # warm_debug = 1 # if warm_debug is set to 1, the debug mode is activated and the debug messages are printed
     # debug = 0 # debug level, 0 means no debug messages, 1 means only important messages, 2 means more detailed messages, 3 means very detailed messages, 4 means all messages
@@ -4833,8 +4850,10 @@ if __name__ == '__main__':
     ###################################################################
     # the min_number of rows of the matrix is below this value, we stock it in the SLIM ;
     min_number_rows = int(min_number_rows_percentage*len(rows))
+    # min_number_rows = 1
     # the min_number of columns of the matrix is below this value, we stock it in the SLIM ;
     min_number_cols = int(min_number_cols_percentage*len(cols))
+    # min_number_cols = 1
     atomic_matrix_size = int(len(rows)*len(cols)*atomic_matrix_size_percentage)
     nb_eges_0 = len(edges_compl)
     nb_eges_1 = len(edges_1)
